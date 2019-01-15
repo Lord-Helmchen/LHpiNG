@@ -1,4 +1,6 @@
-﻿    public static class StringExtensions
+﻿namespace LHpiNg.Util
+{
+    public static class StringExtensions
     {
         public static string Remove(this string source, string remove, int firstN)
         {
@@ -10,3 +12,4 @@
             return index < 0 ? source : source.Remove(index, remove.Length).Remove(remove, --firstN);
         }
     }
+}

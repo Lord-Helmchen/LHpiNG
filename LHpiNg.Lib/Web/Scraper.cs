@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LHpiNG
+namespace LHpiNG.Web
 {
     public class Scraper
     {

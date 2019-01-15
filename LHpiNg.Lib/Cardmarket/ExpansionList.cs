@@ -1,4 +1,5 @@
 ﻿using HtmlAgilityPack;
+using LHpiNG.Web;
 using ScrapySharp.Extensions;
 using ScrapySharp.Network;
 using System;
