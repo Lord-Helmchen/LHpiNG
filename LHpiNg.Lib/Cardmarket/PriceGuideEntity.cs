@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace LHpiNG.Cardmarket
+﻿namespace LHpiNG.Cardmarket
 {
-    class PriceGuideEntity
+    public class PriceGuideEntity
     {
         public decimal Sell { get; set; }                   // Average price of articles ever sold of this product
         public decimal Low { get; set; }                    // Current lowest non-foil price (all conditions)

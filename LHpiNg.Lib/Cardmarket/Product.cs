@@ -1,23 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Web;
+using SQLite;
 
 namespace LHpiNG.Cardmarket
 {
-    class Product : ProductEntity
+    public class Product : ProductEntity
     {
+        public string UrlSuffix { get; set; }
 
-        public void LoadFromDatabase()
-        {
-            throw new NotImplementedException();
-        }
-        public void SaveToDatabase()
-        {
-            throw new NotImplementedException();
-        }
-        public void ImportFromWeb()
-        {
-            throw new NotImplementedException();
-        }
+
     }
 }
