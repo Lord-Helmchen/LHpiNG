@@ -30,9 +30,48 @@ namespace LHpiNG.db
 
         public void CreateTables()
         {
-            Connection.CreateTable<ExpansionEntity>();
-            Connection.CreateTable<Expansion>();
+            CreateTableResult result;
+            result = Connection.CreateTable<ExpansionEntity>();
+            result = Connection.CreateTable<ProductEntity>();
+            result = Connection.CreateTable<CategoryEntity>();
+            result = Connection.CreateTable<LocalizationEntity>();
+            result = Connection.CreateTable<PriceGuideEntity>();
+            result = Connection.CreateTable<ReprintEntity>();
+            result = Connection.CreateTable<Product>();
+            result = Connection.CreateTable<Expansion>();
+
 
         }
-    } 
+
+        #region Cardmarket
+        public override ExpansionList LoadExpansionList()
+        {
+            throw new NotImplementedException();
+        }
+        public override void SaveExpansionList(ExpansionList expansionList)
+        {
+            throw new NotImplementedException();
+        }
+        public override Expansion LoadExpansion(Expansion expansion)
+        {
+            throw new NotImplementedException();
+        }
+        public override void SaveExpansion(Expansion expansion)
+        {
+            throw new NotImplementedException();
+        }
+        public override Product LoadProduct(Product product)
+        {
+            throw new NotImplementedException();
+        }
+        public override void SaveProduct(Product product)
+        {
+            throw new NotImplementedException();
+        }
+        #endregion
+
+        #region Album
+
+        #endregion
+    }
 }

@@ -10,34 +10,16 @@ using System.Data.Entity;
 
 namespace LHpiNG.db
 {
-    public class Database
+    public abstract class Database
     {
 
         #region Cardmarket
-        public ExpansionList LoadExpansionList()
-        {
-            throw new NotImplementedException();
-        }
-        public void SaveExpansionList(ExpansionList expansionList)
-        {
-            throw new NotImplementedException();
-        }
-        public Expansion LoadExpansion(Expansion expansion)
-        {
-            throw new NotImplementedException();
-        }
-        public void SaveExpansion(Expansion expansion)
-        {
-            throw new NotImplementedException();
-        }
-        public Product LoadProduct(Product product)
-        {
-            throw new NotImplementedException();
-        }
-        public void SaveProduct(Product product)
-        {
-            throw new NotImplementedException();
-        }
+        public abstract ExpansionList LoadExpansionList();
+        public abstract void SaveExpansionList(ExpansionList expansionList);
+        public abstract Expansion LoadExpansion(Expansion expansion);
+        public abstract void SaveExpansion(Expansion expansion);
+        public abstract Product LoadProduct(Product product);
+        public abstract void SaveProduct(Product product);
         #endregion
 
         #region Album
