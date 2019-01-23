@@ -4,14 +4,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using SQLite;
-using System.Data.SQLite;
 using System.Data.Entity;
 
 namespace LHpiNG.db
 {
-    public abstract class Database
+    public abstract class LHpiDatabase
     {
+        public string ConnectionString { get; set; }
+        public DbContext Context { get; set; }
+
 
         #region Cardmarket
         public abstract ExpansionList LoadExpansionList();
