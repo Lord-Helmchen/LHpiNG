@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
-
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace LHpiNG.Cardmarket
 {
+    [Table("Expansions")]
     public class ExpansionEntity
     {
+        [Key]
         public int IdExpansion { get; set; }                        // Expansion's ID
         public string EnName { get; set; }                          // Expansion's name in English
         public IEnumerable<LocalizationEntity> Localization { get; set; } // localization entities for the expansion's name

@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using SQLite;
 
 namespace LHpiNG
 {
@@ -39,7 +38,7 @@ namespace LHpiNG
                 default:
                     break;
             }
-         
+
             Console.WriteLine("Press any key to close the window!");
             Console.ReadKey();
             // Go to http://aka.ms/dotnet-get-started-console to continue learning how to build a console app! 
@@ -52,35 +51,42 @@ namespace LHpiNG
         }
         static void TestDb()
         {
-            using (var ctx = new SQLContext())
+            var expansion = new Expansion
             {
-                var  expansion = new ExpansionEntity
-                {
-                    Abbreviation = "FOO",
-                    EnName = "Foobar",
-                    IdExpansion = 13
-                };
+                Abbreviation = "FOO",
+                EnName = "Foobar",
+                IdExpansion = 13
+            };
 
-                ctx.ExpansionEntities.Add(expansion);
+            //using (var ctx = new LHpiNG.db.SQLContext())
+            using (var ctx = new LHpiNG.db.SQLiteContext())
+            {
+
+
+                ctx.Expansions.Add(expansion);
                 ctx.SaveChanges();
 
             }
         }
         static void Test()
         {
-            ExpansionList list = new ExpansionList();
-
-            Expansion expansion = new Expansion();
-            expansion.EnName = "Erweiterung";
-            list.Add(expansion);
-
             List<Product> ProdList = new List<Product>();
-            expansion.Products = ProdList;
 
-            Product product = new Product();
-            product.EnName = "Produkt";
-            product.Expansion = expansion;
+            Expansion expansion = new Expansion
+            {
+                EnName = "Erweiterung",
+                Products = ProdList
+            };
+            ExpansionList list = new ExpansionList
+            {
+                expansion
+            };
 
+            Product product = new Product
+            {
+                EnName = "Produkt",
+                Expansion = expansion
+            };
             ProdList.Add(product);
 
             ;

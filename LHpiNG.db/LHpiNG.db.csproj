@@ -65,26 +65,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="LHpiDatabase.cs" />
+    <Compile Include="ILHpiDatabase.cs" />
     <Compile Include="SQLContext.cs" />
-    <Compile Include="SampleDataAccess\IPersistentData.cs" />
-    <Compile Include="SampleDataAccess\SqLitePersistence.cs" />
-    <Compile Include="SampleDataModel\Client.cs" />
-    <Compile Include="SampleDataModel\DataModel.cs" />
-    <Compile Include="SampleDataModel\IClient.cs" />
-    <Compile Include="SampleDataModel\IProduct.cs" />
-    <Compile Include="SampleDataModel\Product.cs" />
-    <Compile Include="SQLDB.cs" />
-    <Compile Include="SQLiteDB.cs" />
     <Compile Include="SQLiteContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Migrations\1.AddProductsTable.sql" />
-    <Content Include="Migrations\2.AddDescriptionColumnToProductsTable.sql" />
-    <Content Include="Migrations\readme.txt" />
-    <Content Include="Schema\dbo.Expansion.sql" />
-    <Content Include="Schema\dbo.Sets.sql" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

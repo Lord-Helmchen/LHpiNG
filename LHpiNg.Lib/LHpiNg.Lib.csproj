@@ -79,7 +79,6 @@
     <Compile Include="Album\ObjectType.cs" />
     <Compile Include="Album\Rarity.cs" />
     <Compile Include="Album\Set.cs" />
-    <Compile Include="Card.cs" />
     <Compile Include="Cardmarket\CategoryEntity.cs" />
     <Compile Include="Cardmarket\Expansion.cs" />
     <Compile Include="Cardmarket\ExpansionEntity.cs" />
