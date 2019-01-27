@@ -14,9 +14,9 @@ namespace LHpiNG
     {
         static void Main(string[] args)
         {
-            Scraper scraper = new Scraper();
-            //SQLiteContext database = new SQLiteContext(SQLiteContext.ConnectionString);
-            ILHpiDatabase database = new SQLContext();
+            Scraper scraper = Scraper.Instance;
+            //EFContext database = new SQLiteContext(SQLiteContext.ConnectionString);
+            EFContext database = new SQLContext();
             ExpansionList expansionList = new ExpansionList();
 
             Console.WriteLine("Program started!");
@@ -78,13 +78,13 @@ namespace LHpiNG
             // Go to http://aka.ms/dotnet-get-started-console to continue learning how to build a console app! 
         }
 
-        private static ExpansionList LoadExpansion(ILHpiDatabase database)
+        private static ExpansionList LoadExpansion(ICardmarketData database)
         {
             ExpansionList expansions = database.LoadExpansionList();
             return expansions;
         }
 
-        private static void SaveExpansionList(ExpansionList expansionList, ILHpiDatabase database)
+        private static void SaveExpansionList(ExpansionList expansionList, ICardmarketData database)
         {
             database.SaveExpansionList(expansionList);
         }
@@ -95,7 +95,7 @@ namespace LHpiNG
             return expansions;
         }
 
-        private static void TestDb(ILHpiDatabase database)
+        private static void TestDb(ICardmarketData database)
         {
             var expansion = new Expansion
             {

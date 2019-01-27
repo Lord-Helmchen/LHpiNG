@@ -13,11 +13,16 @@ using System.Text.RegularExpressions;
 
 namespace LHpiNG.Web
 {
-    public class Scraper
+    public sealed class Scraper
     {
         public ScrapingBrowser Browser { get; set; }
 
-        public Scraper()
+        private static readonly Lazy<Scraper> lazy = new Lazy<Scraper>(() => new Scraper());
+
+        /// <summary>get singleton instance of Scraper</summary>
+        public static Scraper Instance { get { return lazy.Value; } }
+
+        private Scraper()
         {
             Browser = new ScrapingBrowser
             {

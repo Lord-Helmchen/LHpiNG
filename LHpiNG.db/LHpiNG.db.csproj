@@ -65,7 +65,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="ILHpiDatabase.cs" />
+    <Compile Include="EFContext.cs" />
+    <Compile Include="IAlbumData.cs" />
+    <Compile Include="ICardmarketData.cs" />
     <Compile Include="SQLContext.cs" />
     <Compile Include="SQLiteContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

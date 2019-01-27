@@ -8,7 +8,7 @@ using System.Data.Entity;
 
 namespace LHpiNG.db
 {
-    public interface  ILHpiDatabase
+    public interface  ICardmarketData
     {
         //declare getters and setters as part of the interface to force me to remember to implement the fields
         DbSet<Expansion> Expansions { get; set; }
@@ -18,7 +18,6 @@ namespace LHpiNG.db
         //public DbSet<LocalizationEntity> LocalizationEntities { get; set; }
         //public DbSet<ReprintEntity> ReprintEntities { get; set; }
 
-        #region Cardmarket
         ExpansionList LoadExpansionList();
         void SaveExpansionList(ExpansionList expansionList);
         Expansion LoadExpansion(Expansion expansion);
@@ -27,10 +26,6 @@ namespace LHpiNG.db
         void SaveProducts(Expansion expansion);
         Product LoadProduct(Product product);
         void SaveProduct(Product product);
-        #endregion
 
-        #region Album
-
-        #endregion
     }
 }
