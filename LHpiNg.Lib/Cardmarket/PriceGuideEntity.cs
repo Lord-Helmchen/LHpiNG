@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations.Schema;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace LHpiNG.Cardmarket
 {
@@ -12,7 +14,17 @@ namespace LHpiNG.Cardmarket
         public decimal Avg { get; set; }                    // Current average non-foil price of all available articles of this product
         public decimal Trend { get; set; }                  // Current trend price
 
-        //for EF
-        public int Id { get; set; }
+        [Key]
+        public int Uid { get; set; }                       // Entity Framework Primary Key
+
+        public PriceGuideEntity()
+        {
+
+        }
+        //constructor from API reply
+        public PriceGuideEntity(string jsonEntity)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

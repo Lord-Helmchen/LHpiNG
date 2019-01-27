@@ -32,7 +32,7 @@ namespace LHpiNG.Web
             try
             {
                 WebPage result = Browser.NavigateToPage(uri);
-                if (HttpStatusCode.OK.Equals(result.RawResponse.StatusCode))
+                if ((int)HttpStatusCode.OK == result.RawResponse.StatusCode)
                 {
                     Console.WriteLine(String.Format("got {0} with status {1}", uri.AbsoluteUri, result.RawResponse.StatusCode));
                     return result;
@@ -42,17 +42,13 @@ namespace LHpiNG.Web
                     string message = String.Format("unhandled response status: {0} ({1})", result.RawResponse.StatusCode, result.RawResponse.StatusDescription);
                     Console.WriteLine(message);
 
-                    var exception = new HttpException(result.RawResponse.StatusCode, result.RawResponse.StatusDescription);
-                    throw exception;
+                    throw new HttpException(result.RawResponse.StatusCode, result.RawResponse.StatusDescription);
                 }
             }
-            catch (WebException ex)
+            catch (HttpException ex)
             {
-                throw ex;
-            }
-            catch (Exception ex)
-            {
-                throw ex;
+                Console.WriteLine(ex.ToString());
+                throw;
             }
         }
 
@@ -60,7 +56,7 @@ namespace LHpiNG.Web
         {
             ExpansionList expansionList = new ExpansionList();
 
-            WebPage resultpage = this.Browser.NavigateToPage(expansionList.Url);
+            WebPage resultpage = FetchPage(expansionList.Url);
             IEnumerable<HtmlNode> nodes = resultpage.Html.CssSelect("div.expansion-row");
 
             foreach (HtmlNode node in nodes)
@@ -71,8 +67,10 @@ namespace LHpiNG.Web
                     {
                         EnName = node.ChildNodes[2].ChildNodes[0].InnerText,
                         ReleaseDate = node.ChildNodes[4].InnerText,
-                        UrlSuffix = node.ChildNodes[2].ChildNodes[0].Attributes[0].Value
+                        UrlSuffix = node.ChildNodes[2].ChildNodes[0].Attributes[0].Value,
                     };
+                    var productCount = Regex.Match(node.ChildNodes[3].InnerText, @"^(\d+) Cards").Groups[1].Value;
+                    expansion.ProductCount = int.Parse(productCount);
                     bool dateParsed = DateTime.TryParse(expansion.ReleaseDate, out DateTime parsedDate);
                     if (dateParsed)
                     {
@@ -86,10 +84,12 @@ namespace LHpiNG.Web
                     {
                         throw new FormatException("Release Date not parsed");
                     }
+                    expansion.IsReleased = parsedDate.Date < DateTime.Now.Date;
                     expansionList.Add(expansion);
                 }
-                catch (Exception ex){
-                    throw ex;
+                catch// (Exception ex)
+                {
+                    throw;
                 }
             }
             expansionList.FetchedOn = DateTime.Now;
@@ -98,6 +98,11 @@ namespace LHpiNG.Web
         }
 
         public Product ImportProduct(Product product)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void ImportProductsByExpansion(ExpansionEntity expansion)
         {
             throw new NotImplementedException();
         }

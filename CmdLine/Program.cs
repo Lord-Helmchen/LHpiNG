@@ -14,63 +14,107 @@ namespace LHpiNG
     {
         static void Main(string[] args)
         {
-            // The code provided will print ‘Hello World’ to the console.
-            // Press Ctrl+F5 (or go to Debug > Start Without Debugging) to run your app.
+            Scraper scraper = new Scraper();
+            //SQLiteContext database = new SQLiteContext(SQLiteContext.ConnectionString);
+            ILHpiDatabase database = new SQLContext();
+            ExpansionList expansionList = new ExpansionList();
+
             Console.WriteLine("Program started!");
             Console.WriteLine("Choose which method to run:");
             Console.WriteLine("\t1 - Test()");
-            Console.WriteLine("\t2 - TestScraper()");
-            Console.WriteLine("\t3 - TestDb");
+            Console.WriteLine("\t2 - TestDb");
+            Console.WriteLine("\t3 - Fetch Expansions from Web");
+            Console.WriteLine("\t4 - Load Expansions from DB");
+            Console.WriteLine("\t5 - Save Expansions to Database");
+            Console.WriteLine("\t6 - Print expansionList.Length");
+            Console.WriteLine("\t7 - null expansionList");
             Console.WriteLine("\tq - quit");
-            Console.Write("Your option? ");
 
-            switch (Console.ReadLine())
+
+            bool quit = false;
+            while (!quit)
             {
-                case "1":
-                    Test();
-                    break;
-                case "2":
-                    TestScrape();
-                    break;
-                case "3":
-                    TestDb();
-                    break;
-                default:
-                    break;
+                Console.Write("Your option? ");
+                switch (Console.ReadLine())
+                {
+                    case "1":
+                        Test();
+                        Console.WriteLine(String.Format("Test() done"));
+                        break;
+                    case "2":
+                        TestDb(database);
+                        Console.WriteLine(String.Format("TestDb() done"));
+                        break;
+                    case "3":
+                        expansionList = ScrapeExpansionList(scraper);
+                        Console.WriteLine(String.Format("{0} Expansions scraped", expansionList.Expansions.Count));
+                        break;
+                    case "4":
+                        expansionList = LoadExpansion(database);
+                        Console.WriteLine(String.Format("{0} Expansions loaded", expansionList.Expansions.Count));
+                        break;
+                    case "5":
+                        SaveExpansionList(expansionList, database);
+                        Console.WriteLine(String.Format("{0} Expansions saved", expansionList.Expansions.Count));
+                        break;
+                    case "6":
+                        Console.WriteLine(String.Format("{0} Expansions in List", expansionList.Expansions.Count));
+                        break;
+                    case "7":
+                        expansionList = new ExpansionList();
+                        Console.WriteLine(String.Format("{0} Expansions in List", expansionList.Expansions.Count));
+                        break;
+                    case "q":
+                        quit = true;
+                        break;
+                    default:
+                        Console.WriteLine(String.Format("invalid choice"));
+                        break;
+                }
             }
 
-            Console.WriteLine("Press any key to close the window!");
-            Console.ReadKey();
+            //Console.WriteLine("Press any key to close the window!");
+            //Console.ReadKey();
             // Go to http://aka.ms/dotnet-get-started-console to continue learning how to build a console app! 
         }
-        static void TestScrape()
-        {
-            Scraper scraper = new Scraper();
-            ExpansionList expansions = scraper.ImportExpansions();
 
+        private static ExpansionList LoadExpansion(ILHpiDatabase database)
+        {
+            ExpansionList expansions = database.LoadExpansionList();
+            return expansions;
         }
-        static void TestDb()
+
+        private static void SaveExpansionList(ExpansionList expansionList, ILHpiDatabase database)
+        {
+            database.SaveExpansionList(expansionList);
+        }
+
+        private static ExpansionList ScrapeExpansionList(Scraper scraper)
+        {
+            ExpansionList expansions = scraper.ImportExpansions();
+            return expansions;
+        }
+
+        private static void TestDb(ILHpiDatabase database)
         {
             var expansion = new Expansion
             {
                 Abbreviation = "FOO",
                 EnName = "Foobar",
-                IdExpansion = 13
+                IdExpansion = 13,
+                ProductCount = 69            
             };
 
-            //using (var ctx = new LHpiNG.db.SQLContext())
-            using (var ctx = new LHpiNG.db.SQLiteContext())
-            {
+            database.SaveExpansion(expansion);
 
-
-                ctx.Expansions.Add(expansion);
-                ctx.SaveChanges();
-
-            }
         }
-        static void Test()
+
+        private static void Test()
         {
             List<Product> ProdList = new List<Product>();
+
+            ExpansionEntity expent = new ExpansionEntity();
+            ;
 
             Expansion expansion = new Expansion
             {

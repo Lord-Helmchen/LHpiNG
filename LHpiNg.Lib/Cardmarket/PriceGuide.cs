@@ -11,9 +11,9 @@ namespace LHpiNG.Cardmarket
     [Table("PriceGuides")]
     public class PriceGuide : PriceGuideEntity
     {
-        [Key]
-        public int Id { get; set; }
         public DateTime FetchDate { get; set; }
-        public PriceGuide PreviousPriceGuide { get; set; }
+        public int PreviousPriceGuidUid { get; set; }
+        [ForeignKey("Uid")]
+        public virtual PriceGuide PreviousPriceGuide { get; set; }
     }
 }

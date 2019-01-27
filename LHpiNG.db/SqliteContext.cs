@@ -14,35 +14,29 @@ namespace LHpiNG.db
 
     public class SQLiteContext : DbContext, ILHpiDatabase
     {
-        private string DBPath { get; set; }
-        private SQLiteConnectionStringBuilder connectionStringBuilder{get; set;}
+        //public static string DBPath = String.Format("{1}\\{0}", "LHpiDB.sqlite", System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location));
+        public static string DBPath = String.Format("{1}\\{0}", "LHpiDB.sqlite", "D:\\devel\\VisualStudioProjects\\LHpiNG\\LHpiNG\\LHpiNG.db");
 
+
+        public static string ConnectionString = new SQLiteConnectionStringBuilder
+        {
+            //DateTimeFormat = SQLiteDateFormats.ISO8601,
+            //FailIfMissing = true,
+            //ForeignKeys = true,
+            DataSource = DBPath
+        }.ConnectionString;
 
         public SQLiteContext() : base()
         {
-            DBPath = String.Format("{1}\\{0}", "LHpiDB.sqlite", System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location));
-            connectionStringBuilder = new SQLiteConnectionStringBuilder
-            {
-                FailIfMissing = true,
-                ForeignKeys = true,
-                DataSource = DBPath
-    };
         }
         public SQLiteContext(String connectionString) : base(connectionString)
         {
-            DBPath = String.Format("{1}\\{0}", "LHpiDB.sqlite", System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location));
-            connectionStringBuilder = new SQLiteConnectionStringBuilder
-            {
-                FailIfMissing = true,
-                ForeignKeys = true,
-                DataSource = DBPath
-            };
         }
 
         protected override void OnModelCreating(DbModelBuilder modelBuilder)
         {
             //var sqliteConnectionInitializer = new SqliteCreateDatabaseIfNotExists<SQLiteContext>(modelBuilder);
-            var sqliteConnectionInitializer = new SqliteDropCreateDatabaseWhenModelChanges <SQLiteContext>(modelBuilder);
+            var sqliteConnectionInitializer = new SqliteDropCreateDatabaseWhenModelChanges<SQLiteContext>(modelBuilder);
             Database.SetInitializer(sqliteConnectionInitializer);
         }
 
@@ -54,11 +48,14 @@ namespace LHpiNG.db
         #region Cardmarket
         public ExpansionList LoadExpansionList()
         {
-            throw new NotImplementedException();
+            ExpansionList expansionList = new ExpansionList();
+            expansionList.Expansions = Expansions.ToList();
+            return expansionList;
         }
         public void SaveExpansionList(ExpansionList expansionList)
         {
-            throw new NotImplementedException();
+            Expansions.AddRange(expansionList.Expansions);
+            SaveChanges();
         }
         public Expansion LoadExpansion(Expansion expansion)
         {
@@ -66,13 +63,24 @@ namespace LHpiNG.db
         }
         public void SaveExpansion(Expansion expansion)
         {
-            throw new NotImplementedException();
+            Expansions.Add(expansion);
+            SaveChanges();
         }
         public Product LoadProduct(Product product)
         {
             throw new NotImplementedException();
         }
         public void SaveProduct(Product product)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IEnumerable<Product> LoadProducts(Expansion expansion)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SaveProducts(Expansion expansion)
         {
             throw new NotImplementedException();
         }

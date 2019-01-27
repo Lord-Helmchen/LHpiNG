@@ -20,13 +20,6 @@ namespace LHpiNG.Cardmarket
             this.Expansions = new List<Expansion>();
         }
 
-
-
-        public ExpansionList ImportFromAPI()
-        {
-            throw new NotImplementedException();
-        }
-
         public IEnumerator GetEnumerator()
         {
             return ((IEnumerable)Expansions).GetEnumerator();

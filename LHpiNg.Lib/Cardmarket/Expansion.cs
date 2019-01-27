@@ -11,27 +11,18 @@ namespace LHpiNG.Cardmarket
     public class Expansion : ExpansionEntity
     {
         public int? ProductCount { get; set; }
-
         public DateTime? ReleaseDateTime { get; set; }
         public IEnumerable<Product> Products { get; set; }
         public string UrlSuffix { get; set; }
 
-        public void ImportFromAPI()
+        public Expansion() : base()
         {
-            throw new NotImplementedException();
-        }
-        public void LoadProductsFromDatabase()
-        {
-            throw new NotImplementedException();
-        }
-        public void SaveProductsToDatabase()
-        {
-            throw new NotImplementedException();
-        }
-        public void ImportProductsFromWeb()
-        {
-            throw new NotImplementedException();
-        }
 
+        }
+        //constructor from API reply
+        public Expansion(string jsonEntity): base(jsonEntity)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

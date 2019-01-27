@@ -23,6 +23,8 @@ namespace LHpiNG.db
         void SaveExpansionList(ExpansionList expansionList);
         Expansion LoadExpansion(Expansion expansion);
         void SaveExpansion(Expansion expansion);
+        IEnumerable<Product> LoadProducts(Expansion expansion);
+        void SaveProducts(Expansion expansion);
         Product LoadProduct(Product product);
         void SaveProduct(Product product);
         #endregion
