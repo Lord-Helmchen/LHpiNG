@@ -28,7 +28,7 @@ namespace LHpiNG
             Console.WriteLine("\t5 - Save Expansions to Database");
             Console.WriteLine("\t6 - Print expansionList.Length");
             Console.WriteLine("\t7 - null expansionList");
-            Console.WriteLine("\tq - quit");
+            Console.WriteLine("\tq or 0 - quit");
 
 
             bool quit = false;
@@ -64,6 +64,7 @@ namespace LHpiNG
                         expansionList = new ExpansionList();
                         Console.WriteLine(String.Format("{0} Expansions in List", expansionList.Expansions.Count));
                         break;
+                    case "0":
                     case "q":
                         quit = true;
                         break;
@@ -78,13 +79,13 @@ namespace LHpiNG
             // Go to http://aka.ms/dotnet-get-started-console to continue learning how to build a console app! 
         }
 
-        private static ExpansionList LoadExpansion(ICardmarketData database)
+        private static ExpansionList LoadExpansion(EFContext database)
         {
             ExpansionList expansions = database.LoadExpansionList();
             return expansions;
         }
 
-        private static void SaveExpansionList(ExpansionList expansionList, ICardmarketData database)
+        private static void SaveExpansionList(ExpansionList expansionList, EFContext database)
         {
             database.SaveExpansionList(expansionList);
         }
@@ -95,7 +96,7 @@ namespace LHpiNG
             return expansions;
         }
 
-        private static void TestDb(ICardmarketData database)
+        private static void TestDb(EFContext database)
         {
             var expansion = new Expansion
             {
@@ -105,7 +106,8 @@ namespace LHpiNG
                 ProductCount = 69            
             };
 
-            database.SaveExpansion(expansion);
+            database.AddOrUpdateExpansion(expansion);
+            
 
         }
 
@@ -134,6 +136,7 @@ namespace LHpiNG
             ProdList.Add(product);
 
             ;
+            
         }
     }
 }

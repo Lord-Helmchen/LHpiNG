@@ -91,6 +91,7 @@
     <Compile Include="Cardmarket\Rarity.cs" />
     <Compile Include="Cardmarket\ReprintEntity.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Util\GenericExtensions.cs" />
     <Compile Include="Util\StringExtension.cs" />
     <Compile Include="Web\MkmApi.cs" />
     <Compile Include="Web\Scraper.cs" />

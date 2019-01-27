@@ -12,7 +12,7 @@ namespace LHpiNG.db
     {
         //declare getters and setters as part of the interface to force me to remember to implement the fields
         DbSet<Expansion> Expansions { get; set; }
-        DbSet<Product> Producs { get; set; }
+        DbSet<Product> Products { get; set; }
         DbSet<PriceGuide> PriceGuides { get; set; }
         //public DbSet<CategoryEntity> CategoryEntities { get; set; }
         //public DbSet<LocalizationEntity> LocalizationEntities { get; set; }
@@ -21,11 +21,11 @@ namespace LHpiNG.db
         ExpansionList LoadExpansionList();
         void SaveExpansionList(ExpansionList expansionList);
         Expansion LoadExpansion(Expansion expansion);
-        void SaveExpansion(Expansion expansion);
+        void AddOrUpdateExpansion(Expansion expansion);
         IEnumerable<Product> LoadProducts(Expansion expansion);
         void SaveProducts(Expansion expansion);
         Product LoadProduct(Product product);
-        void SaveProduct(Product product);
+        void AddOrUpdateProduct(Product product);
 
     }
 }

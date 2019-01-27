@@ -1,8 +1,11 @@
-﻿using LHpiNG.Cardmarket;
+﻿using LHpiNg.Util;
+using LHpiNG.Cardmarket;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
 using System.Data.Entity;
+using System.Data.Entity.Core.Objects;
+using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,7 +15,7 @@ namespace LHpiNG.db
     public abstract class EFContext : DbContext, ICardmarketData, IAlbumData
     {
         public DbSet<Expansion> Expansions { get; set; }
-        public DbSet<Product> Producs { get; set; }
+        public DbSet<Product> Products { get; set; }
         public DbSet<PriceGuide> PriceGuides { get; set; }
 
         protected EFContext() : base()
@@ -28,10 +31,12 @@ namespace LHpiNG.db
             //Configure default schema
             builder.HasDefaultSchema("LHpi");
 
-            builder.Entity<ExpansionEntity>()
-                .HasIndex(x => x.Abbreviation)
-                //.IsUnique().HasFilter("Abbreviation IS NOT NULL") // only in EF Core :-(
-                .HasName("IX_tla");
+            //builder.Entity<ExpansionEntity>()
+            //    .HasIndex(x => x.Abbreviation)
+            //    //.IsUnique().HasFilter("Abbreviation IS NOT NULL") // only in EF Core :-(
+            //    .HasName("IX_tla");
+            //builder.Entity<ExpansionEntity>()
+            //    .HasOptional(x => x.IdExpansion);
         }
 
         // ILHpiDatabase methods
@@ -41,7 +46,7 @@ namespace LHpiNG.db
             try
             {
 #pragma warning disable IDE0017 // Simplify object initialization
-                ExpansionList expansionList = new ExpansionList();
+                var expansionList = new ExpansionList();
 #pragma warning restore IDE0017 // Simplify object initialization
                 expansionList.Expansions = Expansions.ToList();
                 return expansionList;
@@ -55,8 +60,10 @@ namespace LHpiNG.db
         {
             try
             {
-                Expansions.AddRange(expansionList.Expansions);
-                
+                foreach (Expansion expansion in expansionList)
+                {
+                    AddOrUpdateExpansion(expansion);
+                }
                 SaveChanges();
             }
             catch (DbException)
@@ -64,15 +71,25 @@ namespace LHpiNG.db
                 throw;
             }
         }
+
         public Expansion LoadExpansion(Expansion expansion)
         {
-            throw new NotImplementedException();
+            return Expansions.Find(expansion.EnName);
+            //TODO alternatively, look for other identifying index values
         }
-        public void SaveExpansion(Expansion expansion)
+        public void AddOrUpdateExpansion(Expansion expansion)
         {
             try
             {
-                Expansions.Add(expansion);
+                var existing = Expansions.SingleOrDefault<Expansion>(x => x.EnName == expansion.EnName);
+                if (existing != null)
+                {
+                    existing.InjectNonNull(expansion);
+                }
+                else
+                {
+                    Expansions.Add(expansion);
+                }
                 SaveChanges();
             }
             catch (DbException)
@@ -82,11 +99,28 @@ namespace LHpiNG.db
         }
         public Product LoadProduct(Product product)
         {
-            throw new NotImplementedException();
+            return Products.Find(new { product.EnName, product.ExpansionName });
         }
-        public void SaveProduct(Product product)
+        public void AddOrUpdateProduct(Product product)
         {
-            throw new NotImplementedException();
+            try
+            {
+                var existing = Products.SingleOrDefault<Product>(x => x.EnName == product.EnName && x.ExpansionName == product.ExpansionName);
+                if (existing != null)
+                {
+                    existing.InjectNonNull(product);
+
+                }
+                else
+                {
+                    Products.Add(product);
+                }
+                SaveChanges();
+            }
+            catch (DbException)
+            {
+                throw;
+            }
         }
 
         public IEnumerable<Product> LoadProducts(Expansion expansion)
