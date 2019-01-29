@@ -10,12 +10,14 @@ using LHpiNG.Cardmarket;
 using HtmlAgilityPack;
 using ScrapySharp.Extensions;
 using System.Text.RegularExpressions;
+using LHpiNg.Web;
 
 namespace LHpiNG.Web
 {
-    public sealed class Scraper
+    public sealed class Scraper : IFromCardmarket
     {
         public ScrapingBrowser Browser { get; set; }
+        public string UrlPrefix { get; set; }
 
         private static readonly Lazy<Scraper> lazy = new Lazy<Scraper>(() => new Scraper());
 
@@ -30,6 +32,7 @@ namespace LHpiNG.Web
                 AllowMetaRedirect = true,
                 Language = System.Globalization.CultureInfo.GetCultureInfoByIetfLanguageTag("en-DE")
             };
+            UrlPrefix = "https://sandbox.cardmarket.com/en/Magic"; //TODO need to stop this at tld, "/en/Magic" must be part of suffix 
         }
 
         public WebPage FetchPage(Uri uri)
@@ -61,7 +64,7 @@ namespace LHpiNG.Web
         {
             ExpansionList expansionList = new ExpansionList();
 
-            WebPage resultpage = FetchPage(expansionList.Url);
+            WebPage resultpage = FetchPage(new Uri(String.Concat(this.UrlPrefix,expansionList.UrlSuffix)));
             IEnumerable<HtmlNode> nodes = resultpage.Html.CssSelect("div.expansion-row");
 
             foreach (HtmlNode node in nodes)
@@ -72,8 +75,9 @@ namespace LHpiNG.Web
                     {
                         EnName = node.ChildNodes[2].ChildNodes[0].InnerText,
                         ReleaseDate = node.ChildNodes[4].InnerText,
-                        UrlSuffix = node.ChildNodes[2].ChildNodes[0].Attributes[0].Value,
                     };
+                    var urlSuffix = Regex.Replace(node.ChildNodes[2].ChildNodes[0].Attributes[0].Value, @"^/en/Magic/Expansions", "/Products/Singles", RegexOptions.IgnoreCase);
+                    expansion.UrlSuffix = urlSuffix;// TODO scraped Value is for Expansion overview, but set suffix for Singles differs
                     var productCount = Regex.Match(node.ChildNodes[3].InnerText, @"^(\d+) Cards").Groups[1].Value;
                     expansion.ProductCount = int.Parse(productCount);
                     bool dateParsed = DateTime.TryParse(expansion.ReleaseDate, out DateTime parsedDate);
@@ -102,15 +106,41 @@ namespace LHpiNG.Web
             return expansionList;
         }
 
-        public Product ImportProduct(Product product)
+        public IEnumerable<ProductEntity> ImportProductsByExpansion(ExpansionEntity expansion)
+        {
+            List<ProductEntity> products = new List<ProductEntity>();
+
+            Uri url = new Uri(String.Concat(this.UrlPrefix, ((Expansion)expansion).UrlSuffix));
+            WebPage resultpage = FetchPage(url);
+
+            IEnumerable<HtmlNode> nodes = resultpage.Html.CssSelect("tbody").FirstOrDefault().ChildNodes;
+            foreach (HtmlNode node in nodes)
+            {
+                ProductEntity product = new ProductEntity
+                {
+                    EnName = node.ChildNodes[2].InnerText,
+                    ExpansionName = expansion.EnName,
+                    Website = node.ChildNodes[2].ChildNodes[0].GetAttributeValue("href"),
+                    Expansion = expansion
+                };
+                string rarityString = node.ChildNodes[3].FirstChild.FirstChild.GetAttributeValue("data-original-title");
+                if (Enum.TryParse(rarityString, true, out Rarity parsedRarity))
+                {
+                    product.Rarity = parsedRarity;
+
+                }
+                products.Add(product);
+            }
+            products.OrderBy(x => x.EnName);
+
+            return products;
+        }
+
+        public Product ImportProduct(ProductEntity product)
         {
             throw new NotImplementedException();
         }
 
-        public void ImportProductsByExpansion(ExpansionEntity expansion)
-        {
-            throw new NotImplementedException();
-        }
     }
 }
 

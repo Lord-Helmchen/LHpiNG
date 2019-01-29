@@ -81,7 +81,7 @@ namespace LHpiNG.db
         {
             try
             {
-                var existing = Expansions.SingleOrDefault<Expansion>(x => x.EnName == expansion.EnName);
+                Expansion existing = Expansions.SingleOrDefault(x => x.EnName == expansion.EnName);
                 if (existing != null)
                 {
                     existing.InjectNonNull(expansion);
@@ -105,7 +105,7 @@ namespace LHpiNG.db
         {
             try
             {
-                var existing = Products.SingleOrDefault<Product>(x => x.EnName == product.EnName && x.ExpansionName == product.ExpansionName);
+                Product existing = Products.SingleOrDefault(x => x.EnName == product.EnName && x.ExpansionName == product.ExpansionName);
                 if (existing != null)
                 {
                     existing.InjectNonNull(product);

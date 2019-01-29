@@ -11,12 +11,12 @@ namespace LHpiNG.Cardmarket
     public class ExpansionList : IEnumerable
     {
         public List<Expansion> Expansions { get; set; }
-        public Uri Url { get; set; }
+        public string UrlSuffix { get; set; }
         public DateTime FetchedOn { get; set; }
 
         public ExpansionList()
         {
-            this.Url = new Uri("https://sandbox.cardmarket.com/en/Magic/Expansions");
+            this.UrlSuffix = "/Expansions";
             this.Expansions = new List<Expansion>();
         }
 

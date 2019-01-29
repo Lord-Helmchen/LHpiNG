@@ -36,7 +36,8 @@ namespace LHpiNG.Cardmarket
 
         public ProductEntity()
         {
-
+            this.GameName = "Magic";
+            this.Links = null;//not used yet
         }
         //constructor from API reply
         public ProductEntity(string jsonEntity)
