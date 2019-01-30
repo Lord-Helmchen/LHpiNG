@@ -17,8 +17,8 @@ namespace LHpiNG.Web
 {
     public sealed class Scraper : IFromCardmarket
     {
-        public ScrapingBrowser Browser { get; set; }
-        public string UrlPrefix { get; set; }
+        private ScrapingBrowser Browser { get; set; }
+        private string UrlPrefix { get; set; }
 
         private static readonly Lazy<Scraper> lazy = new Lazy<Scraper>(() => new Scraper());
 
@@ -36,7 +36,7 @@ namespace LHpiNG.Web
             UrlPrefix = "https://sandbox.cardmarket.com";
         }
 
-        public WebPage FetchPage(Uri uri)
+        private WebPage FetchPage(Uri uri)
         {
             try
             {
@@ -108,7 +108,7 @@ namespace LHpiNG.Web
             return expansionList;
         }
 
-        public ExpansionList FetchProductsUrlSuffix(ExpansionList expansionList)
+        private ExpansionList FetchProductsUrlSuffix(ExpansionList expansionList)
         {
             foreach (Expansion expansion in expansionList)
             {
@@ -125,7 +125,7 @@ namespace LHpiNG.Web
                             expansion.ProductsUrlSuffix = node.GetAttributeValue("href");
                             break;
                         }
-                        throw new Exception("throttling needed ?");
+                        throw new Exception("throttling needed ?");//should have reached break;
 
                     }
                 }
@@ -135,6 +135,10 @@ namespace LHpiNG.Web
 
         public IEnumerable<ProductEntity> ImportProductList(ExpansionEntity expansion)
         {
+            if (!(expansion is Expansion))
+            {
+                throw new ArgumentException();
+            }
             List<ProductEntity> products = new List<ProductEntity>();
 
             Uri url = new Uri(String.Concat(this.UrlPrefix, ((Expansion)expansion).UrlSuffix));
@@ -163,11 +167,50 @@ namespace LHpiNG.Web
             return products;
         }
 
-        public Product ImportProduct(ProductEntity product)
+        public IEnumerable<ExpansionEntity> ImportAllProductLists(IEnumerable<ExpansionEntity> expansions)
+        {
+            if (!(expansions is IEnumerable<Expansion>))
+            {
+                throw new ArgumentException();
+            }
+            foreach(Expansion expansion in expansions)
+            {
+                try
+                {
+                    IEnumerable<ProductEntity> products = new List<ProductEntity>();
+                    if (expansion.ProductCount > 0)
+                    {
+                        products = ImportProductList(expansion);
+                    }
+                    if (products.Count() != expansion.ProductCount)
+                    {
+                        throw new ScrapingException ("Product Count mismatch (found" + products.Count());
+                    }
+                }
+                catch(ScrapingException ex)
+                {
+                    Console.WriteLine(ex.Message + ": ProductCount=" + expansion.ProductCount + " in " + expansion.EnName);
+                }
+
+            }
+            return expansions;
+        }
+
+        public ProductEntity ImportProduct(ProductEntity product)
         {
             throw new NotImplementedException();
         }
 
+        public IEnumerable<ProductEntity> ImportAllProducts(ExpansionEntity expansion)
+        {
+            List<Product> products = new List<Product>();
+            foreach (Product expansionProduct in ((Expansion)expansion).Products)
+            {
+                Product product = ImportProduct(expansionProduct) as Product;
+                products.Add(product);
+            }
+            return products;
+        }
     }
 }
 
