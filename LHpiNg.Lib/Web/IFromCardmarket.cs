@@ -15,7 +15,7 @@ namespace LHpiNg.Web
         /// <returns></returns>
         ExpansionList ImportExpansions();
 
-        IEnumerable<ProductEntity> ImportProductsByExpansion(ExpansionEntity expansion);
+        IEnumerable<ProductEntity> ImportProductList(ExpansionEntity expansion);
 
         Product ImportProduct(ProductEntity product);
     }

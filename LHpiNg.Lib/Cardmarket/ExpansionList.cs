@@ -16,7 +16,7 @@ namespace LHpiNG.Cardmarket
 
         public ExpansionList()
         {
-            this.UrlSuffix = "/Expansions";
+            this.UrlSuffix = "/en/Magic/Expansions";
             this.Expansions = new List<Expansion>();
         }
 

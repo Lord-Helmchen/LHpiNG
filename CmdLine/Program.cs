@@ -58,10 +58,10 @@ namespace LHpiNG
                         SaveExpansionList(expansionList, database);
                         Console.WriteLine(String.Format("{0} Expansions saved", expansionList.Expansions.Count));
                         break;
-                    case "6":
+                    case "6"://noop
                         Console.WriteLine(String.Format("{0} Expansions in List", expansionList.Expansions.Count));
                         break;
-                    case "7":
+                    case "7"://null list
                         expansionList = new ExpansionList();
                         Console.WriteLine(String.Format("{0} Expansions in List", expansionList.Expansions.Count));
                         break;
@@ -103,7 +103,7 @@ namespace LHpiNG
 
         private static IEnumerable<ProductEntity> ScrapeProducts(Scraper scraper, Expansion expansion)
         {
-            IEnumerable<ProductEntity> products = scraper.ImportProductsByExpansion(expansion);
+            IEnumerable<ProductEntity> products = scraper.ImportProductList(expansion);
             expansion.Products = (IEnumerable<Product>) products;
             return products;
         }

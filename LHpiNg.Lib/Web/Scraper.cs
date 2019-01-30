@@ -11,6 +11,7 @@ using HtmlAgilityPack;
 using ScrapySharp.Extensions;
 using System.Text.RegularExpressions;
 using LHpiNg.Web;
+using ScrapySharp.Html;
 
 namespace LHpiNG.Web
 {
@@ -32,7 +33,7 @@ namespace LHpiNG.Web
                 AllowMetaRedirect = true,
                 Language = System.Globalization.CultureInfo.GetCultureInfoByIetfLanguageTag("en-DE")
             };
-            UrlPrefix = "https://sandbox.cardmarket.com/en/Magic"; //TODO need to stop this at tld, "/en/Magic" must be part of suffix 
+            UrlPrefix = "https://sandbox.cardmarket.com";
         }
 
         public WebPage FetchPage(Uri uri)
@@ -75,9 +76,8 @@ namespace LHpiNG.Web
                     {
                         EnName = node.ChildNodes[2].ChildNodes[0].InnerText,
                         ReleaseDate = node.ChildNodes[4].InnerText,
+                        UrlSuffix = node.ChildNodes[2].ChildNodes[0].GetAttributeValue("href")
                     };
-                    var urlSuffix = Regex.Replace(node.ChildNodes[2].ChildNodes[0].Attributes[0].Value, @"^/en/Magic/Expansions", "/Products/Singles", RegexOptions.IgnoreCase);
-                    expansion.UrlSuffix = urlSuffix;// TODO scraped Value is for Expansion overview, but set suffix for Singles differs
                     var productCount = Regex.Match(node.ChildNodes[3].InnerText, @"^(\d+) Cards").Groups[1].Value;
                     expansion.ProductCount = int.Parse(productCount);
                     bool dateParsed = DateTime.TryParse(expansion.ReleaseDate, out DateTime parsedDate);
@@ -103,10 +103,37 @@ namespace LHpiNG.Web
             }
             expansionList.FetchedOn = DateTime.Now;
 
+            expansionList = FetchProductsUrlSuffix(expansionList);
+
             return expansionList;
         }
 
-        public IEnumerable<ProductEntity> ImportProductsByExpansion(ExpansionEntity expansion)
+        public ExpansionList FetchProductsUrlSuffix(ExpansionList expansionList)
+        {
+            foreach (Expansion expansion in expansionList)
+            {
+                if (expansion.ProductCount > 0
+                    //&& (expansion.EnName == "Ugin's Fate Promos" || expansion.EnName == "Commander 2018")//Debug
+                    )
+                {
+                    WebPage resultpage = FetchPage(new Uri(String.Concat(this.UrlPrefix, expansion.UrlSuffix)));
+                    IEnumerable<HtmlNode> nodes = resultpage.Html.CssSelect("a.card");
+                    foreach (HtmlNode node in nodes)
+                    {
+                        if (node.GetAttributeValue("href").Contains("Singles"))
+                        {
+                            expansion.ProductsUrlSuffix = node.GetAttributeValue("href");
+                            break;
+                        }
+                        throw new Exception("throttling needed ?");
+
+                    }
+                }
+            }
+            return expansionList;
+        }
+
+        public IEnumerable<ProductEntity> ImportProductList(ExpansionEntity expansion)
         {
             List<ProductEntity> products = new List<ProductEntity>();
 

@@ -14,6 +14,7 @@ namespace LHpiNG.Cardmarket
         public DateTime? ReleaseDateTime { get; set; }
         public IEnumerable<Product> Products { get; set; }
         public string UrlSuffix { get; set; }
+        public string ProductsUrlSuffix { get; set; }
 
         public Expansion() : base()
         {
