@@ -85,6 +85,7 @@
     <Compile Include="Cardmarket\ExpansionList.cs" />
     <Compile Include="Cardmarket\LocalizationEntity.cs" />
     <Compile Include="Cardmarket\PriceGuide.cs" />
+    <Compile Include="Cardmarket\PriceGuideProEntity.cs" />
     <Compile Include="Cardmarket\PriceGuideEntity.cs" />
     <Compile Include="Cardmarket\Product.cs" />
     <Compile Include="Cardmarket\ProductEntity.cs" />

@@ -15,12 +15,12 @@ namespace LHpiNg.Web
         /// <returns></returns>
         ExpansionList ImportExpansions();
 
-        IEnumerable<ProductEntity> ImportProductList(ExpansionEntity expansion);
+        IEnumerable<ProductEntity> ImportProducts(ExpansionEntity expansion);
 
-        IEnumerable<ExpansionEntity> ImportAllProductLists(IEnumerable<ExpansionEntity> expansions);
+        IEnumerable<ExpansionEntity> ImportAllProducts(IEnumerable<ExpansionEntity> expansions);
 
-        ProductEntity ImportProduct(ProductEntity product);
+        ProductEntity ImportProductDetails(ProductEntity product);
 
-        IEnumerable<ProductEntity> ImportAllProducts(ExpansionEntity expansion);
+        IEnumerable<ProductEntity> ImportAllProductDetails(ExpansionEntity expansion);
     }
 }

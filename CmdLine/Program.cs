@@ -103,8 +103,8 @@ namespace LHpiNG
 
         private static IEnumerable<ProductEntity> ScrapeProducts(Scraper scraper, Expansion expansion)
         {
-            IEnumerable<ProductEntity> products = scraper.ImportProductList(expansion);
-            expansion.Products = (IEnumerable<Product>) products;
+            IEnumerable<ProductEntity> products = scraper.ImportProducts(expansion);
+            expansion.Products = products.Cast<Product>();
             return products;
         }
         private static IEnumerable<ProductEntity> TestScrapeProducts(Scraper scraper, ExpansionList expansionList)
@@ -120,11 +120,11 @@ namespace LHpiNG
                 Abbreviation = "FOO",
                 EnName = "Foobar",
                 IdExpansion = 13,
-                ProductCount = 69            
+                ProductCount = 69
             };
 
             database.AddOrUpdateExpansion(expansion);
-            
+
 
         }
 
@@ -153,7 +153,7 @@ namespace LHpiNG
             ProdList.Add(product);
 
             ;
-            
+
         }
     }
 }

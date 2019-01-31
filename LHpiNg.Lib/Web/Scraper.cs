@@ -12,6 +12,7 @@ using ScrapySharp.Extensions;
 using System.Text.RegularExpressions;
 using LHpiNg.Web;
 using ScrapySharp.Html;
+using ScrapySharp.Exceptions;
 
 namespace LHpiNG.Web
 {
@@ -43,7 +44,10 @@ namespace LHpiNG.Web
                 WebPage result = Browser.NavigateToPage(uri);
                 if ((int)HttpStatusCode.OK == result.RawResponse.StatusCode)
                 {
-                    Console.WriteLine(String.Format("got {0} with status {1}", uri.AbsoluteUri, result.RawResponse.StatusCode));
+                    string msg = String.Format("got {0} with status {1}", uri.AbsoluteUri, result.RawResponse.StatusCode);
+                    int msgSpaces = Console.WindowWidth - msg.Length - 3;
+                    msgSpaces = (msgSpaces > 0) ? msgSpaces: 0;
+                    Console.Write(String.Concat("\r", msg, new String(' ', msgSpaces)));
                     return result;
                 }
                 else
@@ -65,7 +69,8 @@ namespace LHpiNG.Web
         {
             ExpansionList expansionList = new ExpansionList();
 
-            WebPage resultpage = FetchPage(new Uri(String.Concat(this.UrlPrefix,expansionList.UrlSuffix)));
+            Console.WriteLine();
+            WebPage resultpage = FetchPage(new Uri(String.Concat(this.UrlPrefix, expansionList.UrlSuffix)));
             IEnumerable<HtmlNode> nodes = resultpage.Html.CssSelect("div.expansion-row");
 
             foreach (HtmlNode node in nodes)
@@ -103,58 +108,68 @@ namespace LHpiNG.Web
             }
             expansionList.FetchedOn = DateTime.Now;
 
-            expansionList = FetchProductsUrlSuffix(expansionList);
+            expansionList = ImportProductsUrlSuffix(expansionList);
 
             return expansionList;
         }
 
-        private ExpansionList FetchProductsUrlSuffix(ExpansionList expansionList)
+        private ExpansionList ImportProductsUrlSuffix(ExpansionList expansionList)
         {
+            Console.WriteLine();
             foreach (Expansion expansion in expansionList)
             {
-                if (expansion.ProductCount > 0
-                    //&& (expansion.EnName == "Ugin's Fate Promos" || expansion.EnName == "Commander 2018")//Debug
-                    )
+                if (expansion.ProductCount > 0) //&& (expansion.EnName == "Ugin's Fate Promos" || expansion.EnName == "Commander 2018")//Debug
                 {
-                    WebPage resultpage = FetchPage(new Uri(String.Concat(this.UrlPrefix, expansion.UrlSuffix)));
-                    IEnumerable<HtmlNode> nodes = resultpage.Html.CssSelect("a.card");
-                    foreach (HtmlNode node in nodes)
+                    expansion.ProductsUrlSuffix = ImportProductsUrlSuffix(expansion);
+                    if (expansion.ProductsUrlSuffix == null)
                     {
-                        if (node.GetAttributeValue("href").Contains("Singles"))
-                        {
-                            expansion.ProductsUrlSuffix = node.GetAttributeValue("href");
-                            break;
-                        }
                         throw new Exception("throttling needed ?");//should have reached break;
-
                     }
                 }
             }
             return expansionList;
         }
 
-        public IEnumerable<ProductEntity> ImportProductList(ExpansionEntity expansion)
+        private string ImportProductsUrlSuffix(Expansion expansion)
+        {
+            WebPage resultpage = FetchPage(new Uri(String.Concat(this.UrlPrefix, expansion.UrlSuffix)));
+            IEnumerable<HtmlNode> nodes = resultpage.Html.CssSelect("a.card");
+            string productsUrlSuffix = null;
+            foreach (HtmlNode node in nodes)
+            {
+                if (node.GetAttributeValue("href").Contains("Singles"))
+                {
+                    productsUrlSuffix = node.GetAttributeValue("href");
+                    break;
+                }
+
+            }
+            return productsUrlSuffix;
+        }
+
+        public IEnumerable<ProductEntity> ImportProducts(ExpansionEntity expansion)
         {
             if (!(expansion is Expansion))
             {
-                throw new ArgumentException();
+                throw new ArgumentException("Need Expansion instead of only ExpansionEntity");
             }
             List<ProductEntity> products = new List<ProductEntity>();
 
-            Uri url = new Uri(String.Concat(this.UrlPrefix, ((Expansion)expansion).UrlSuffix));
+            Uri url = new Uri(String.Concat(this.UrlPrefix, ((Expansion)expansion).ProductsUrlSuffix));
+            Console.WriteLine();
             WebPage resultpage = FetchPage(url);
 
-            IEnumerable<HtmlNode> nodes = resultpage.Html.CssSelect("tbody").FirstOrDefault().ChildNodes;
-            foreach (HtmlNode node in nodes)
+            HtmlNode Table = resultpage.Html.CssSelect("table.MKMTable").First();
+            foreach (HtmlNode row in Table.SelectNodes("tbody/tr"))
             {
-                ProductEntity product = new ProductEntity
+                ProductEntity product = new Product
                 {
-                    EnName = node.ChildNodes[2].InnerText,
+                    EnName = row.ChildNodes[2].InnerText,
                     ExpansionName = expansion.EnName,
-                    Website = node.ChildNodes[2].ChildNodes[0].GetAttributeValue("href"),
+                    Website = row.ChildNodes[2].ChildNodes[0].GetAttributeValue("href"),
                     Expansion = expansion
                 };
-                string rarityString = node.ChildNodes[3].FirstChild.FirstChild.GetAttributeValue("data-original-title");
+                string rarityString = row.ChildNodes[3].FirstChild.FirstChild.GetAttributeValue("data-original-title");
                 if (Enum.TryParse(rarityString, true, out Rarity parsedRarity))
                 {
                     product.Rarity = parsedRarity;
@@ -164,30 +179,30 @@ namespace LHpiNG.Web
             }
             products.OrderBy(x => x.EnName);
 
-            return products;
+            return products.AsEnumerable();
         }
 
-        public IEnumerable<ExpansionEntity> ImportAllProductLists(IEnumerable<ExpansionEntity> expansions)
+        public IEnumerable<ExpansionEntity> ImportAllProducts(IEnumerable<ExpansionEntity> expansions)
         {
             if (!(expansions is IEnumerable<Expansion>))
             {
-                throw new ArgumentException();
+                throw new ArgumentException("Need Expansion instead of only ExpansionEntity");
             }
-            foreach(Expansion expansion in expansions)
+            foreach (Expansion expansion in expansions)
             {
                 try
                 {
                     IEnumerable<ProductEntity> products = new List<ProductEntity>();
                     if (expansion.ProductCount > 0)
                     {
-                        products = ImportProductList(expansion);
+                        products = ImportProducts(expansion);
                     }
                     if (products.Count() != expansion.ProductCount)
                     {
-                        throw new ScrapingException ("Product Count mismatch (found" + products.Count());
+                        throw new ScrapingException("Product Count mismatch (found" + products.Count());
                     }
                 }
-                catch(ScrapingException ex)
+                catch (ScrapingException ex)
                 {
                     Console.WriteLine(ex.Message + ": ProductCount=" + expansion.ProductCount + " in " + expansion.EnName);
                 }
@@ -196,17 +211,21 @@ namespace LHpiNG.Web
             return expansions;
         }
 
-        public ProductEntity ImportProduct(ProductEntity product)
+        public ProductEntity ImportProductDetails(ProductEntity product)
         {
             throw new NotImplementedException();
         }
 
-        public IEnumerable<ProductEntity> ImportAllProducts(ExpansionEntity expansion)
+        public IEnumerable<ProductEntity> ImportAllProductDetails(ExpansionEntity expansion)
         {
+            if (!(expansion is Expansion))
+            {
+                throw new ArgumentException("Need Expansion instead of only ExpansionEntity");
+            }
             List<Product> products = new List<Product>();
             foreach (Product expansionProduct in ((Expansion)expansion).Products)
             {
-                Product product = ImportProduct(expansionProduct) as Product;
+                Product product = ImportProductDetails(expansionProduct) as Product;
                 products.Add(product);
             }
             return products;

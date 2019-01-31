@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 namespace LHpiNG.Cardmarket
 {
     [Table("PriceGuides")]
-    public class PriceGuide : PriceGuideEntity
+    public class PriceGuide : PriceGuideProEntity
     {
         public DateTime FetchDate { get; set; }
         public int PreviousPriceGuidUid { get; set; }

@@ -14,7 +14,7 @@ namespace LHpiNg.Web
             throw new NotImplementedException();
         }
 
-        public IEnumerable<ProductEntity> ImportAllProducts(ExpansionEntity expansion)
+        public IEnumerable<ProductEntity> ImportAllProductDetails(ExpansionEntity expansion)
         {
             throw new NotImplementedException();
         }
@@ -24,19 +24,20 @@ namespace LHpiNg.Web
             throw new NotImplementedException();
         }
 
-        public ProductEntity ImportProduct(ProductEntity product)
+        public ProductEntity ImportProductDetails(ProductEntity product)
         {
             throw new NotImplementedException();
         }
 
-        public IEnumerable<ProductEntity> ImportProductList(ExpansionEntity expansion)
+        public IEnumerable<ProductEntity> ImportProducts(ExpansionEntity expansion)
         {
             throw new NotImplementedException();
         }
 
-        IEnumerable<ExpansionEntity> IFromCardmarket.ImportAllProductLists(IEnumerable<ExpansionEntity> expansions)
+        public IEnumerable<ExpansionEntity> ImportAllProducts(IEnumerable<ExpansionEntity> expansions)
         {
             throw new NotImplementedException();
         }
+
     }
 }
