@@ -7,9 +7,8 @@ namespace LHpiNG.Cardmarket
     [Table("Products")]
     public class Product : ProductEntity
     {
-        //TODO can we use ProductEntity.Website instead ?
-        public string UrlSuffix { get; set; }
-
+        // keep price history
+        public IList<PriceGuide> PriceGuides { get; set; }
 
     }
 }

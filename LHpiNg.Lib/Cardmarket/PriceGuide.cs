@@ -12,8 +12,18 @@ namespace LHpiNG.Cardmarket
     public class PriceGuide : PriceGuideProEntity
     {
         public DateTime FetchDate { get; set; }
+
         public int PreviousPriceGuidUid { get; set; }
-        [ForeignKey("Uid")]
-        public virtual PriceGuide PreviousPriceGuide { get; set; }
+        [ForeignKey("PreviousPriceGuidUid")]
+        public PriceGuide PreviousPriceGuide { get; set; }
+
+        // EF rereference navigation property
+        [ForeignKey("Product"), Column(Order = 1)]
+        public string ProductName { get; set; }             // Product's English name
+        [ForeignKey("Product"), Column(Order = 2)]
+        public string ExpansionName { get; set; }           // Expansion's name 
+
+        public Product Product { get; set; }
+
     }
 }

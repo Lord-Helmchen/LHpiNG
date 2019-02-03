@@ -13,6 +13,8 @@ using System.Text.RegularExpressions;
 using LHpiNg.Web;
 using ScrapySharp.Html;
 using ScrapySharp.Exceptions;
+using System.Diagnostics;
+using System.Threading;
 
 namespace LHpiNG.Web
 {
@@ -37,18 +39,39 @@ namespace LHpiNG.Web
             UrlPrefix = "https://sandbox.cardmarket.com";
         }
 
-        private WebPage FetchPage(Uri uri)
+        private WebPage FetchPage(Uri uri, int msDelay = 0)
         {
+            //wait for flood protection to calm down
+            if (msDelay > 0)
+            {
+                Console.Write(String.Format("\rWaiting {0} seconds for flood protection to calm down", msDelay));
+                Stopwatch stopwatch = Stopwatch.StartNew();
+                while (true)
+                {
+                    //some other processing to do STILL POSSIBLE here
+                    if (stopwatch.ElapsedMilliseconds >= msDelay)
+                    {
+                        break;
+                    }
+                    Thread.Sleep(1); //so processor can rest for a while
+                }
+            }
+
             try
             {
                 WebPage result = Browser.NavigateToPage(uri);
-                if ((int)HttpStatusCode.OK == result.RawResponse.StatusCode)
+                if ((int)HttpStatusCode.OK == result.RawResponse.StatusCode && result.RawResponse.Body.Length > 0)
                 {
                     string msg = String.Format("got {0} with status {1}", uri.AbsoluteUri, result.RawResponse.StatusCode);
                     int msgSpaces = Console.WindowWidth - msg.Length - 3;
-                    msgSpaces = (msgSpaces > 0) ? msgSpaces: 0;
+                    msgSpaces = (msgSpaces > 0) ? msgSpaces : 0;
                     Console.Write(String.Concat("\r", msg, new String(' ', msgSpaces)));
                     return result;
+                }
+                else if ((int)HttpStatusCode.OK == result.RawResponse.StatusCode)
+                {
+                    //recursively work around flood protection
+                    return FetchPage(uri, msDelay == 0 ? 1000 : msDelay * 2);
                 }
                 else
                 {
@@ -65,73 +88,69 @@ namespace LHpiNG.Web
             }
         }
 
-        public ExpansionList ImportExpansions()
+    public ExpansionList ImportExpansions()
         {
             ExpansionList expansionList = new ExpansionList();
 
-            Console.WriteLine();
             WebPage resultpage = FetchPage(new Uri(String.Concat(this.UrlPrefix, expansionList.UrlSuffix)));
             IEnumerable<HtmlNode> nodes = resultpage.Html.CssSelect("div.expansion-row");
 
             foreach (HtmlNode node in nodes)
             {
-                try
-                {
-                    Expansion expansion = new Expansion
-                    {
-                        EnName = node.ChildNodes[2].ChildNodes[0].InnerText,
-                        ReleaseDate = node.ChildNodes[4].InnerText,
-                        UrlSuffix = node.ChildNodes[2].ChildNodes[0].GetAttributeValue("href")
-                    };
-                    var productCount = Regex.Match(node.ChildNodes[3].InnerText, @"^(\d+) Cards").Groups[1].Value;
-                    expansion.ProductCount = int.Parse(productCount);
-                    bool dateParsed = DateTime.TryParse(expansion.ReleaseDate, out DateTime parsedDate);
-                    if (dateParsed)
-                    {
-                        expansion.ReleaseDateTime = parsedDate;
-                    }
-                    else if (DateTime.TryParse(Regex.Replace(expansion.ReleaseDate, @"^(\d+)[snrt][tdh]", "$1"), out parsedDate))//remove "st" from "1st" etc
-                    {
-                        expansion.ReleaseDateTime = parsedDate;
-                    }
-                    else
-                    {
-                        throw new FormatException("Release Date not parsed");
-                    }
-                    expansion.IsReleased = parsedDate.Date < DateTime.Now.Date;
-                    expansionList.Add(expansion);
-                }
-                catch// (Exception ex)
-                {
-                    throw;
-                }
+                Expansion expansion = ImportExpansion(node);
+                expansionList.Add(expansion);
             }
             expansionList.FetchedOn = DateTime.Now;
-
-            expansionList = ImportProductsUrlSuffix(expansionList);
 
             return expansionList;
         }
 
-        private ExpansionList ImportProductsUrlSuffix(ExpansionList expansionList)
+        private Expansion ImportExpansion(HtmlNode node)
         {
-            Console.WriteLine();
-            foreach (Expansion expansion in expansionList)
+            try
             {
-                if (expansion.ProductCount > 0) //&& (expansion.EnName == "Ugin's Fate Promos" || expansion.EnName == "Commander 2018")//Debug
+                Expansion expansion = new Expansion
                 {
-                    expansion.ProductsUrlSuffix = ImportProductsUrlSuffix(expansion);
-                    if (expansion.ProductsUrlSuffix == null)
-                    {
-                        throw new Exception("throttling needed ?");//should have reached break;
-                    }
+                    EnName = node.ChildNodes[2].ChildNodes[0].InnerText,
+                    ReleaseDate = node.ChildNodes[4].InnerText,
+                    UrlSuffix = node.ChildNodes[2].ChildNodes[0].GetAttributeValue("href")
+                };
+                var productCount = Regex.Match(node.ChildNodes[3].InnerText, @"^(\d+) Cards").Groups[1].Value;
+                expansion.ProductCount = int.Parse(productCount);
+                bool dateParsed = DateTime.TryParse(expansion.ReleaseDate, out DateTime parsedDate);
+                if (dateParsed)
+                {
+                    expansion.ReleaseDateTime = parsedDate;
                 }
+                else if (DateTime.TryParse(Regex.Replace(expansion.ReleaseDate, @"^(\d+)[snrt][tdh]", "$1"), out parsedDate))//remove "st" from "1st" etc
+                {
+                    expansion.ReleaseDateTime = parsedDate;
+                }
+                else
+                {
+                    throw new FormatException("Release Date not parsed");
+                }
+                expansion.IsReleased = parsedDate.Date < DateTime.Now.Date;
+                string productsUrl = ImportProductsUrlSuffix(expansion);
+                expansion.ProductsUrlSuffix = productsUrl;
+
+                Console.WriteLine();
+                return expansion;
             }
-            return expansionList;
+            catch// (Exception ex)
+            {
+                throw;
+            }
         }
 
         private string ImportProductsUrlSuffix(Expansion expansion)
         {
+            //shortcut nonexisting Singles url
+            if (expansion.ProductCount <= 0) // || (expansion.EnName != "Ugin's Fate Promos" || expansion.EnName != "Commander 2018")//Debug
+            {
+                return null;
+            }
+
             WebPage resultpage = FetchPage(new Uri(String.Concat(this.UrlPrefix, expansion.UrlSuffix)));
             IEnumerable<HtmlNode> nodes = resultpage.Html.CssSelect("a.card");
             string productsUrlSuffix = null;
@@ -142,8 +161,8 @@ namespace LHpiNG.Web
                     productsUrlSuffix = node.GetAttributeValue("href");
                     break;
                 }
-
             }
+
             return productsUrlSuffix;
         }
 
@@ -154,9 +173,9 @@ namespace LHpiNG.Web
                 throw new ArgumentException("Need Expansion instead of only ExpansionEntity");
             }
             List<ProductEntity> products = new List<ProductEntity>();
+            string baseProductsUrl = String.Concat(this.UrlPrefix, ((Expansion)expansion).ProductsUrlSuffix);
 
-            Uri url = new Uri(String.Concat(this.UrlPrefix, ((Expansion)expansion).ProductsUrlSuffix));
-            Console.WriteLine();
+            Uri url = new Uri(baseProductsUrl);
             WebPage resultpage = FetchPage(url);
 
             HtmlNode Table = resultpage.Html.CssSelect("table.MKMTable").First();
@@ -177,6 +196,9 @@ namespace LHpiNG.Web
                 }
                 products.Add(product);
             }
+
+
+
             products.OrderBy(x => x.EnName);
 
             return products.AsEnumerable();

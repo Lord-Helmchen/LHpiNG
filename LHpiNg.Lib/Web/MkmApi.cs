@@ -19,7 +19,7 @@ namespace LHpiNg.Web
             throw new NotImplementedException();
         }
 
-        public ExpansionList ImportExpansions()
+        ExpansionList IFromCardmarket.ImportExpansions()
         {
             throw new NotImplementedException();
         }
@@ -38,6 +38,5 @@ namespace LHpiNg.Web
         {
             throw new NotImplementedException();
         }
-
     }
 }

@@ -12,7 +12,7 @@ namespace LHpiNG.Cardmarket
         public int IdProduct { get; set; }                          // Product ID
         public int? IdMetaproduct { get; set; }                     // Metaproduct ID
         public int? CountReprints { get; set; }                     // Number of total products bundled by the metaproduct
-        [Key, Column(Order = 1)]
+        [Key, Column("Name",Order = 1)]
         public string EnName { get; set; }                          // Product's English name
         public IEnumerable<LocalizationEntity> Localization { get; set; } // localization entities for the product's name
         public CategoryEntity Category { get; set; }                // Category entity the product belongs to
@@ -26,7 +26,7 @@ namespace LHpiNG.Cardmarket
         public string ExpansionName { get; set; }                   // Expansion's name 
         public IEnumerable<string> Links { get; set; }              // HATEOAS links
         /* The following information is only returned for responses that return the detailed product entity */
-        [ForeignKey("EnName")]// Foreign Key has to be a property name, not table column name
+        [ForeignKey("ExpansionName")]// Foreign Key has to be a property name, not table column name
         public ExpansionEntity Expansion { get; set; }             // detailed expansion information (where applicable)
         public PriceGuideEntity PriceGuide { get; set; }            // Price guide entity '''(ATTN {get;set;} not returned for expansion requests)'''
         public ReprintEntity Reprint { get; set; }                  // Reprint entities for each similar product bundled by the metaproduct
@@ -37,6 +37,7 @@ namespace LHpiNG.Cardmarket
         public ProductEntity()
         {
             this.GameName = "Magic";
+            this.Rarity = Rarity.None;
             this.Links = null;//not used yet
         }
         //constructor from API reply

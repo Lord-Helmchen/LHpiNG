@@ -41,14 +41,23 @@ namespace LHpiNG.db
 
         // ILHpiDatabase methods
         #region Cardmarket
+        /// <summary>
+        /// Load all Data from db into memory
+        /// </summary>
+        /// <returns></returns>
         public ExpansionList LoadExpansionList()
         {
             try
             {
-#pragma warning disable IDE0017 // Simplify object initialization
-                var expansionList = new ExpansionList();
-#pragma warning restore IDE0017 // Simplify object initialization
-                expansionList.Expansions = Expansions.ToList();
+                var expansionList = new ExpansionList
+                {
+                    Expansions = Expansions.ToList()
+                };
+                foreach (Expansion expansion in expansionList)
+                {
+                    expansion.Products = LoadProducts(expansion);
+                }
+
                 return expansionList;
             }
             catch (DbException) //should catch both SqlExcelption and SqliteException
@@ -56,6 +65,7 @@ namespace LHpiNG.db
                 throw;
             }
         }
+
         public void SaveExpansionList(ExpansionList expansionList)
         {
             try
@@ -74,9 +84,18 @@ namespace LHpiNG.db
 
         public Expansion LoadExpansion(Expansion expansion)
         {
-            return Expansions.Find(expansion.EnName);
-            //TODO alternatively, look for other identifying index values
+            try
+            {
+                expansion = Expansions.Find(expansion.EnName);
+                expansion.Products = LoadProducts(expansion);
+                return expansion;
+            }
+            catch (DbException)
+            {
+                throw;
+            }
         }
+
         public void AddOrUpdateExpansion(Expansion expansion)
         {
             try
@@ -90,6 +109,7 @@ namespace LHpiNG.db
                 {
                     Expansions.Add(expansion);
                 }
+                SaveProducts(expansion);
                 SaveChanges();
             }
             catch (DbException)
@@ -101,6 +121,11 @@ namespace LHpiNG.db
         {
             return Products.Find(new { product.EnName, product.ExpansionName });
         }
+        public IEnumerable<Product> LoadProducts(Expansion expansion)
+        {
+            return Products.Where(x => x.ExpansionName == expansion.EnName);
+        }
+
         public void AddOrUpdateProduct(Product product)
         {
             try
@@ -109,7 +134,6 @@ namespace LHpiNG.db
                 if (existing != null)
                 {
                     existing.InjectNonNull(product);
-
                 }
                 else
                 {
@@ -123,14 +147,15 @@ namespace LHpiNG.db
             }
         }
 
-        public IEnumerable<Product> LoadProducts(Expansion expansion)
-        {
-            throw new NotImplementedException();
-        }
-
         public void SaveProducts(Expansion expansion)
         {
-            throw new NotImplementedException();
+            if (expansion.Products != null)
+            {
+                foreach (Product product in expansion.Products)
+                {
+                    AddOrUpdateProduct(product);
+                }
+            }
         }
         #endregion
 

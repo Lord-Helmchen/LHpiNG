@@ -9,7 +9,7 @@ namespace LHpiNG.Cardmarket
     public class ExpansionEntity
     {
         public int? IdExpansion { get; set; }                        // Expansion's ID
-        [Key, Column("Name")]
+        [Key]
         public string EnName { get; set; }                          // Expansion's name in English
         public IEnumerable<LocalizationEntity> Localization { get; set; } // localization entities for the expansion's name
         public string Abbreviation { get; set; }                    // the expansion's abbreviation
