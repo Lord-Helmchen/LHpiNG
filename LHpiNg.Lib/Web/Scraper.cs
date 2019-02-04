@@ -15,6 +15,7 @@ using ScrapySharp.Html;
 using ScrapySharp.Exceptions;
 using System.Diagnostics;
 using System.Threading;
+using ScrapySharp.Html.Forms;
 
 namespace LHpiNG.Web
 {
@@ -45,22 +46,7 @@ namespace LHpiNG.Web
 
         private WebPage FetchPage(Uri uri, int delay = 0)
         {
-            DelayMiliseconds = delay > 0 ? delay : DelayMiliseconds;
-            //wait for flood protection to calm down
-            if (DelayMiliseconds > 0)
-            {
-                Console.Write($"\rWaiting {DelayMiliseconds / 1000} seconds for flood protection to calm down on {uri.AbsoluteUri}");
-                Stopwatch stopwatch = Stopwatch.StartNew();
-                while (true)
-                {
-                    //some other processing to do STILL POSSIBLE here
-                    if (stopwatch.ElapsedMilliseconds >= DelayMiliseconds)
-                    {
-                        break;
-                    }
-                    Thread.Sleep(1); //so processor can rest for a while
-                }
-            }
+            DelayRequest(delay);
             try
             {
                 WebPage result = Browser.NavigateToPage(uri);
@@ -85,6 +71,63 @@ namespace LHpiNG.Web
                     Console.WriteLine(message);
                     throw new HttpException(result.RawResponse.StatusCode, result.RawResponse.StatusDescription);
                 }
+            }
+            catch (HttpException ex)
+            {
+                Console.WriteLine(ex.ToString());
+                throw;
+            }
+        }
+
+        private void DelayRequest(int delay = 0)
+        {
+            DelayMiliseconds = delay > 0 ? delay : DelayMiliseconds;
+            //wait for flood protection to calm down
+            if (DelayMiliseconds > 0)
+            {
+                Console.Write($"\rWaiting {DelayMiliseconds / 1000} seconds for flood protection to calm down");
+                Stopwatch stopwatch = Stopwatch.StartNew();
+                while (true)
+                {
+                    //some other processing to do STILL POSSIBLE here
+                    if (stopwatch.ElapsedMilliseconds >= DelayMiliseconds)
+                    {
+                        break;
+                    }
+                    Thread.Sleep(1); //so processor can rest for a while
+                }
+            }
+        }
+
+        private WebPage SubmitForm(PageWebForm form, int delay = 0)
+        {
+            DelayRequest();
+            try
+            {
+                WebPage result = form.Submit();
+
+                if ((int)HttpStatusCode.OK == result.RawResponse.StatusCode && result.RawResponse.Body.Length > 0)
+                {
+                    string msg = String.Format("got reply to form {0} with status {1}", form.Action, result.RawResponse.StatusCode);
+                    int msgSpaces = Console.WindowWidth - msg.Length - 3;
+                    msgSpaces = (msgSpaces > 0) ? msgSpaces : 0;
+                    Console.Write(String.Concat("\r", msg, new String(' ', msgSpaces)));
+                    DelayMiliseconds = DelayMiliseconds == 1 ? 1 : DelayMiliseconds / 2;
+                    return result;
+                }
+                else if ((int)HttpStatusCode.OK == result.RawResponse.StatusCode)
+                {
+                    //recursively work around flood protection
+                    DelayMiliseconds = DelayMiliseconds * 2;// remember delay globally
+                    return SubmitForm(form, DelayMiliseconds);
+                }
+                else
+                {
+                    string message = String.Format("unhandled response status: {0} ({1})", result.RawResponse.StatusCode, result.RawResponse.StatusDescription);
+                    Console.WriteLine(message);
+                    throw new HttpException(result.RawResponse.StatusCode, result.RawResponse.StatusDescription);
+                }
+
             }
             catch (HttpException ex)
             {
@@ -230,8 +273,10 @@ namespace LHpiNG.Web
                 products.Add(product);
             }
             products.OrderBy(x => x.EnName);
+
             if (products.Count() != ((Expansion)expansion).ProductCount)
             {
+                //TODO handle multiple pages
                 string msg = $"Product Count mismatch (found {products.Count()}, expected {((Expansion)expansion).ProductCount})";
                 Console.WriteLine(msg);
                 throw new ScrapingException(msg);
@@ -242,38 +287,90 @@ namespace LHpiNG.Web
 
         public PriceGuideEntity ImportPriceGuide(ProductEntity product)
         {
+            PriceGuideEntity guideEntity = new PriceGuideEntity();
             Uri url = new Uri(String.Concat(this.UrlServerPrefix, product.Website));
             WebPage resultpage = FetchPage(url);
+            HtmlNode infoListNode = resultpage.Html.CssSelect(".info-list-container").First().FirstChild;
 
-            PriceGuideEntity guideEntity = new PriceGuideEntity();
-
-            HtmlNode infoListNode = resultpage.Html.CssSelect(".info-list-container").First();
-            string LowexPlus = Regex.Match(infoListNode.FirstChild.ChildNodes[11].InnerText, @"^(\d+[.,]\d+) [(&#x20AC)€$]").Groups[1].Value;
-            if (decimal.TryParse(LowexPlus, out decimal LowexPlusParsed, System.Globalization.NumberStyles.AllowDecimalPoint)){
-                guideEntity.LowexPlus = LowexPlusParsed;
-            }
-            string trend = Regex.Match(infoListNode.FirstChild.ChildNodes[13].FirstChild.InnerText, @"^(\d+[.,]\d+) [(&#x20AC)€$]").Groups[1].Value;
-            if (decimal.TryParse(trend, out decimal trendParsed))
+            if (int.TryParse(infoListNode.ChildNodes[9].InnerText, out int parsedAvailable) && parsedAvailable > 0)
             {
-                guideEntity.Trend = trendParsed;
+                string LowexPlus = Regex.Replace(infoListNode.ChildNodes[11].InnerText, @"^(\d+)[.,](\d+).*", "$1$2");
+                if (decimal.TryParse(LowexPlus, out decimal LowexPlusParsed))
+                {
+                    guideEntity.LowexPlus = LowexPlusParsed / 100;
+                }
+                else
+                {
+                    throw new ScrapingException("Could not parse LowexPlus");
+                }
+                //scraping trend from graph works even when 0 available, so we'll prefer that.
+                //string trend = Regex.Replace(infoListNode.ChildNodes[13].FirstChild.InnerText, @"^(\d+)[.,](\d+).*", "$1$2");
+                //if (decimal.TryParse(trend, out decimal trendParsed))
+                //{
+                //    guideEntity.Trend = trendParsed / 100;
+                //}
+                //else
+                //{
+                //    throw new ScrapingException("Could not parse LowexPlus");
+                //}
             }
-            HtmlNode chartWrapper = resultpage.Html.CssSelect(".chart-wrapper").First();
-            string javaScriptString = chartWrapper.ChildNodes[2].InnerText;
-
-
-            guideEntity.Sell = 0;
-
-
-            if (!(product is Product))
+            string javaScriptString = Regex.Replace(resultpage.Html.CssSelect(".chart-wrapper").First().ChildNodes[1].InnerText, "\\\"", "_");
+            string[] sellArray = Regex.Match(javaScriptString, @"Avg\. Sell Price_,_data_:\[([^\]]+)]").Groups[1].Value.Split(',');
+            if (decimal.TryParse(sellArray.Last(), out decimal parsedSell))
             {
-                // only attach a PriceGuide(Pro)Entity
+                guideEntity.Sell = parsedSell;
             }
             else
             {
-                //update Product.PriceGuides history as well
+                throw new ScrapingException("Could not parse Sell from graph");
+            }
+            string[] trendArray = Regex.Match(javaScriptString, @"Price Trend_,_data_:\[([^\]]+)]").Groups[1].Value.Split(',');
+            if (decimal.TryParse(trendArray.Last(), out decimal parsedTrend))
+            {
+                guideEntity.Trend = parsedTrend;
+            }
+            else
+            {
+                throw new ScrapingException("Could not parse Trend from graph");
             }
 
-            throw new NotImplementedException();
+            PriceGuideProEntity guideProEntity = new PriceGuideProEntity(guideEntity)
+            {
+                IdProduct = product.IdProduct
+            };
+
+            PageWebForm form = resultpage.FindFormById("FilterForm");
+            form["extra[isFoil]"] = "Y";
+            WebPage foilResultPagex = SubmitForm(form);
+
+            javaScriptString = Regex.Replace(foilResultPagex.Html.CssSelect(".chart-wrapper").First().ChildNodes[1].InnerText, "\\\"", "_");
+            string[] foilSellArray = Regex.Match(javaScriptString, @"Avg\. Sell Price_,_data_:\[([^\]]+)]").Groups[1].Value.Split(',');
+            if (decimal.TryParse(sellArray.Last(), out decimal parsedFoilSell))
+            {
+                guideProEntity.FoilSell = parsedFoilSell;
+            }
+            else
+            {
+                throw new ScrapingException("Could not parse FoilSell from graph");
+            }
+            string[] foilTrendArray = Regex.Match(javaScriptString, @"Price Trend_,_data_:\[([^\]]+)]").Groups[1].Value.Split(',');
+            if (decimal.TryParse(foilTrendArray.Last(), out decimal parsedFoilTrend))
+            {
+                guideProEntity.FoilTrend = parsedFoilTrend;
+            }
+            else
+            {
+                throw new ScrapingException("Could not parse Trend from graph");
+            }
+
+            if (product is Product)
+            {
+                //update Product.PriceGuides history as well
+                //don't, that belongs somewhere else
+            }
+            Browser.ClearCookies(); // reset session, so the (foil-)filter will be reset
+
+            return guideProEntity;
         }
 
 

@@ -45,5 +45,26 @@ namespace LHpiNG.Cardmarket
         {
             throw new NotImplementedException();
         }
+        //copy constructor
+        public ProductEntity(ProductEntity entity)
+        {
+            IdProduct = entity.IdProduct;
+            IdMetaproduct = entity.IdMetaproduct;
+            CountReprints = entity.CountReprints;
+            EnName = entity.EnName;
+            Localization = entity.Localization;
+            Category = entity.Category;
+            Website = entity.Website;
+            Image = entity.Image;
+            GameName = entity.GameName;
+            CategoryName = entity.CategoryName;
+            Number = entity.Number;
+            Rarity = entity.Rarity;
+            ExpansionName = entity.ExpansionName;
+            Links = entity.Links;
+            Expansion = entity.Expansion;
+            PriceGuide = entity.PriceGuide;
+            Reprint = entity.Reprint;
     }
+}
 }

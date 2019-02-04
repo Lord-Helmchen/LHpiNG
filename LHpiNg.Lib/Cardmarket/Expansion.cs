@@ -18,12 +18,16 @@ namespace LHpiNG.Cardmarket
 
         public Expansion() : base()
         {
-
         }
         //constructor from API reply
         public Expansion(string jsonEntity): base(jsonEntity)
         {
             throw new NotImplementedException();
+        }
+        //copy constructor
+        public Expansion(ExpansionEntity entity): base(entity)
+        {
+            //just use copy constructor from base class
         }
     }
 }

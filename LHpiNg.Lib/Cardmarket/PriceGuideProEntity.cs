@@ -15,12 +15,24 @@ namespace LHpiNG.Cardmarket
 
         public PriceGuideProEntity() : base()
         {
-
         }
         //constructor from API reply
         public PriceGuideProEntity(string jsonEntity) : base(jsonEntity)
         {
             throw new NotImplementedException();
         }
+        // sort of copy constructor
+        public PriceGuideProEntity(PriceGuideEntity entity) : base(entity)
+        {
+            if (entity is PriceGuideProEntity proEntity)
+            {
+                IdProduct = proEntity.IdProduct;
+                GermanProLow = proEntity.GermanProLow;
+                Suggested = proEntity.Suggested;
+                FoilSell = proEntity.FoilSell;
+                FoilTrend = proEntity.FoilTrend;
+            }
+        }
+
     }
 }

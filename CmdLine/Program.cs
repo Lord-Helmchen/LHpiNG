@@ -120,7 +120,7 @@ namespace LHpiNG
         private static ProductEntity TestScrapePrice(Scraper scraper, ExpansionList expansionList)
         {
             Expansion expansion = expansionList.Expansions.SingleOrDefault(x => x.EnName == "Ugin's Fate Promos");
-            ProductEntity product = expansion.Products.FirstOrDefault();
+            ProductEntity product = expansion.Products.Where(x => x.EnName == "Ghostfire Blade").Single();
             PriceGuideEntity priceGuide = scraper.ImportPriceGuide(product);
             product.PriceGuide = priceGuide;
             return product;

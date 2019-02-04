@@ -19,12 +19,22 @@ namespace LHpiNG.Cardmarket
 
         public PriceGuideEntity()
         {
-
         }
         //constructor from API reply
         public PriceGuideEntity(string jsonEntity)
         {
             throw new NotImplementedException();
+        }
+        //copy constructor
+        public PriceGuideEntity(PriceGuideEntity entity)
+        {
+            Sell = entity.Sell;
+            Low = entity.Low;
+            LowexPlus = entity.LowexPlus;
+            LowFoil = entity.LowexPlus;
+            Avg = entity.Avg;
+            Trend = entity.Trend;
+            Uid = entity.Uid;
         }
     }
 }

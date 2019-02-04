@@ -25,5 +25,18 @@ namespace LHpiNG.Cardmarket
 
         public Product Product { get; set; }
 
+        public PriceGuide() : base()
+        {
+        }
+        //constructor from API reply
+        public PriceGuide(string jsonEntity) : base(jsonEntity)
+        {
+            throw new NotImplementedException();
+        }
+        public PriceGuide(PriceGuideEntity entity) : base(entity)
+        {
+            //just use copy constructor from base class
+        }
+
     }
 }

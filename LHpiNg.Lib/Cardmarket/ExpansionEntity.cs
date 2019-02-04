@@ -30,7 +30,19 @@ namespace LHpiNG.Cardmarket
         {
             throw new NotImplementedException();
         }
-
+        //copy constructor
+        public ExpansionEntity(ExpansionEntity entity)
+        {
+            IdExpansion = entity.IdExpansion;
+            EnName = entity.EnName;
+            Localization = entity.Localization;
+            Abbreviation = entity.Abbreviation;
+            Icon = entity.Icon;
+            ReleaseDate = entity.ReleaseDate;
+            IsReleased = entity.IsReleased;
+            IdGame = entity.IdGame;
+            Links = entity.Links;
+        }
 
     }
 
