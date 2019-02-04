@@ -17,10 +17,10 @@ namespace LHpiNg.Web
 
         IEnumerable<ProductEntity> ImportProducts(ExpansionEntity expansion);
 
-        IEnumerable<ExpansionEntity> ImportAllProducts(IEnumerable<ExpansionEntity> expansions);
+        IEnumerable<ExpansionEntity> ImportProducts(IEnumerable<ExpansionEntity> expansions);
 
-        ProductEntity ImportProductDetails(ProductEntity product);
+        PriceGuideEntity ImportPriceGuide(ProductEntity product);
 
-        IEnumerable<ProductEntity> ImportAllProductDetails(ExpansionEntity expansion);
+        IEnumerable<ProductEntity> ImportPriceGuides(IEnumerable<ProductEntity> products);
     }
 }

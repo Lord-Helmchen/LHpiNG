@@ -9,22 +9,17 @@ namespace LHpiNg.Web
 {
     class MkmApi : IFromCardmarket
     {
-        public IEnumerable<Expansion> ImportAllProductLists(IEnumerable<ExpansionEntity> expansions)
+        public ExpansionList ImportExpansions()
         {
             throw new NotImplementedException();
         }
 
-        public IEnumerable<ProductEntity> ImportAllProductDetails(ExpansionEntity expansion)
+        public PriceGuideEntity ImportPriceGuide(ProductEntity product)
         {
             throw new NotImplementedException();
         }
 
-        ExpansionList IFromCardmarket.ImportExpansions()
-        {
-            throw new NotImplementedException();
-        }
-
-        public ProductEntity ImportProductDetails(ProductEntity product)
+        public IEnumerable<ProductEntity> ImportPriceGuides(IEnumerable<ProductEntity> products)
         {
             throw new NotImplementedException();
         }
@@ -34,7 +29,7 @@ namespace LHpiNg.Web
             throw new NotImplementedException();
         }
 
-        public IEnumerable<ExpansionEntity> ImportAllProducts(IEnumerable<ExpansionEntity> expansions)
+        public IEnumerable<ExpansionEntity> ImportProducts(IEnumerable<ExpansionEntity> expansions)
         {
             throw new NotImplementedException();
         }

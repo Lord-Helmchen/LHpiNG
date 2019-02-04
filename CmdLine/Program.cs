@@ -29,6 +29,7 @@ namespace LHpiNG
             Console.WriteLine("\t6 - Print expansionList.Length");
             Console.WriteLine("\t7 - null expansionList");
             Console.WriteLine("\t8 - test product list scraping");
+            Console.WriteLine("\t9 - test priceguide scraping");
             Console.WriteLine("\tq or 0 - quit");
 
 
@@ -68,6 +69,9 @@ namespace LHpiNG
                     case "8":
                         IEnumerable<ProductEntity> products = TestScrapeProducts(scraper, expansionList);
                         Console.WriteLine(String.Format("{0} Products scraped", products.Count()));
+                        break;
+                    case "9":
+                        ProductEntity prod = TestScrapePrice(scraper, expansionList);
                         break;
                     case "0":
                     case "q":
@@ -111,6 +115,16 @@ namespace LHpiNG
         {
             Expansion expansion = expansionList.Expansions.SingleOrDefault(x => x.EnName == "Ugin's Fate Promos");
             return ScrapeProducts(scraper, expansion);
+        }
+
+        private static ProductEntity TestScrapePrice(Scraper scraper, ExpansionList expansionList)
+        {
+            Expansion expansion = expansionList.Expansions.SingleOrDefault(x => x.EnName == "Ugin's Fate Promos");
+            ProductEntity product = expansion.Products.FirstOrDefault();
+            PriceGuideEntity priceGuide = scraper.ImportPriceGuide(product);
+            product.PriceGuide = priceGuide;
+            return product;
+
         }
 
         private static void TestDb(EFContext database)

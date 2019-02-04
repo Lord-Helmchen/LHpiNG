@@ -21,7 +21,9 @@ namespace LHpiNG.Web
     public sealed class Scraper : IFromCardmarket
     {
         private ScrapingBrowser Browser { get; set; }
-        private string UrlPrefix { get; set; }
+        private string UrlServerPrefix { get; set; }
+        private int DelayMiliseconds { get; set; }
+        private string UrlResultsPerPageSuffix { get; set; }
 
         private static readonly Lazy<Scraper> lazy = new Lazy<Scraper>(() => new Scraper());
 
@@ -36,27 +38,29 @@ namespace LHpiNG.Web
                 AllowMetaRedirect = true,
                 Language = System.Globalization.CultureInfo.GetCultureInfoByIetfLanguageTag("en-DE")
             };
-            UrlPrefix = "https://sandbox.cardmarket.com";
+            UrlServerPrefix = "https://www.cardmarket.com";
+            UrlResultsPerPageSuffix = "perSite=50";
+            DelayMiliseconds = 100;
         }
 
-        private WebPage FetchPage(Uri uri, int msDelay = 0)
+        private WebPage FetchPage(Uri uri, int delay = 0)
         {
+            DelayMiliseconds = delay > 0 ? delay : DelayMiliseconds;
             //wait for flood protection to calm down
-            if (msDelay > 0)
+            if (DelayMiliseconds > 0)
             {
-                Console.Write(String.Format("\rWaiting {0} seconds for flood protection to calm down", msDelay));
+                Console.Write($"\rWaiting {DelayMiliseconds / 1000} seconds for flood protection to calm down on {uri.AbsoluteUri}");
                 Stopwatch stopwatch = Stopwatch.StartNew();
                 while (true)
                 {
                     //some other processing to do STILL POSSIBLE here
-                    if (stopwatch.ElapsedMilliseconds >= msDelay)
+                    if (stopwatch.ElapsedMilliseconds >= DelayMiliseconds)
                     {
                         break;
                     }
                     Thread.Sleep(1); //so processor can rest for a while
                 }
             }
-
             try
             {
                 WebPage result = Browser.NavigateToPage(uri);
@@ -66,18 +70,19 @@ namespace LHpiNG.Web
                     int msgSpaces = Console.WindowWidth - msg.Length - 3;
                     msgSpaces = (msgSpaces > 0) ? msgSpaces : 0;
                     Console.Write(String.Concat("\r", msg, new String(' ', msgSpaces)));
+                    DelayMiliseconds = DelayMiliseconds == 1 ? 1 : DelayMiliseconds / 2;
                     return result;
                 }
                 else if ((int)HttpStatusCode.OK == result.RawResponse.StatusCode)
                 {
                     //recursively work around flood protection
-                    return FetchPage(uri, msDelay == 0 ? 1000 : msDelay * 2);
+                    DelayMiliseconds = DelayMiliseconds * 2;// remember delay globally
+                    return FetchPage(uri, DelayMiliseconds);
                 }
                 else
                 {
                     string message = String.Format("unhandled response status: {0} ({1})", result.RawResponse.StatusCode, result.RawResponse.StatusDescription);
                     Console.WriteLine(message);
-
                     throw new HttpException(result.RawResponse.StatusCode, result.RawResponse.StatusDescription);
                 }
             }
@@ -88,16 +93,16 @@ namespace LHpiNG.Web
             }
         }
 
-    public ExpansionList ImportExpansions()
+        public ExpansionList ImportExpansions()
         {
             ExpansionList expansionList = new ExpansionList();
 
-            WebPage resultpage = FetchPage(new Uri(String.Concat(this.UrlPrefix, expansionList.UrlSuffix)));
+            WebPage resultpage = FetchPage(new Uri(String.Concat(this.UrlServerPrefix, expansionList.UrlSuffix)));
             IEnumerable<HtmlNode> nodes = resultpage.Html.CssSelect("div.expansion-row");
 
             foreach (HtmlNode node in nodes)
             {
-                Expansion expansion = ImportExpansion(node);
+                Expansion expansion = ParseExpansion(node);
                 expansionList.Add(expansion);
             }
             expansionList.FetchedOn = DateTime.Now;
@@ -105,7 +110,7 @@ namespace LHpiNG.Web
             return expansionList;
         }
 
-        private Expansion ImportExpansion(HtmlNode node)
+        private Expansion ParseExpansion(HtmlNode node)
         {
             try
             {
@@ -117,8 +122,7 @@ namespace LHpiNG.Web
                 };
                 var productCount = Regex.Match(node.ChildNodes[3].InnerText, @"^(\d+) Cards").Groups[1].Value;
                 expansion.ProductCount = int.Parse(productCount);
-                bool dateParsed = DateTime.TryParse(expansion.ReleaseDate, out DateTime parsedDate);
-                if (dateParsed)
+                if (DateTime.TryParse(expansion.ReleaseDate, out DateTime parsedDate))
                 {
                     expansion.ReleaseDateTime = parsedDate;
                 }
@@ -128,11 +132,10 @@ namespace LHpiNG.Web
                 }
                 else
                 {
-                    throw new FormatException("Release Date not parsed");
+                    throw new FormatException("Failed to parse Release Date!");
                 }
                 expansion.IsReleased = parsedDate.Date < DateTime.Now.Date;
-                string productsUrl = ImportProductsUrlSuffix(expansion);
-                expansion.ProductsUrlSuffix = productsUrl;
+                expansion.ProductsUrlSuffix = ScrapeProductsUrlSuffix(expansion); ;
 
                 Console.WriteLine();
                 return expansion;
@@ -143,15 +146,14 @@ namespace LHpiNG.Web
             }
         }
 
-        private string ImportProductsUrlSuffix(Expansion expansion)
+        private string ScrapeProductsUrlSuffix(Expansion expansion)
         {
             //shortcut nonexisting Singles url
             if (expansion.ProductCount <= 0) // || (expansion.EnName != "Ugin's Fate Promos" || expansion.EnName != "Commander 2018")//Debug
             {
                 return null;
             }
-
-            WebPage resultpage = FetchPage(new Uri(String.Concat(this.UrlPrefix, expansion.UrlSuffix)));
+            WebPage resultpage = FetchPage(new Uri(String.Concat(UrlServerPrefix, expansion.UrlSuffix, "?", UrlResultsPerPageSuffix)));
             IEnumerable<HtmlNode> nodes = resultpage.Html.CssSelect("a.card");
             string productsUrlSuffix = null;
             foreach (HtmlNode node in nodes)
@@ -162,8 +164,35 @@ namespace LHpiNG.Web
                     break;
                 }
             }
-
             return productsUrlSuffix;
+        }
+
+        public IEnumerable<ExpansionEntity> ImportProducts(IEnumerable<ExpansionEntity> expansions)
+        {
+            foreach (Expansion expansion in expansions)
+            {
+                try
+                {
+                    IEnumerable<ProductEntity> products = new List<ProductEntity>();
+                    products = ImportProducts(expansion);
+                }
+                catch (ScrapingException ex)
+                {
+                    Console.WriteLine(ex.Message + ": ProductCount=" + expansion.ProductCount + " in " + expansion.EnName);
+                }
+            }
+            return expansions;
+        }
+
+        [Obsolete]
+        public IEnumerable<ProductEntity> ImportPriceGuides(IEnumerable<ProductEntity> products)
+        {
+            foreach (Product product in products)
+            {
+                product.PriceGuide = ImportPriceGuide(product);
+                //TODO add to price history (or probably do it in called method)
+            }
+            return products;
         }
 
         public IEnumerable<ProductEntity> ImportProducts(ExpansionEntity expansion)
@@ -173,85 +202,81 @@ namespace LHpiNG.Web
                 throw new ArgumentException("Need Expansion instead of only ExpansionEntity");
             }
             List<ProductEntity> products = new List<ProductEntity>();
-            string baseProductsUrl = String.Concat(this.UrlPrefix, ((Expansion)expansion).ProductsUrlSuffix);
+            string baseProductsUrl = String.Concat(UrlServerPrefix, ((Expansion)expansion).ProductsUrlSuffix, "?", UrlResultsPerPageSuffix);
 
             Uri url = new Uri(baseProductsUrl);
             WebPage resultpage = FetchPage(url);
 
-            HtmlNode Table = resultpage.Html.CssSelect("table.MKMTable").First();
-            foreach (HtmlNode row in Table.SelectNodes("tbody/tr"))
+            HtmlNode Table = resultpage.Html.CssSelect("div.table-body").First();
+            foreach (HtmlNode row in Table.ChildNodes)
             {
                 ProductEntity product = new Product
                 {
-                    EnName = row.ChildNodes[2].InnerText,
+                    EnName = row.ChildNodes[3].FirstChild.FirstChild.FirstChild.InnerText,
                     ExpansionName = expansion.EnName,
-                    Website = row.ChildNodes[2].ChildNodes[0].GetAttributeValue("href"),
+                    Website = row.ChildNodes[3].FirstChild.FirstChild.FirstChild.GetAttributeValue("href"),
                     Expansion = expansion
                 };
-                string rarityString = row.ChildNodes[3].FirstChild.FirstChild.GetAttributeValue("data-original-title");
+                string numberString = row.ChildNodes[3].FirstChild.ChildNodes[1].InnerText;
+                if (int.TryParse(numberString, out int parsedNumber))
+                {
+                    product.Number = parsedNumber;
+                }
+                string rarityString = row.ChildNodes[3].FirstChild.ChildNodes[2].FirstChild.GetAttributeValue("data-original-title");
                 if (Enum.TryParse(rarityString, true, out Rarity parsedRarity))
                 {
                     product.Rarity = parsedRarity;
-
                 }
                 products.Add(product);
             }
-
-
-
             products.OrderBy(x => x.EnName);
+            if (products.Count() != ((Expansion)expansion).ProductCount)
+            {
+                string msg = $"Product Count mismatch (found {products.Count()}, expected {((Expansion)expansion).ProductCount})";
+                Console.WriteLine(msg);
+                throw new ScrapingException(msg);
+            }
 
             return products.AsEnumerable();
         }
 
-        public IEnumerable<ExpansionEntity> ImportAllProducts(IEnumerable<ExpansionEntity> expansions)
+        public PriceGuideEntity ImportPriceGuide(ProductEntity product)
         {
-            if (!(expansions is IEnumerable<Expansion>))
-            {
-                throw new ArgumentException("Need Expansion instead of only ExpansionEntity");
-            }
-            foreach (Expansion expansion in expansions)
-            {
-                try
-                {
-                    IEnumerable<ProductEntity> products = new List<ProductEntity>();
-                    if (expansion.ProductCount > 0)
-                    {
-                        products = ImportProducts(expansion);
-                    }
-                    if (products.Count() != expansion.ProductCount)
-                    {
-                        throw new ScrapingException("Product Count mismatch (found" + products.Count());
-                    }
-                }
-                catch (ScrapingException ex)
-                {
-                    Console.WriteLine(ex.Message + ": ProductCount=" + expansion.ProductCount + " in " + expansion.EnName);
-                }
+            Uri url = new Uri(String.Concat(this.UrlServerPrefix, product.Website));
+            WebPage resultpage = FetchPage(url);
 
-            }
-            return expansions;
-        }
+            PriceGuideEntity guideEntity = new PriceGuideEntity();
 
-        public ProductEntity ImportProductDetails(ProductEntity product)
-        {
+            HtmlNode infoListNode = resultpage.Html.CssSelect(".info-list-container").First();
+            string LowexPlus = Regex.Match(infoListNode.FirstChild.ChildNodes[11].InnerText, @"^(\d+[.,]\d+) [(&#x20AC)€$]").Groups[1].Value;
+            if (decimal.TryParse(LowexPlus, out decimal LowexPlusParsed, System.Globalization.NumberStyles.AllowDecimalPoint)){
+                guideEntity.LowexPlus = LowexPlusParsed;
+            }
+            string trend = Regex.Match(infoListNode.FirstChild.ChildNodes[13].FirstChild.InnerText, @"^(\d+[.,]\d+) [(&#x20AC)€$]").Groups[1].Value;
+            if (decimal.TryParse(trend, out decimal trendParsed))
+            {
+                guideEntity.Trend = trendParsed;
+            }
+            HtmlNode chartWrapper = resultpage.Html.CssSelect(".chart-wrapper").First();
+            string javaScriptString = chartWrapper.ChildNodes[2].InnerText;
+
+
+            guideEntity.Sell = 0;
+
+
+            if (!(product is Product))
+            {
+                // only attach a PriceGuide(Pro)Entity
+            }
+            else
+            {
+                //update Product.PriceGuides history as well
+            }
+
             throw new NotImplementedException();
         }
 
-        public IEnumerable<ProductEntity> ImportAllProductDetails(ExpansionEntity expansion)
-        {
-            if (!(expansion is Expansion))
-            {
-                throw new ArgumentException("Need Expansion instead of only ExpansionEntity");
-            }
-            List<Product> products = new List<Product>();
-            foreach (Product expansionProduct in ((Expansion)expansion).Products)
-            {
-                Product product = ImportProductDetails(expansionProduct) as Product;
-                products.Add(product);
-            }
-            return products;
-        }
+
     }
 }
 
