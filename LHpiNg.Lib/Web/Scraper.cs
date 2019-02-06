@@ -38,6 +38,7 @@ namespace LHpiNG.Web
                 AllowAutoRedirect = true, // Browser has settings you can access in setup
                 AllowMetaRedirect = true,
                 Language = System.Globalization.CultureInfo.GetCultureInfoByIetfLanguageTag("en-DE")
+                //,UserAgent = // TODO include "This wouldn't be necessary if you hadn't revoked my API access" in AgentString
             };
             UrlServerPrefix = "https://www.cardmarket.com";
             UrlResultsPerPageSuffix = "perSite=50";
@@ -180,7 +181,6 @@ namespace LHpiNG.Web
                 expansion.IsReleased = parsedDate.Date < DateTime.Now.Date;
                 expansion.ProductsUrlSuffix = ScrapeProductsUrlSuffix(expansion); ;
 
-                Console.WriteLine();
                 return expansion;
             }
             catch// (Exception ex)
@@ -285,9 +285,18 @@ namespace LHpiNG.Web
             return products.AsEnumerable();
         }
 
+        //TODO recreate previous priceGuidePros from graph
+
         public PriceGuideEntity ImportPriceGuide(ProductEntity product)
         {
-            PriceGuideEntity guideEntity = new PriceGuideEntity();
+            PriceGuide priceGuide = new PriceGuide()
+            {
+                ExpansionName = product.ExpansionName,
+                ProductName = product.EnName,
+                Product = product as Product,
+                IdProduct = product.IdProduct
+            };
+
             Uri url = new Uri(String.Concat(this.UrlServerPrefix, product.Website));
             WebPage resultpage = FetchPage(url);
             HtmlNode infoListNode = resultpage.Html.CssSelect(".info-list-container").First().FirstChild;
@@ -297,7 +306,7 @@ namespace LHpiNG.Web
                 string LowexPlus = Regex.Replace(infoListNode.ChildNodes[11].InnerText, @"^(\d+)[.,](\d+).*", "$1$2");
                 if (decimal.TryParse(LowexPlus, out decimal LowexPlusParsed))
                 {
-                    guideEntity.LowexPlus = LowexPlusParsed / 100;
+                    priceGuide.LowexPlus = LowexPlusParsed / 100;
                 }
                 else
                 {
@@ -314,40 +323,50 @@ namespace LHpiNG.Web
                 //    throw new ScrapingException("Could not parse LowexPlus");
                 //}
             }
-            string javaScriptString = Regex.Replace(resultpage.Html.CssSelect(".chart-wrapper").First().ChildNodes[1].InnerText, "\\\"", "_");
-            string[] sellArray = Regex.Match(javaScriptString, @"Avg\. Sell Price_,_data_:\[([^\]]+)]").Groups[1].Value.Split(',');
+            string javaScriptString = Regex.Replace(resultpage.Html.CssSelect(".chart-wrapper").First().ChildNodes[1].InnerText, "\\\"", "");
+            string[] sellArray = Regex.Match(javaScriptString, @"Avg\. Sell Price,data:\[([^\]]+)]").Groups[1].Value.Split(',');
             if (decimal.TryParse(sellArray.Last(), out decimal parsedSell))
             {
-                guideEntity.Sell = parsedSell;
+                priceGuide.Sell = parsedSell;
             }
             else
             {
                 throw new ScrapingException("Could not parse Sell from graph");
             }
-            string[] trendArray = Regex.Match(javaScriptString, @"Price Trend_,_data_:\[([^\]]+)]").Groups[1].Value.Split(',');
+            string[] trendArray = Regex.Match(javaScriptString, @"Price Trend,data:\[([^\]]+)]").Groups[1].Value.Split(',');
             if (decimal.TryParse(trendArray.Last(), out decimal parsedTrend))
             {
-                guideEntity.Trend = parsedTrend;
+                priceGuide.Trend = parsedTrend;
             }
             else
             {
                 throw new ScrapingException("Could not parse Trend from graph");
             }
-
-            PriceGuideProEntity guideProEntity = new PriceGuideProEntity(guideEntity)
+            string[] dateArray = Regex.Match(javaScriptString, @"labels:\[([^\]]+)]").Groups[1].Value.Split(',');
+            if (DateTime.TryParse(dateArray.Last(), out DateTime parsedDate))
             {
-                IdProduct = product.IdProduct
-            };
+                priceGuide.FetchDate = parsedDate;
+            }
+            else
+            {
+                priceGuide.FetchDate = DateTime.Now;
+                throw new ScrapingException("Could not parse Date from graph");
+            }
+
+            //TODO generate useful uid from cardname,expansionname,fetchdate
+            //var uidstring = String.Concat(priceGuide.ExpansionName, priceGuide.ProductName, priceGuide.FetchDate.ToShortDateString());
+            //var uidhash = Crypto.ComputeHash(Encoding.UTF8.GetBytes(String.Concat(priceGuide.ExpansionName,priceGuide.ProductName,priceGuide.FetchDate.ToShortDateString()))).ToString();
 
             PageWebForm form = resultpage.FindFormById("FilterForm");
             form["extra[isFoil]"] = "Y";
             WebPage foilResultPagex = SubmitForm(form);
+            Browser.ClearCookies(); // reset session, so the (foil-)filter will be reset
 
             javaScriptString = Regex.Replace(foilResultPagex.Html.CssSelect(".chart-wrapper").First().ChildNodes[1].InnerText, "\\\"", "_");
             string[] foilSellArray = Regex.Match(javaScriptString, @"Avg\. Sell Price_,_data_:\[([^\]]+)]").Groups[1].Value.Split(',');
             if (decimal.TryParse(sellArray.Last(), out decimal parsedFoilSell))
             {
-                guideProEntity.FoilSell = parsedFoilSell;
+                priceGuide.FoilSell = parsedFoilSell;
             }
             else
             {
@@ -356,21 +375,22 @@ namespace LHpiNG.Web
             string[] foilTrendArray = Regex.Match(javaScriptString, @"Price Trend_,_data_:\[([^\]]+)]").Groups[1].Value.Split(',');
             if (decimal.TryParse(foilTrendArray.Last(), out decimal parsedFoilTrend))
             {
-                guideProEntity.FoilTrend = parsedFoilTrend;
+                priceGuide.FoilTrend = parsedFoilTrend;
             }
             else
             {
                 throw new ScrapingException("Could not parse Trend from graph");
             }
 
+
             if (product is Product)
             {
                 //update Product.PriceGuides history as well
                 //don't, that belongs somewhere else
             }
-            Browser.ClearCookies(); // reset session, so the (foil-)filter will be reset
+            
 
-            return guideProEntity;
+            return priceGuide;
         }
 
 
