@@ -1,11 +1,9 @@
 ﻿using LHpiNg.Util;
 using LHpiNG.Cardmarket;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
-using System.Data.Entity;
-using System.Data.Entity.Core.Objects;
-using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -20,23 +18,37 @@ namespace LHpiNG.db
 
         protected EFContext() : base()
         {// just pass along to DbContext()
+            this.Database.Migrate();//https://docs.microsoft.com/en-us/ef/core/managing-schemas/migrations/#apply-migrations-at-runtime
         }
 
-        protected EFContext(String connectionString) : base(connectionString)
-        {// just pass along to DbContext(connectionString)
-        }
-
-        protected override void OnModelCreating(DbModelBuilder builder)
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             //Configure default schema
-            builder.HasDefaultSchema("LHpi");
+            modelBuilder.HasDefaultSchema("LHpi");
 
-            //builder.Entity<ExpansionEntity>()
-            //    .HasIndex(x => x.Abbreviation)
-            //    //.IsUnique().HasFilter("Abbreviation IS NOT NULL") // only in EF Core :-(
-            //    .HasName("IX_tla");
-            //builder.Entity<ExpansionEntity>()
-            //    .HasOptional(x => x.IdExpansion);
+            // column names
+            modelBuilder.Entity<ProductEntity>()
+                .Property(p => p.EnName)
+                .HasColumnName("Name");
+            modelBuilder.Entity<ExpansionEntity>()
+                .Property(e => e.EnName)
+                .HasColumnName("Name");
+            // primary keys
+            modelBuilder.Entity<ProductEntity>()
+                .HasKey(p => new { p.EnName, p.ExpansionName });
+            modelBuilder.Entity<ExpansionEntity>()
+                .HasKey(e => e.EnName);
+            //foreign keys
+            modelBuilder.Entity<ProductEntity>()
+                .HasOne<ExpansionEntity>(p => p.Expansion)
+                .WithOne()
+                .HasForeignKey<ExpansionEntity>(e => e.EnName);
+            modelBuilder.Entity<Expansion>()
+                .HasMany<Product>(e => e.Products)
+                .WithOne(p => p.Expansion as Expansion)
+                .HasForeignKey(p => new { p.EnName, p.ExpansionName })
+                ;
+
         }
 
         // ILHpiDatabase methods

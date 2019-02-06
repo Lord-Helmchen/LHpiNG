@@ -1,8 +1,7 @@
 ﻿using LHpiNG.Cardmarket;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
-using System.Data.Entity;
-using System.Data.SqlClient;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,16 +10,10 @@ namespace LHpiNG.db
 {
     public class SQLContext : EFContext 
     {
-        public SQLContext() : base()
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            System.Data.Entity.Database.SetInitializer<SQLContext>(new DropCreateDatabaseIfModelChanges<SQLContext>());
+            optionsBuilder.UseSqlServer(@"Data Source=(localdb)\MSSQLLocalDB;Integrated Security=True;");
         }
-
-        public SQLContext(String connectionString) : base(connectionString)
-        {
-            System.Data.Entity.Database.SetInitializer<SQLContext>(new CreateDatabaseIfNotExists<SQLContext>());
-        }
-
 
     }
 }

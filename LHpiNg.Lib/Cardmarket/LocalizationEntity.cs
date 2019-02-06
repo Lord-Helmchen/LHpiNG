@@ -1,9 +1,11 @@
 ﻿using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace LHpiNG.Cardmarket
 {
     // a name entity per supported language
+    [NotMapped]
     public class LocalizationEntity
     {
         public string Name { get; set; }            // the localized name

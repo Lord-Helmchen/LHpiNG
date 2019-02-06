@@ -12,33 +12,38 @@ namespace LHpiNG.Cardmarket
         public int IdProduct { get; set; }                          // Product ID
         public int? IdMetaproduct { get; set; }                     // Metaproduct ID
         public int? CountReprints { get; set; }                     // Number of total products bundled by the metaproduct
-        [Key, Column("Name",Order = 1)]
+        //[Key, Column("Name",Order = 0)]
         public string EnName { get; set; }                          // Product's English name
         public IEnumerable<LocalizationEntity> Localization { get; set; } // localization entities for the product's name
+        [NotMapped]
         public CategoryEntity Category { get; set; }                // Category entity the product belongs to
         public string Website { get; set; }                         // URL to the product (relative to MKM's base URL)
+        [NotMapped]
         public string Image { get; set; }                           // Path to the product's image
+        [NotMapped]
         public string GameName { get; set; }                        // the game's name
+        [NotMapped]
         public string CategoryName { get; set; }                    // the category's name
         public int? Number { get; set; }                            // Number of product within the expansion (where applicable)
         public Rarity Rarity { get; set; }                          // Rarity of product (where applicable)
-        [Key, Column(Order = 2)] 
+        //[Key, Column(Order = 1)]
+        //[ForeignKey("ExpansionName")]
         public string ExpansionName { get; set; }                   // Expansion's name 
+        [NotMapped]
         public IEnumerable<string> Links { get; set; }              // HATEOAS links
         /* The following information is only returned for responses that return the detailed product entity */
-        [ForeignKey("ExpansionName")]// Foreign Key has to be a property name, not table column name
-        public ExpansionEntity Expansion { get; set; }             // detailed expansion information (where applicable)
+        //[ForeignKey("ExpansionName")]// Foreign Key has to be a property name, not table column name
+        public ExpansionEntity Expansion { get; set; }              // detailed expansion information (where applicable)
         public PriceGuideEntity PriceGuide { get; set; }            // Price guide entity '''(ATTN {get;set;} not returned for expansion requests)'''
+        [NotMapped]
         public ReprintEntity Reprint { get; set; }                  // Reprint entities for each similar product bundled by the metaproduct
-
-        //[Key]
-        //public int Uid { get; set; }                               // Entity Framework Primary Key
 
         public ProductEntity()
         {
             this.GameName = "Magic";
             this.Rarity = Rarity.None;
             this.Links = null;//not used yet
+            this.CategoryName = "Singles";
         }
         //constructor from API reply
         public ProductEntity(string jsonEntity)
