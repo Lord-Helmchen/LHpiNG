@@ -270,6 +270,7 @@ namespace LHpiNG.Web
                 {
                     product.Rarity = parsedRarity;
                 }
+                //TODO can I scrape reprintCount ?
                 products.Add(product);
             }
             products.OrderBy(x => x.EnName);
@@ -291,8 +292,6 @@ namespace LHpiNG.Web
         {
             PriceGuide priceGuide = new PriceGuide()
             {
-                ExpansionName = product.ExpansionName,
-                ProductName = product.EnName,
                 Product = product as Product,
                 IdProduct = product.IdProduct
             };

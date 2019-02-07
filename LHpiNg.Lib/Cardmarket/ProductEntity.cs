@@ -8,12 +8,12 @@ namespace LHpiNG.Cardmarket
     [Table("Products")]
     public class ProductEntity
     {
-        //[Index]
         public int IdProduct { get; set; }                          // Product ID
         public int? IdMetaproduct { get; set; }                     // Metaproduct ID
         public int? CountReprints { get; set; }                     // Number of total products bundled by the metaproduct
         //[Key, Column("Name",Order = 0)]
         public string EnName { get; set; }                          // Product's English name
+        [NotMapped]
         public IEnumerable<LocalizationEntity> Localization { get; set; } // localization entities for the product's name
         [NotMapped]
         public CategoryEntity Category { get; set; }                // Category entity the product belongs to
@@ -26,13 +26,10 @@ namespace LHpiNG.Cardmarket
         public string CategoryName { get; set; }                    // the category's name
         public int? Number { get; set; }                            // Number of product within the expansion (where applicable)
         public Rarity Rarity { get; set; }                          // Rarity of product (where applicable)
-        //[Key, Column(Order = 1)]
-        //[ForeignKey("ExpansionName")]
         public string ExpansionName { get; set; }                   // Expansion's name 
         [NotMapped]
         public IEnumerable<string> Links { get; set; }              // HATEOAS links
         /* The following information is only returned for responses that return the detailed product entity */
-        //[ForeignKey("ExpansionName")]// Foreign Key has to be a property name, not table column name
         public ExpansionEntity Expansion { get; set; }              // detailed expansion information (where applicable)
         public PriceGuideEntity PriceGuide { get; set; }            // Price guide entity '''(ATTN {get;set;} not returned for expansion requests)'''
         [NotMapped]
