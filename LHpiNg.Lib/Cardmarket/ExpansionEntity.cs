@@ -18,6 +18,7 @@ namespace LHpiNG.Cardmarket
         public int? Icon { get; set; }                              // Index of the expansion's icon
         public string ReleaseDate { get; set; }                     // the expansion's release date
         public bool? IsReleased { get; set; }                       // true|false; a flag if the expansion is released yet
+        [NotMapped]
         public int IdGame { get; set; }                             // the game ID the expansion belongs to
         [NotMapped]
         public IEnumerable<string> Links { get; set; }              // HATEOAS links

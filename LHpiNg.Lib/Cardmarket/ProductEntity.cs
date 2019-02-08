@@ -8,7 +8,7 @@ namespace LHpiNG.Cardmarket
     [Table("Products")]
     public class ProductEntity
     {
-        public int IdProduct { get; set; }                          // Product ID
+        public int? IdProduct { get; set; }                          // Product ID
         public int? IdMetaproduct { get; set; }                     // Metaproduct ID
         public int? CountReprints { get; set; }                     // Number of total products bundled by the metaproduct
         //[Key, Column("Name",Order = 0)]

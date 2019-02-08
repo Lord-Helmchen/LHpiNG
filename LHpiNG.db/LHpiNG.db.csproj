@@ -49,6 +49,11 @@
     <Compile Include="EFContext.cs" />
     <Compile Include="IAlbumData.cs" />
     <Compile Include="ICardmarketData.cs" />
+    <Compile Include="Migrations\20190208003832_InitialCreation.cs" />
+    <Compile Include="Migrations\20190208003832_InitialCreation.designer.cs">
+      <DependentUpon>20190208003832_InitialCreation.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\SQLContextModelSnapshot.cs" />
     <Compile Include="SQLContext.cs" />
     <Compile Include="SQLiteContext.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

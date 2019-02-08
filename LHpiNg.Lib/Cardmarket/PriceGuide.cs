@@ -12,8 +12,13 @@ namespace LHpiNG.Cardmarket
     public class PriceGuide : PriceGuideProEntity
     {
         public DateTime FetchDate { get => FetchDate.Date; set => FetchDate = value; }
-        public virtual PriceGuide PreviousPriceGuide { get; set; }
+        public PriceGuide PreviousPriceGuide { get; set; }
         public Product Product { get; set; }
+
+        //public virtual PriceGuide PreviousPriceGuide { get; set; }
+        //public int PreviousPriceGuideUid { get; set; }
+        //public string ProductName { get; set; }
+        //public string ExpansionName { get; set; }
 
 
         public PriceGuide() : base()

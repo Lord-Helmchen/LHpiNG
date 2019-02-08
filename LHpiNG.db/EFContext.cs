@@ -18,7 +18,7 @@ namespace LHpiNG.db
 
         protected EFContext() : base()
         {// just pass along to DbContext()
-            this.Database.Migrate();//https://docs.microsoft.com/en-us/ef/core/managing-schemas/migrations/#apply-migrations-at-runtime
+            //this.Database.Migrate();//https://docs.microsoft.com/en-us/ef/core/managing-schemas/migrations/#apply-migrations-at-runtime
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -26,61 +26,63 @@ namespace LHpiNG.db
             //Configure default schema
             modelBuilder.HasDefaultSchema("LHpi");
 
-            // column names
-            modelBuilder.Entity<ProductEntity>()
-                .Property(p => p.EnName)
-                .HasColumnName("Name")
-                ;
             modelBuilder.Entity<ExpansionEntity>()
                 .Property(e => e.EnName)
                 .HasColumnName("Name")
+                .IsRequired()
                 .ValueGeneratedNever()
-                ;
-            // primary keys
-            modelBuilder.Entity<ProductEntity>()
-                .HasKey(p => new { p.EnName, p.ExpansionName });
+            ;
             modelBuilder.Entity<ExpansionEntity>()
-                .HasKey(e => e.EnName)
-                ;
-
-            //foreign keys
-            modelBuilder.Entity<ProductEntity>()
-                .HasOne<ExpansionEntity>(p => p.Expansion)
-                .WithMany()
-                .HasForeignKey(p => new { p.EnName, p.ExpansionName })
-                ;
-            //modelBuilder.Entity<ProductEntity>()
-            //    .HasOne<PriceGuideEntity>(p => p.PriceGuide)
-            //    .WithOne()
-            //    .HasForeignKey<PriceGuideEntity>(g => g.Uid)
-            //    ;
-            modelBuilder.Entity<Product>()
-                .HasMany<PriceGuide>(p => p.PriceGuides)
-                .WithOne(g => g.Product)
-                .HasForeignKey(p => p.Uid)
-                ;
-
+                 .HasKey(e => e.EnName)
+            ;
             modelBuilder.Entity<Expansion>()
                 .HasMany<Product>(e => e.Products)
                 .WithOne(p => p.Expansion as Expansion)
-                .HasForeignKey(e => e.EnName)
-                ;
+                .HasForeignKey("ExpansionName")
+            ;
 
-            modelBuilder.Entity<PriceGuide>()
-                .HasOne<PriceGuide>(g => g.PreviousPriceGuide)
+            modelBuilder.Entity<ProductEntity>()
+                .Property(p => p.EnName)
+                .HasColumnName("Name")
+                .IsRequired()
+                .ValueGeneratedNever()
+            ;
+            modelBuilder.Entity<ProductEntity>()
+                .Property(p => p.ExpansionName)
+                .IsRequired()
+                .ValueGeneratedNever()
+            ;
+            modelBuilder.Entity<ProductEntity>()
+                .HasKey(p => new { p.EnName, p.ExpansionName })
+            ;
+            modelBuilder.Entity<ProductEntity>()
+                .HasOne<ExpansionEntity>(p => p.Expansion)
+                .WithMany()
+                .HasForeignKey("ExpansionName")
+            ;
+            modelBuilder.Entity<Product>()
+                .HasMany<PriceGuide>(p => p.PriceGuides)
                 .WithOne()
-                .HasForeignKey<PriceGuide>(g => g.Uid)
-                ;
+                .HasForeignKey("ProductName", "ExpansionName");
+            ;
+
+            modelBuilder.Entity<PriceGuideEntity>()
+                .Property(g => g.Uid)
+                .ValueGeneratedOnAdd()
+            ;
+            modelBuilder.Entity<PriceGuideEntity>()
+               .HasKey(g => g.Uid)
+            ;
             modelBuilder.Entity<PriceGuide>()
                 .HasOne<Product>(g => g.Product)
                 .WithMany(p => p.PriceGuides)
-                .HasForeignKey(g => g.Uid)
-                ;
-            modelBuilder.Entity<PriceGuideEntity>()
-                .HasOne<ProductEntity>()
-                .WithOne(x => x.PriceGuide)
-                .HasForeignKey<PriceGuideEntity>(g => g.Uid)
-                ;
+                .HasForeignKey("ProductName", "ExpansionName");
+            ;
+            modelBuilder.Entity<PriceGuide>()
+                .HasOne<PriceGuide>(g => g.PreviousPriceGuide)
+                .WithOne()
+                .HasForeignKey<PriceGuide>("PreviousPriceGuideUid")
+            ;
 
         }
 

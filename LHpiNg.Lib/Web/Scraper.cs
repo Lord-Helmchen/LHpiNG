@@ -179,7 +179,9 @@ namespace LHpiNG.Web
                     throw new FormatException("Failed to parse Release Date!");
                 }
                 expansion.IsReleased = parsedDate.Date < DateTime.Now.Date;
-                expansion.ProductsUrlSuffix = ScrapeProductsUrlSuffix(expansion); ;
+
+                //TODO check if this is needed on mkm prod
+                //expansion.ProductsUrlSuffix = ScrapeProductsUrlSuffix(expansion); ;
 
                 return expansion;
             }
