@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LHpiNG.db
 {
-    public interface  IAlbumData
+    public interface IAlbumData
     {
         //declare getters and setters as part of the interface to force me to remember to implement the fields
         //DbSet<LHpiNG.Album.Set> Sets { get; set; }

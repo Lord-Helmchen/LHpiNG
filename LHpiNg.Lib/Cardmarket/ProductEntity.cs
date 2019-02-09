@@ -31,6 +31,7 @@ namespace LHpiNG.Cardmarket
         public IEnumerable<string> Links { get; set; }              // HATEOAS links
         /* The following information is only returned for responses that return the detailed product entity */
         public ExpansionEntity Expansion { get; set; }              // detailed expansion information (where applicable)
+        [NotMapped]
         public PriceGuideEntity PriceGuide { get; set; }            // Price guide entity '''(ATTN {get;set;} not returned for expansion requests)'''
         [NotMapped]
         public ReprintEntity Reprint { get; set; }                  // Reprint entities for each similar product bundled by the metaproduct

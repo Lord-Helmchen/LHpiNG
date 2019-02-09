@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LHpiNG.db.Migrations
 {
     [DbContext(typeof(SQLContext))]
-    [Migration("20190208003832_InitialCreation")]
-    partial class InitialCreation
+    [Migration("20190209001952_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -91,8 +91,6 @@ namespace LHpiNG.db.Migrations
 
                     b.Property<int?>("Number");
 
-                    b.Property<int?>("PriceGuideUid");
-
                     b.Property<int>("Rarity");
 
                     b.Property<string>("Website");
@@ -100,8 +98,6 @@ namespace LHpiNG.db.Migrations
                     b.HasKey("EnName", "ExpansionName");
 
                     b.HasIndex("ExpansionName");
-
-                    b.HasIndex("PriceGuideUid");
 
                     b.ToTable("Products");
 
@@ -129,7 +125,8 @@ namespace LHpiNG.db.Migrations
                 {
                     b.HasBaseType("LHpiNG.Cardmarket.PriceGuideEntity");
 
-                    b.Property<string>("ExpansionName");
+                    b.Property<string>("ExpansionName")
+                        .IsRequired();
 
                     b.Property<DateTime>("FetchDate");
 
@@ -143,7 +140,8 @@ namespace LHpiNG.db.Migrations
 
                     b.Property<int?>("PreviousPriceGuideUid");
 
-                    b.Property<string>("ProductName");
+                    b.Property<string>("ProductName")
+                        .IsRequired();
 
                     b.Property<decimal?>("Suggested");
 
@@ -162,10 +160,6 @@ namespace LHpiNG.db.Migrations
                 {
                     b.HasBaseType("LHpiNG.Cardmarket.ProductEntity");
 
-                    b.Property<string>("ExpansionEnName");
-
-                    b.HasIndex("ExpansionEnName");
-
                     b.ToTable("Products");
 
                     b.HasDiscriminator().HasValue("Product");
@@ -176,11 +170,8 @@ namespace LHpiNG.db.Migrations
                     b.HasOne("LHpiNG.Cardmarket.ExpansionEntity", "Expansion")
                         .WithMany()
                         .HasForeignKey("ExpansionName")
+                        .HasConstraintName("FK_Products_Expansions_ExpansionName")
                         .OnDelete(DeleteBehavior.Cascade);
-
-                    b.HasOne("LHpiNG.Cardmarket.PriceGuideEntity", "PriceGuide")
-                        .WithMany()
-                        .HasForeignKey("PriceGuideUid");
                 });
 
             modelBuilder.Entity("LHpiNG.Cardmarket.PriceGuide", b =>
@@ -191,14 +182,17 @@ namespace LHpiNG.db.Migrations
 
                     b.HasOne("LHpiNG.Cardmarket.Product", "Product")
                         .WithMany("PriceGuides")
-                        .HasForeignKey("ProductName", "ExpansionName");
+                        .HasForeignKey("ProductName", "ExpansionName")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("LHpiNG.Cardmarket.Product", b =>
                 {
                     b.HasOne("LHpiNG.Cardmarket.Expansion")
                         .WithMany("Products")
-                        .HasForeignKey("ExpansionEnName");
+                        .HasForeignKey("ExpansionName")
+                        .HasConstraintName("FK_Products_Expansions_ExpansionName")
+                        .OnDelete(DeleteBehavior.Cascade);
                 });
 #pragma warning restore 612, 618
         }

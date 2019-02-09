@@ -37,8 +37,10 @@ namespace LHpiNG.db
             ;
             modelBuilder.Entity<Expansion>()
                 .HasMany<Product>(e => e.Products)
-                .WithOne(p => p.Expansion as Expansion)
+                .WithOne()
                 .HasForeignKey("ExpansionName")
+                .HasConstraintName("FK_Products_Expansions_ExpansionName")
+                .OnDelete(DeleteBehavior.Cascade)
             ;
 
             modelBuilder.Entity<ProductEntity>()
@@ -59,11 +61,13 @@ namespace LHpiNG.db
                 .HasOne<ExpansionEntity>(p => p.Expansion)
                 .WithMany()
                 .HasForeignKey("ExpansionName")
+                .HasConstraintName("FK_Products_Expansions_ExpansionName")
+                .OnDelete(DeleteBehavior.Cascade)
             ;
             modelBuilder.Entity<Product>()
                 .HasMany<PriceGuide>(p => p.PriceGuides)
-                .WithOne()
-                .HasForeignKey("ProductName", "ExpansionName");
+                .WithOne(g => g.Product)
+                .HasForeignKey("ProductName", "ExpansionName")
             ;
 
             modelBuilder.Entity<PriceGuideEntity>()
@@ -76,12 +80,16 @@ namespace LHpiNG.db
             modelBuilder.Entity<PriceGuide>()
                 .HasOne<Product>(g => g.Product)
                 .WithMany(p => p.PriceGuides)
-                .HasForeignKey("ProductName", "ExpansionName");
+                .HasForeignKey("ProductName", "ExpansionName")//shadow property (db columns but no field in model)
+                .IsRequired(true)
+                .OnDelete(DeleteBehavior.Cascade)
             ;
             modelBuilder.Entity<PriceGuide>()
                 .HasOne<PriceGuide>(g => g.PreviousPriceGuide)
-                .WithOne()
-                .HasForeignKey<PriceGuide>("PreviousPriceGuideUid")
+                .WithOne()//no navigational property on other end
+                .HasForeignKey<PriceGuide>("PreviousPriceGuideUid")//shadow property (db columns but no field in model)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.ClientSetNull)
             ;
 
         }
@@ -100,10 +108,10 @@ namespace LHpiNG.db
                 {
                     Expansions = Expansions.ToList()
                 };
-                foreach (Expansion expansion in expansionList)
-                {
-                    expansion.Products = LoadProducts(expansion);
-                }
+                //foreach (Expansion expansion in expansionList)
+                //{
+                //    expansion.Products = LoadProducts(expansion);
+                //}
 
                 return expansionList;
             }
@@ -134,7 +142,7 @@ namespace LHpiNG.db
             try
             {
                 expansion = Expansions.Find(expansion.EnName);
-                expansion.Products = LoadProducts(expansion);
+                //expansion.Products = LoadProducts(expansion);
                 return expansion;
             }
             catch (DbException)
@@ -156,7 +164,7 @@ namespace LHpiNG.db
                 {
                     Expansions.Add(expansion);
                 }
-                SaveProducts(expansion);
+                //SaveProducts(expansion);
                 SaveChanges();
             }
             catch (DbException)

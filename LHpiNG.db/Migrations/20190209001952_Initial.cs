@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace LHpiNG.db.Migrations
 {
-    public partial class InitialCreation : Migration
+    public partial class Initial : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -45,8 +45,7 @@ namespace LHpiNG.db.Migrations
                     Website = table.Column<string>(nullable: true),
                     Number = table.Column<int>(nullable: true),
                     Rarity = table.Column<int>(nullable: false),
-                    PriceGuideUid = table.Column<int>(nullable: true),
-                    Discriminator = table.Column<string>(nullable: false),
+                    Discriminator = table.Column<string>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -81,8 +80,8 @@ namespace LHpiNG.db.Migrations
                     FoilTrend = table.Column<decimal>(nullable: true),
                     FetchDate = table.Column<DateTime>(nullable: true),
                     PreviousPriceGuideUid = table.Column<int>(nullable: true),
-                    ProductName = table.Column<string>(nullable: false),
-                    ExpansionName = table.Column<string>(nullable: false)
+                    ProductName = table.Column<string>(nullable: true),
+                    ExpansionName = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -122,30 +121,13 @@ namespace LHpiNG.db.Migrations
                 schema: "LHpi",
                 table: "Products",
                 column: "ExpansionName");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_Products_PriceGuideUid",
-                schema: "LHpi",
-                table: "Products",
-                column: "PriceGuideUid");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Products_PriceGuides_PriceGuideUid",
-                schema: "LHpi",
-                table: "Products",
-                column: "PriceGuideUid",
-                principalSchema: "LHpi",
-                principalTable: "PriceGuides",
-                principalColumn: "Uid",
-                onDelete: ReferentialAction.Restrict);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_PriceGuides_Products_ProductName_ExpansionName",
-                schema: "LHpi",
-                table: "PriceGuides");
+            migrationBuilder.DropTable(
+                name: "PriceGuides",
+                schema: "LHpi");
 
             migrationBuilder.DropTable(
                 name: "Products",
@@ -153,10 +135,6 @@ namespace LHpiNG.db.Migrations
 
             migrationBuilder.DropTable(
                 name: "Expansions",
-                schema: "LHpi");
-
-            migrationBuilder.DropTable(
-                name: "PriceGuides",
                 schema: "LHpi");
         }
     }

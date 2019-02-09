@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace LHpiNG.db
 {
-    public interface  ICardmarketData
+    public interface ICardmarketData
     {
         //declare getters and setters as part of the interface to force me to remember to implement the fields
         DbSet<Expansion> Expansions { get; set; }
