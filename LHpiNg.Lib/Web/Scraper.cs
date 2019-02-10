@@ -4,14 +4,10 @@ using System.Net;
 using System.Web;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using LHpiNG.Cardmarket;
 using HtmlAgilityPack;
 using ScrapySharp.Extensions;
 using System.Text.RegularExpressions;
-using LHpiNg.Web;
-using ScrapySharp.Html;
 using ScrapySharp.Exceptions;
 using System.Diagnostics;
 using System.Threading;
@@ -19,7 +15,7 @@ using ScrapySharp.Html.Forms;
 
 namespace LHpiNG.Web
 {
-    public sealed class Scraper : IFromCardmarket
+    internal sealed class Scraper : IFromCardmarket
     {
         private ScrapingBrowser Browser { get; set; }
         private string UrlServerPrefix { get; set; }
@@ -35,7 +31,8 @@ namespace LHpiNG.Web
         {
             Browser = new ScrapingBrowser
             {
-                AllowAutoRedirect = true, // Browser has settings you can access in setup
+                // Browser has settings you can access in setup
+                AllowAutoRedirect = true,
                 AllowMetaRedirect = true,
                 Language = System.Globalization.CultureInfo.GetCultureInfoByIetfLanguageTag("en-DE")
                 //,UserAgent = // TODO include "This wouldn't be necessary if you hadn't revoked my API access" in AgentString
@@ -86,7 +83,10 @@ namespace LHpiNG.Web
             //wait for flood protection to calm down
             if (DelayMiliseconds > 0)
             {
-                Console.Write($"\rWaiting {DelayMiliseconds / 1000} seconds for flood protection to calm down");
+                if (DelayMiliseconds > 999)
+                {
+                    Console.Write($"\rWaiting {DelayMiliseconds / 1000} seconds for flood protection to calm down");
+                }
                 Stopwatch stopwatch = Stopwatch.StartNew();
                 while (true)
                 {
@@ -137,7 +137,12 @@ namespace LHpiNG.Web
             }
         }
 
-        public ExpansionList ImportExpansions()
+        #region expansions
+        
+        /// <summary>
+        /// implements interface IFromCardmarket
+        /// </summary>
+        public ExpansionList ImportExpansionList()
         {
             ExpansionList expansionList = new ExpansionList();
 
@@ -179,9 +184,7 @@ namespace LHpiNG.Web
                     throw new FormatException("Failed to parse Release Date!");
                 }
                 expansion.IsReleased = parsedDate.Date < DateTime.Now.Date;
-
-                //TODO check if this is needed on mkm prod
-                //expansion.ProductsUrlSuffix = ScrapeProductsUrlSuffix(expansion); ;
+                expansion.ProductsUrlSuffix = ScrapeProductsUrlSuffix(expansion); ;
 
                 return expansion;
             }
@@ -191,61 +194,51 @@ namespace LHpiNG.Web
             }
         }
 
-        private string ScrapeProductsUrlSuffix(Expansion expansion)
+        private string ScrapeProductsUrlSuffix(Expansion expansion, bool doGuess = true)
         {
             //shortcut nonexisting Singles url
             if (expansion.ProductCount <= 0) // || (expansion.EnName != "Ugin's Fate Promos" || expansion.EnName != "Commander 2018")//Debug
             {
                 return null;
             }
-            WebPage resultpage = FetchPage(new Uri(String.Concat(UrlServerPrefix, expansion.UrlSuffix, "?", UrlResultsPerPageSuffix)));
-            IEnumerable<HtmlNode> nodes = resultpage.Html.CssSelect("a.card");
-            string productsUrlSuffix = null;
-            foreach (HtmlNode node in nodes)
+
+            if (doGuess)
             {
-                if (node.GetAttributeValue("href").Contains("Singles"))
-                {
-                    productsUrlSuffix = node.GetAttributeValue("href");
-                    break;
-                }
+                return Regex.Replace(expansion.UrlSuffix, @"^.*[^/]/", "en/Magic/Products/Singles/");
             }
-            return productsUrlSuffix;
+            else
+            {
+                WebPage resultpage = FetchPage(new Uri(String.Concat(UrlServerPrefix, expansion.UrlSuffix, "?", UrlResultsPerPageSuffix)));
+                IEnumerable<HtmlNode> nodes = resultpage.Html.CssSelect("a.card");
+                string productsUrlSuffix = null;
+                foreach (HtmlNode node in nodes)
+                {
+                    if (node.GetAttributeValue("href").Contains("Singles"))
+                    {
+                        productsUrlSuffix = node.GetAttributeValue("href");
+                        break;
+                    }
+                }
+                return productsUrlSuffix;
+            }
         }
 
-        public IEnumerable<ExpansionEntity> ImportProducts(IEnumerable<ExpansionEntity> expansions)
-        {
-            foreach (Expansion expansion in expansions)
-            {
-                try
-                {
-                    IEnumerable<ProductEntity> products = new List<ProductEntity>();
-                    products = ImportProducts(expansion);
-                }
-                catch (ScrapingException ex)
-                {
-                    Console.WriteLine(ex.Message + ": ProductCount=" + expansion.ProductCount + " in " + expansion.EnName);
-                }
-            }
-            return expansions;
-        }
+        #endregion
 
-        [Obsolete]
-        public IEnumerable<ProductEntity> ImportPriceGuides(IEnumerable<ProductEntity> products)
-        {
-            foreach (Product product in products)
-            {
-                product.PriceGuide = ImportPriceGuide(product);
-                //TODO add to price history (or probably do it in called method)
-            }
-            return products;
-        }
+        #region products
 
+        /// <summary>
+        /// implements interface IFromCardmarket
+        /// </summary>
         public IEnumerable<ProductEntity> ImportProducts(ExpansionEntity expansion)
         {
             if (!(expansion is Expansion))
             {
                 throw new ArgumentException("Need Expansion instead of only ExpansionEntity");
             }
+
+            if (expansion.EnName != "Ugin's Fate Promos") return null;
+
             List<ProductEntity> products = new List<ProductEntity>();
             string baseProductsUrl = String.Concat(UrlServerPrefix, ((Expansion)expansion).ProductsUrlSuffix, "?", UrlResultsPerPageSuffix);
 
@@ -272,10 +265,17 @@ namespace LHpiNG.Web
                 {
                     product.Rarity = parsedRarity;
                 }
-                //TODO can I scrape reprintCount ?
+                //TODO can I scrape reprintCount ? -> yes, but only from priceGuide page
                 products.Add(product);
             }
-            products.OrderBy(x => x.EnName);
+            if (products.All(p => p.Number.HasValue))
+            {
+                products.OrderBy(x => x.Number);
+            }
+            else
+            {
+                products.OrderBy(x => x.EnName);
+            }
 
             if (products.Count() != ((Expansion)expansion).ProductCount)
             {
@@ -285,11 +285,37 @@ namespace LHpiNG.Web
                 throw new ScrapingException(msg);
             }
 
-            return products.AsEnumerable();
+            return products;
         }
 
-        //TODO recreate previous priceGuidePros from graph
+        #endregion
 
+        #region prices
+
+        [Obsolete]
+        public IEnumerable<ProductEntity> ImportPriceGuides(IEnumerable<ProductEntity> products)
+        {
+            foreach (Product product in products)
+            {
+                product.PriceGuide = ImportPriceGuide(product);
+                //TODO add to price history (or probably do it in called method)
+            }
+            return products;
+        }
+
+        /// <summary>
+        /// implements interface IFromCardmarket
+        /// </summary>
+        public IList<PriceGuide> ImportPriceGuides(ProductEntity product)
+        {
+            //TODO recreate previous priceGuidePros from graph
+            //probably want to split common parts of ImportPriceGuide for this
+            throw new NotImplementedException();
+        }
+
+        /// <summary>
+        /// implements interface IFromCardmarket
+        /// </summary>
         public PriceGuideEntity ImportPriceGuide(ProductEntity product)
         {
             PriceGuide priceGuide = new PriceGuide()
@@ -354,10 +380,6 @@ namespace LHpiNG.Web
                 throw new ScrapingException("Could not parse Date from graph");
             }
 
-            //TODO generate useful uid from cardname,expansionname,fetchdate
-            //var uidstring = String.Concat(priceGuide.ExpansionName, priceGuide.ProductName, priceGuide.FetchDate.ToShortDateString());
-            //var uidhash = Crypto.ComputeHash(Encoding.UTF8.GetBytes(String.Concat(priceGuide.ExpansionName,priceGuide.ProductName,priceGuide.FetchDate.ToShortDateString()))).ToString();
-
             PageWebForm form = resultpage.FindFormById("FilterForm");
             form["extra[isFoil]"] = "Y";
             WebPage foilResultPagex = SubmitForm(form);
@@ -380,19 +402,14 @@ namespace LHpiNG.Web
             }
             else
             {
-                throw new ScrapingException("Could not parse Trend from graph");
+                throw new ScrapingException("Could not parse FoilTrend from graph");
             }
-
-
-            if (product is Product)
-            {
-                //update Product.PriceGuides history as well
-                //don't, that belongs somewhere else
-            }
-            
 
             return priceGuide;
         }
+        #endregion
+
+
 
 
     }

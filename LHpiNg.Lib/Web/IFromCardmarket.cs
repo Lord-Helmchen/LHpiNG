@@ -5,22 +5,36 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LHpiNg.Web
+namespace LHpiNG.Web
 {
-    interface IFromCardmarket
+    //TODO in Program replace Ínterface Instance with new Import wrapper class
+    internal interface IFromCardmarket
     {
         /// <summary>
-        /// Fetch available Expansions
+        /// Fetch a list of all available expansions
         /// </summary>
-        /// <returns></returns>
-        ExpansionList ImportExpansions();
+        /// <returns>freshly fetched Expansions</returns>
+        ExpansionList ImportExpansionList();
 
+        /// <summary>
+        /// Fetch products and attach them to the expansion
+        /// </summary>
+        /// <param name="expansion"></param>
+        /// <returns>products for the expansion</returns>
         IEnumerable<ProductEntity> ImportProducts(ExpansionEntity expansion);
 
-        IEnumerable<ExpansionEntity> ImportProducts(IEnumerable<ExpansionEntity> expansions);
-
+        /// <summary>
+        /// fetch latest prices for a product
+        /// </summary>
+        /// <param name="product"></param>
+        /// <returns>latest priceGuide for the product</returns>
         PriceGuideEntity ImportPriceGuide(ProductEntity product);
 
-        IEnumerable<ProductEntity> ImportPriceGuides(IEnumerable<ProductEntity> products);
+        /// <summary>
+        /// fetch price history for a product
+        /// </summary>
+        /// <param name="product"></param>
+        /// <returns></returns>
+        IList<PriceGuide> ImportPriceGuides(ProductEntity product);
     }
 }

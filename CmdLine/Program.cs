@@ -1,4 +1,5 @@
-﻿using LHpiNG.Cardmarket;
+﻿using LHpiNg.Web;
+using LHpiNG.Cardmarket;
 using LHpiNG.db;
 using LHpiNG.Web;
 using System;
@@ -6,6 +7,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace LHpiNG
@@ -14,23 +16,24 @@ namespace LHpiNG
     {
         static void Main(string[] args)
         {
-            Scraper scraper = Scraper.Instance;
-            //EFContext database = new SQLiteContext(SQLiteContext.ConnectionString);
+            Importer importer = new Importer();
             EFContext database = new SQLContext();
+
             ExpansionList expansionList = new ExpansionList();
 
             Console.WriteLine("Program started!");
             Console.WriteLine("Choose which method to run:");
-            Console.WriteLine("\t1 - Test()");
-            Console.WriteLine("\t2 - TestDb");
+            Console.WriteLine("\t0 - Print expansionList.Length");
+            Console.WriteLine("\t1 - Load Expansions from DB");
+            Console.WriteLine("\t2 - Save Expansions to Database");
             Console.WriteLine("\t3 - Fetch Expansions from Web");
-            Console.WriteLine("\t4 - Load Expansions from DB");
-            Console.WriteLine("\t5 - Save Expansions to Database");
-            Console.WriteLine("\t6 - Print expansionList.Length");
-            Console.WriteLine("\t7 - null expansionList");
-            Console.WriteLine("\t8 - test product list scraping");
-            Console.WriteLine("\t9 - test priceguide scraping");
-            Console.WriteLine("\tq or 0 - quit");
+            Console.WriteLine("\t4 - null expansionList");
+
+            Console.WriteLine("\t5 - test product list scraping");
+            Console.WriteLine("\t6 - test priceguide scraping");
+
+            Console.WriteLine("\t9 - variable Test(...) method");
+            Console.WriteLine("\tq - quit");
 
 
             bool quit = false;
@@ -39,41 +42,40 @@ namespace LHpiNG
                 Console.Write("Your option? ");
                 switch (Console.ReadLine())
                 {
+                    case "0"://noop
+                        Console.WriteLine(String.Format("{0} Expansions in List", expansionList.Expansions.Count));
+                        break;
                     case "1":
-                        Test();
-                        Console.WriteLine(String.Format("Test() done"));
-                        break;
-                    case "2":
-                        TestDb(database);
-                        Console.WriteLine(String.Format("TestDb() done"));
-                        break;
-                    case "3":
-                        expansionList = ScrapeExpansionList(scraper);
-                        Console.WriteLine(String.Format("{0} Expansions scraped", expansionList.Expansions.Count));
-                        break;
-                    case "4":
                         expansionList = LoadExpansion(database);
                         Console.WriteLine(String.Format("{0} Expansions loaded", expansionList.Expansions.Count));
                         break;
-                    case "5":
+                    case "2":
                         SaveExpansionList(expansionList, database);
                         Console.WriteLine(String.Format("{0} Expansions saved", expansionList.Expansions.Count));
                         break;
-                    case "6"://noop
-                        Console.WriteLine(String.Format("{0} Expansions in List", expansionList.Expansions.Count));
+                    case "3":
+                        expansionList = ScrapeExpansionList(importer);
+                        Console.WriteLine(String.Format("{0} Expansions scraped", expansionList.Expansions.Count));
                         break;
-                    case "7"://null list
+                    case "4"://null list
                         expansionList = new ExpansionList();
                         Console.WriteLine(String.Format("{0} Expansions in List", expansionList.Expansions.Count));
                         break;
+                    case "5":
+                        Expansion expansion = TestScrapeProducts(importer, expansionList);
+                        Console.WriteLine(String.Format("{0} Products scraped", expansion.Products.Count()));
+                        break;
+                    case "6":
+                        //ProductEntity prod = TestScrapePrice(importer, expansionList);
+                        break;
+                    case "7":
+                        break;
                     case "8":
-                        IEnumerable<ProductEntity> products = TestScrapeProducts(scraper, expansionList);
-                        Console.WriteLine(String.Format("{0} Products scraped", products.Count()));
                         break;
                     case "9":
-                        ProductEntity prod = TestScrapePrice(scraper, expansionList);
+                        Test(expansionList, importer);
+                        Console.WriteLine(String.Format("Test() done"));
                         break;
-                    case "0":
                     case "q":
                         quit = true;
                         break;
@@ -88,6 +90,11 @@ namespace LHpiNG
             // Go to http://aka.ms/dotnet-get-started-console to continue learning how to build a console app! 
         }
 
+        private static void Test(ExpansionList expansionList, Importer importer)
+        {
+          //  expansionList.Expansions = importer.ImportProducts(expansionList.Expansions).Cast<Expansion>().ToList();
+        }
+
         private static ExpansionList LoadExpansion(EFContext database)
         {
             ExpansionList expansions = database.LoadExpansionList();
@@ -99,34 +106,37 @@ namespace LHpiNG
             database.SaveExpansionList(expansionList);
         }
 
-        private static ExpansionList ScrapeExpansionList(Scraper scraper)
+        private static ExpansionList ScrapeExpansionList(Importer importer)
         {
-            ExpansionList expansions = scraper.ImportExpansions();
+            ExpansionList expansions = importer.ImportExpansionList();
             return expansions;
         }
 
-        private static IEnumerable<ProductEntity> ScrapeProducts(Scraper scraper, Expansion expansion)
+        // "correct" implementation
+        private static ExpansionList ScrapeProducts(Importer importer, ExpansionList expansionList)
         {
-            IEnumerable<ProductEntity> products = scraper.ImportProducts(expansion);
-            expansion.Products = products.Cast<Product>();
-            return products;
+            importer.ImportProducts(expansionList);
+            return expansionList;
         }
-        private static IEnumerable<ProductEntity> TestScrapeProducts(Scraper scraper, ExpansionList expansionList)
+        //shorten expansion list an call ScrapeProducts(...)
+        private static Expansion TestScrapeProducts(Importer importer, ExpansionList expansionList)
         {
-            Expansion expansion = expansionList.Expansions.SingleOrDefault(x => x.EnName == "Ugin's Fate Promos");
-            return ScrapeProducts(scraper, expansion);
-        }
-
-        private static ProductEntity TestScrapePrice(Scraper scraper, ExpansionList expansionList)
-        {
-            Expansion expansion = expansionList.Expansions.SingleOrDefault(x => x.EnName == "Ugin's Fate Promos");
-            ProductEntity product = expansion.Products.Where(x => x.EnName == "Ghostfire Blade").Single();
-            PriceGuideEntity priceGuide = scraper.ImportPriceGuide(product);
-            product.PriceGuide = priceGuide;
-            return product;
-
+            expansionList.Expansions = expansionList.Expansions.Where(x => x.EnName == "Ugin's Fate Promos").ToList();
+            expansionList = ScrapeProducts(importer, expansionList);
+            return expansionList.Expansions.SingleOrDefault(x => x.EnName == "Ugin's Fate Promos");
         }
 
+        //private static ProductEntity TestScrapePrice(Importer importer, ExpansionList expansionList)
+        //{
+            //Expansion expansion = expansionList.Expansions.SingleOrDefault(x => x.EnName == "Ugin's Fate Promos");
+            //ProductEntity product = expansion.Products.Where(x => x.EnName == "Ghostfire Blade").Single();
+            //PriceGuideEntity priceGuide = scraper.ImportPriceGuide(product);
+            //product.PriceGuide = priceGuide;
+            //return product;
+
+        //}
+
+        [Obsolete]
         private static void TestDb(EFContext database)
         {
             var expansion = new Expansion
@@ -138,36 +148,18 @@ namespace LHpiNG
             };
 
             database.AddOrUpdateExpansion(expansion);
-
-
         }
 
-        private static void Test()
+        [Obsolete]
+        private static int CheckProductSuffixScrapingNeeded(ExpansionList all)
         {
-            List<Product> ProdList = new List<Product>();
+            IEnumerable<Expansion> almostall = all.Expansions.Where(e => e.ProductCount > 0);
+            IEnumerable<Expansion> equal = almostall.Where(e => Regex.Replace(e.UrlSuffix, @"^.*[^/]/", "/") == Regex.Replace(e.ProductsUrlSuffix, @"^.*[^/]/", "/"));
+            int equalCount=  equal.Count();
+            IEnumerable<Expansion> different = almostall.Where(e => Regex.Replace(e.UrlSuffix, @"^.*[^/]/", "/") != Regex.Replace(e.ProductsUrlSuffix, @"^.*[^/]/", "/"));
+            int diffCount = different.Count();
 
-            ExpansionEntity expent = new ExpansionEntity();
-            ;
-
-            Expansion expansion = new Expansion
-            {
-                EnName = "Erweiterung",
-                Products = ProdList
-            };
-            ExpansionList list = new ExpansionList
-            {
-                expansion
-            };
-
-            Product product = new Product
-            {
-                EnName = "Produkt",
-                Expansion = expansion
-            };
-            ProdList.Add(product);
-
-            ;
-
+            return diffCount;
         }
     }
 }

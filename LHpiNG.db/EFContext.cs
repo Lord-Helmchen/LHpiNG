@@ -1,4 +1,4 @@
-﻿using LHpiNg.Util;
+﻿using LHpiNG.Util;
 using LHpiNG.Cardmarket;
 using Microsoft.EntityFrameworkCore;
 using System;
@@ -15,6 +15,7 @@ namespace LHpiNG.db
         public DbSet<Expansion> Expansions { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<PriceGuide> PriceGuides { get; set; }
+        public DbSet<State> State { get; set; }
 
         protected EFContext() : base()
         {// just pass along to DbContext()
@@ -112,7 +113,7 @@ namespace LHpiNG.db
                 //{
                 //    expansion.Products = LoadProducts(expansion);
                 //}
-
+                expansionList.FetchedOn = State.Last().ExpansionListFetchDate;
                 return expansionList;
             }
             catch (DbException) //should catch both SqlExcelption and SqliteException
@@ -129,6 +130,7 @@ namespace LHpiNG.db
                 {
                     AddOrUpdateExpansion(expansion);
                 }
+                State.Last().ExpansionListFetchDate = expansionList.FetchedOn;
                 SaveChanges();
             }
             catch (DbException)
