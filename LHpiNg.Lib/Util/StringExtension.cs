@@ -1,4 +1,4 @@
-﻿namespace LHpiNg.Util
+﻿namespace LHpiNG.Util
 {
     public static class StringExtensions
     {

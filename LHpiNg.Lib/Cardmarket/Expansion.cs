@@ -12,7 +12,7 @@ namespace LHpiNG.Cardmarket
     {
         public int? ProductCount { get; set; }
         public DateTime? ReleaseDateTime { get; set; }
-        public IEnumerable<Product> Products { get; set; }
+        public ICollection<Product> Products { get; set; }
         public string UrlSuffix { get; set; }
         public string ProductsUrlSuffix { get; set; }
 
@@ -20,12 +20,12 @@ namespace LHpiNG.Cardmarket
         {
         }
         //constructor from API reply
-        public Expansion(string jsonEntity): base(jsonEntity)
+        public Expansion(string jsonEntity) : base(jsonEntity)
         {
             throw new NotImplementedException();
         }
         //copy constructor
-        public Expansion(ExpansionEntity entity): base(entity)
+        public Expansion(ExpansionEntity entity) : base(entity)
         {
             //just use copy constructor from base class
         }

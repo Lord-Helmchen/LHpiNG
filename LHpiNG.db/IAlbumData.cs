@@ -4,11 +4,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Data.Entity;
+using Microsoft.EntityFrameworkCore;
 
 namespace LHpiNG.db
 {
-    public interface  IAlbumData
+    public interface IAlbumData
     {
         //declare getters and setters as part of the interface to force me to remember to implement the fields
         //DbSet<LHpiNG.Album.Set> Sets { get; set; }

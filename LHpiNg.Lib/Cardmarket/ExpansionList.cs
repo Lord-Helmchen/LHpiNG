@@ -10,7 +10,7 @@ namespace LHpiNG.Cardmarket
 {
     public class ExpansionList : IEnumerable
     {
-        public List<Expansion> Expansions { get; set; }
+        public IList<Expansion> Expansions { get; set; }
         public string UrlSuffix { get; set; }
         public DateTime FetchedOn { get; set; }
 
@@ -22,7 +22,7 @@ namespace LHpiNG.Cardmarket
 
         public IEnumerator GetEnumerator()
         {
-            return ((IEnumerable)Expansions).GetEnumerator();
+            return Expansions.GetEnumerator();
         }
         public void Add(Expansion expansion)
         {

@@ -5,7 +5,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LHpiNg.Util
+namespace LHpiNG.Util
 {
     public static class GenericExtensions
     {

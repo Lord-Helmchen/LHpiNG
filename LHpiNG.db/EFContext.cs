@@ -1,11 +1,9 @@
-﻿using LHpiNg.Util;
+﻿using LHpiNG.Util;
 using LHpiNG.Cardmarket;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
 using System.Data.Common;
-using System.Data.Entity;
-using System.Data.Entity.Core.Objects;
-using System.Data.Entity.Infrastructure;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -17,26 +15,88 @@ namespace LHpiNG.db
         public DbSet<Expansion> Expansions { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<PriceGuide> PriceGuides { get; set; }
+        public DbSet<State> State { get; set; }
 
         protected EFContext() : base()
         {// just pass along to DbContext()
+            //this.Database.Migrate();//https://docs.microsoft.com/en-us/ef/core/managing-schemas/migrations/#apply-migrations-at-runtime
         }
 
-        protected EFContext(String connectionString) : base(connectionString)
-        {// just pass along to DbContext(connectionString)
-        }
-
-        protected override void OnModelCreating(DbModelBuilder builder)
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             //Configure default schema
-            builder.HasDefaultSchema("LHpi");
+            modelBuilder.HasDefaultSchema("LHpi");
 
-            //builder.Entity<ExpansionEntity>()
-            //    .HasIndex(x => x.Abbreviation)
-            //    //.IsUnique().HasFilter("Abbreviation IS NOT NULL") // only in EF Core :-(
-            //    .HasName("IX_tla");
-            //builder.Entity<ExpansionEntity>()
-            //    .HasOptional(x => x.IdExpansion);
+            modelBuilder.Entity<ExpansionEntity>()
+                .Property(e => e.EnName)
+                .HasColumnName("Name")
+                .IsRequired()
+                .ValueGeneratedNever()
+            ;
+            modelBuilder.Entity<ExpansionEntity>()
+                 .HasKey(e => e.EnName)
+            ;
+            modelBuilder.Entity<Expansion>()
+                .HasMany<Product>(e => e.Products)
+                .WithOne()
+                .HasForeignKey("ExpansionName")
+                .HasConstraintName("FK_Products_Expansions_ExpansionName")
+                .OnDelete(DeleteBehavior.Cascade)
+            ;
+
+            modelBuilder.Entity<ProductEntity>()
+                .Property(p => p.EnName)
+                .HasColumnName("Name")
+                .IsRequired()
+                .ValueGeneratedNever()
+            ;
+            modelBuilder.Entity<ProductEntity>()
+                .Property(p => p.ExpansionName)
+                .IsRequired()
+                .ValueGeneratedNever()
+            ;
+            modelBuilder.Entity<ProductEntity>()
+                .HasKey(p => new { p.EnName, p.ExpansionName })
+            ;
+            modelBuilder.Entity<ProductEntity>()
+                .HasOne<ExpansionEntity>(p => p.Expansion)
+                .WithMany()
+                .HasForeignKey("ExpansionName")
+                .HasConstraintName("FK_Products_Expansions_ExpansionName")
+                .OnDelete(DeleteBehavior.Cascade)
+            ;
+            modelBuilder.Entity<Product>()
+                .HasMany<PriceGuide>(p => p.PriceGuides)
+                .WithOne(g => g.Product)
+                .HasForeignKey("ProductName", "ExpansionName")
+            ;
+
+            modelBuilder.Entity<PriceGuideEntity>()
+                .Property(g => g.Uid)
+                .ValueGeneratedOnAdd()
+            ;
+            modelBuilder.Entity<PriceGuideEntity>()
+               .HasKey(g => g.Uid)
+            ;
+            modelBuilder.Entity<PriceGuide>()
+                .HasOne<Product>(g => g.Product)
+                .WithMany(p => p.PriceGuides)
+                .HasForeignKey("ProductName", "ExpansionName")//shadow property (db columns but no field in model)
+                .IsRequired(true)
+                .OnDelete(DeleteBehavior.Cascade)
+            ;
+            modelBuilder.Entity<PriceGuide>()
+                .HasOne<PriceGuide>(g => g.PreviousPriceGuide)
+                .WithOne()//no navigational property on other end
+                .HasForeignKey<PriceGuide>("PreviousPriceGuideUid")//shadow property (db columns but no field in model)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+            ;
+
+            modelBuilder.Entity<State>().HasData(new { Id = 1, ExpansionListFetchDate = DateTime.MinValue } );
+
+            ;
+
         }
 
         // ILHpiDatabase methods
@@ -51,13 +111,9 @@ namespace LHpiNG.db
             {
                 var expansionList = new ExpansionList
                 {
-                    Expansions = Expansions.ToList()
+                    Expansions = Expansions.Include(e => e.Products).ToList()
                 };
-                foreach (Expansion expansion in expansionList)
-                {
-                    expansion.Products = LoadProducts(expansion);
-                }
-
+                expansionList.FetchedOn = State.LastOrDefault()?.ExpansionListFetchDate ?? DateTime.MinValue;
                 return expansionList;
             }
             catch (DbException) //should catch both SqlExcelption and SqliteException
@@ -74,6 +130,7 @@ namespace LHpiNG.db
                 {
                     AddOrUpdateExpansion(expansion);
                 }
+                State.LastOrDefault().ExpansionListFetchDate = expansionList.FetchedOn;
                 SaveChanges();
             }
             catch (DbException)
@@ -82,12 +139,12 @@ namespace LHpiNG.db
             }
         }
 
+        [Obsolete]
         public Expansion LoadExpansion(Expansion expansion)
         {
             try
             {
                 expansion = Expansions.Find(expansion.EnName);
-                expansion.Products = LoadProducts(expansion);
                 return expansion;
             }
             catch (DbException)
@@ -109,7 +166,6 @@ namespace LHpiNG.db
                 {
                     Expansions.Add(expansion);
                 }
-                SaveProducts(expansion);
                 SaveChanges();
             }
             catch (DbException)
@@ -117,15 +173,20 @@ namespace LHpiNG.db
                 throw;
             }
         }
+
+        [Obsolete]
         public Product LoadProduct(Product product)
         {
             return Products.Find(new { product.EnName, product.ExpansionName });
         }
+
+        [Obsolete]
         public IEnumerable<Product> LoadProducts(Expansion expansion)
         {
             return Products.Where(x => x.ExpansionName == expansion.EnName);
         }
 
+        [Obsolete]
         public void AddOrUpdateProduct(Product product)
         {
             try
@@ -147,6 +208,7 @@ namespace LHpiNG.db
             }
         }
 
+        [Obsolete]
         public void SaveProducts(Expansion expansion)
         {
             if (expansion.Products != null)
