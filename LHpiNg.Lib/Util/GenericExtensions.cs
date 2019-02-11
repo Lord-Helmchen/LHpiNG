@@ -1,4 +1,9 @@
-﻿using System;
+﻿/// This file is licensed as https://creativecommons.org/licenses/by-sa/3.0/ 
+/// source: https://stackoverflow.com/questions/17385472/entity-framework-only-update-values-that-are-not-null
+/// author https://stackoverflow.com/users/1715579/p-s-w-g
+
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
