@@ -32,6 +32,7 @@ namespace LHpiNG
             Console.WriteLine("\t5 - test product list scraping");
             Console.WriteLine("\t6 - test priceguide scraping");
 
+            Console.WriteLine("\t8 - reduce expansionList to debug-worthy cases");
             Console.WriteLine("\t9 - variable Test(...) method");
             Console.WriteLine("\tq - quit");
 
@@ -62,9 +63,10 @@ namespace LHpiNG
                         Console.WriteLine(String.Format("{0} Expansions in List", expansionList.Expansions.Count));
                         break;
                     case "5":
-                        //expansionList = importer.ImportProducts(expansionList); //<- correct way for whole list
-                        Expansion expansion = TestScrapeProducts(importer, expansionList);
-                        Console.WriteLine(String.Format("{0} Products scraped", expansion?.Products?.Count() ?? 0));
+                        expansionList = CullExpansionList(expansionList);
+                        expansionList = importer.ImportProducts(expansionList); //<- correct way for whole list
+                        //Expansion expansion = TestScrapeProducts(importer, expansionList);
+                        //Console.WriteLine(String.Format("{0} Products scraped", expansion?.Products?.Count() ?? 0));
                         break;
                     case "6":
                         //ProductEntity prod = TestScrapePrice(importer, expansionList);
@@ -72,6 +74,8 @@ namespace LHpiNG
                     case "7":
                         break;
                     case "8":
+                        CullExpansionList(expansionList);
+                        Console.WriteLine(String.Format("{0} Expansions selected", expansionList.Expansions.Count));
                         break;
                     case "9":
                         Test();
@@ -95,6 +99,16 @@ namespace LHpiNG
         {
         }
 
+        private static ExpansionList CullExpansionList(ExpansionList expansionList)
+        {
+            expansionList.Expansions = expansionList.Expansions.Where(
+                x => x.EnName == "Ugin's Fate Promos"
+                || x.EnName == "Explorers of Ixalan"
+                ).ToList();
+            return expansionList;
+        }
+
+        [Obsolete]
         private static Expansion TestScrapeProducts(Importer importer, ExpansionList expansionList)
         {
             expansionList.Expansions = expansionList.Expansions.Where(x => x.EnName == "Ugin's Fate Promos").ToList();

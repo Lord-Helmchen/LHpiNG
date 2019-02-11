@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 
 namespace LHpiNG.Web
 {
-    //TODO in Program replace Ínterface Instance with new Import wrapper class
     internal interface IFromCardmarket
     {
         /// <summary>

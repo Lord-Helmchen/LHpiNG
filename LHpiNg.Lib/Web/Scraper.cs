@@ -38,62 +38,70 @@ namespace LHpiNG.Web
                 //,UserAgent = // TODO include "This wouldn't be necessary if you hadn't revoked my API access" in AgentString
             };
             UrlServerPrefix = "https://www.cardmarket.com";
-            UrlResultsPerPageSuffix = "perSite=50";
+            UrlResultsPerPageSuffix = "?perSite=50";
             DelayMiliseconds = 100;
         }
 
         private WebPage FetchPage(Uri uri, int delay = 0)
         {
-            DelayRequest(delay);
             try
             {
-                WebPage result = Browser.NavigateToPage(uri);
-                if ((int)HttpStatusCode.OK == result.RawResponse.StatusCode && result.RawResponse.Body.Length > 0)
+                WebPage result;
+                bool fetchedPage = false;
+                do
                 {
-                    string msg = String.Format("got {0} with status {1}", uri.AbsoluteUri, result.RawResponse.StatusCode);
-                    int msgSpaces = Console.WindowWidth - msg.Length - 3;
-                    msgSpaces = (msgSpaces > 0) ? msgSpaces : 0;
-                    Console.Write(String.Concat("\r", msg, new String(' ', msgSpaces)));
-                    DelayMiliseconds = DelayMiliseconds == 1 ? 1 : DelayMiliseconds / 2;
-                    return result;
+                    DelayRequest(delay);
+                    fetchedPage = TryFetchPage(uri, out result);
                 }
-                else if ((int)HttpStatusCode.OK == result.RawResponse.StatusCode)
-                {
-                    //recursively work around flood protection
-                    DelayMiliseconds = DelayMiliseconds * 2;
-                    return FetchPage(uri, DelayMiliseconds);
-                }
-                else
-                {
-                    string message = String.Format("unhandled response status: {0} ({1})", result.RawResponse.StatusCode, result.RawResponse.StatusDescription);
-                    throw new HttpException(result.RawResponse.StatusCode, result.RawResponse.StatusDescription);
-                }
+                while (!fetchedPage);
+                return result;
             }
-#pragma warning disable CS0162 // Unreachable code detected
-            catch (HttpException ex)
+            catch (Exception ex) when (ex is HttpException || ex is WebException)
             {
-                Console.WriteLine(ex.ToString());
+                Console.WriteLine(ex.Message);
 #if DEBUG
                 throw;
 #endif
+#pragma warning disable CS0162 // Unreachable code detected
                 return null;
+#pragma warning restore CS0162 // Unreachable code detected
+            }
+        }
+
+        private bool TryFetchPage(Uri uri, out WebPage page)
+        {
+            try
+            {
+                page = Browser.NavigateToPage(uri);
             }
             catch (AggregateException ex)
             {
                 if (ex.InnerExceptions.Single() is WebException)
                 {
-                    Console.WriteLine(ex.InnerException.Message);
-#if DEBUG
-                    throw;
-#endif
-                    return null;
+                    throw ex.InnerException;
                 }
-                else
-                {
-                    throw;
-                }
+                else { throw; }
             }
-#pragma warning restore CS0162 // Unreachable code detected
+
+            if ((int)HttpStatusCode.OK == page?.RawResponse.StatusCode && page.RawResponse.Body.Length > 0)
+            {
+                string msg = String.Format("got {0} with status {1}", uri.AbsoluteUri, page.RawResponse.StatusCode);
+                int msgSpaces = Console.WindowWidth - msg.Length - 3;
+                msgSpaces = (msgSpaces > 0) ? msgSpaces : 0;
+                Console.Write(String.Concat("\r", msg, new String(' ', msgSpaces)));
+                DelayMiliseconds = DelayMiliseconds == 1 ? 1 : DelayMiliseconds / 2;
+                return true;
+            }
+            else if ((int)HttpStatusCode.OK == page.RawResponse.StatusCode)
+            {
+                DelayMiliseconds = DelayMiliseconds * 2;
+                return false;
+            }
+            else
+            {
+                string message = String.Format("unhandled response status: {0} ({1})", page.RawResponse.StatusCode, page.RawResponse.StatusDescription);
+                throw new HttpException(page.RawResponse.StatusCode, page.RawResponse.StatusDescription);
+            }
         }
 
         private void DelayRequest(int delay = 0)
@@ -119,6 +127,7 @@ namespace LHpiNG.Web
             }
         }
 
+        //TODO unroll SubmitForm recursion, reuse code from FetchPage as much as possible
         private WebPage SubmitForm(PageWebForm form, int delay = 0)
         {
             DelayRequest();
@@ -138,7 +147,7 @@ namespace LHpiNG.Web
                 else if ((int)HttpStatusCode.OK == result.RawResponse.StatusCode)
                 {
                     //recursively work around flood protection
-                    DelayMiliseconds = DelayMiliseconds * 2;// remember delay globally
+                    DelayMiliseconds = DelayMiliseconds * 2;
                     return SubmitForm(form, DelayMiliseconds);
                 }
                 else
@@ -216,7 +225,7 @@ namespace LHpiNG.Web
         private string ScrapeProductsUrlSuffix(Expansion expansion, bool doGuess = true)
         {
             //shortcut nonexisting Singles url
-            if (expansion.ProductCount <= 0) // || (expansion.EnName != "Ugin's Fate Promos" || expansion.EnName != "Commander 2018")//Debug
+            if (expansion.ProductCount <= 0)
             {
                 return null;
             }
@@ -227,7 +236,7 @@ namespace LHpiNG.Web
             }
             else
             {
-                WebPage resultpage = FetchPage(new Uri(String.Concat(UrlServerPrefix, expansion.UrlSuffix, "?", UrlResultsPerPageSuffix)));
+                WebPage resultpage = FetchPage(new Uri(String.Concat(UrlServerPrefix, expansion.UrlSuffix, UrlResultsPerPageSuffix)));
                 IEnumerable<HtmlNode> nodes = resultpage.Html.CssSelect("a.card");
                 string productsUrlSuffix = null;
                 foreach (HtmlNode node in nodes)
@@ -257,13 +266,44 @@ namespace LHpiNG.Web
             }
 
             List<ProductEntity> products = new List<ProductEntity>();
-            string baseProductsUrl = String.Concat(UrlServerPrefix, ((Expansion)expansion).ProductsUrlSuffix, "?", UrlResultsPerPageSuffix);
+            string urlSuffix = String.Concat(((Expansion)expansion).ProductsUrlSuffix, UrlResultsPerPageSuffix);
 
-            Uri url = new Uri(baseProductsUrl);
-            WebPage resultpage = FetchPage(url);
+            while (urlSuffix != String.Empty)
+            {
+                string productsUrl = String.Concat(UrlServerPrefix, urlSuffix);
+                urlSuffix = ParseProducts(expansion, products, productsUrl);
+            }
 
-            HtmlNode Table = resultpage?.Html?.CssSelect("div.table-body")?.First();
-            foreach (HtmlNode row in Table?.ChildNodes ?? Enumerable.Empty<HtmlNode>())
+            if (products.Count() != ((Expansion)expansion).ProductCount)
+            {
+                string msg = $"Product Count mismatch (found {products.Count()}, expected {((Expansion)expansion).ProductCount})";
+                Console.WriteLine(msg);
+                throw new ScrapingException(msg);
+            }
+            if (products.All(p => p.Number.HasValue))
+            {
+                return products.OrderBy(x => x.Number).ToList();
+            }
+            else
+            {
+                return products.OrderBy(x => x.EnName).ToList();
+            }
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="expansion">the Products' expansion</param>
+        /// <param name="products">parsed Products are added here</param>
+        /// <param name="productsUrl">url without </param>
+        /// <returns>next pagination url or null when last</returns>
+        private String ParseProducts(ExpansionEntity expansion, List<ProductEntity> products, string url)
+        {
+            WebPage resultpage = FetchPage(new Uri(url));
+            if (resultpage == null) return String.Empty;
+
+            HtmlNode table = resultpage?.Html?.CssSelect("div.table-body")?.First();
+            foreach (HtmlNode row in table?.ChildNodes ?? Enumerable.Empty<HtmlNode>())
             {
                 ProductEntity product = new Product
                 {
@@ -285,22 +325,10 @@ namespace LHpiNG.Web
                 //TODO can I scrape reprintCount ? -> yes, but only from priceGuide page
                 products.Add(product);
             }
+            HtmlNode pagination = resultpage?.Html?.CssSelect("div#pagination")?.First();
+            string nextUrlSuffix = pagination.CssSelect("a.btn").Last().GetAttributeValue("href") ?? String.Empty;
 
-            if (products.Count() != ((Expansion)expansion).ProductCount)
-            {
-                //TODO handle multiple pages
-                string msg = $"Product Count mismatch (found {products.Count()}, expected {((Expansion)expansion).ProductCount})";
-                Console.WriteLine(msg);
-                throw new ScrapingException(msg);
-            }
-            if (products.All(p => p.Number.HasValue))
-            {
-                return products.OrderBy(x => x.Number).ToList();
-            }
-            else
-            {
-                return products.OrderBy(x => x.EnName).ToList();
-            }
+            return nextUrlSuffix;
         }
 
         #endregion
@@ -313,7 +341,7 @@ namespace LHpiNG.Web
             foreach (Product product in products)
             {
                 product.PriceGuide = ImportPriceGuide(product);
-                //TODO add to price history (or probably do it in called method)
+                //would have to add to price history (or probably do it in called method)
             }
             return products;
         }
@@ -339,8 +367,7 @@ namespace LHpiNG.Web
                 IdProduct = product.IdProduct
             };
 
-            Uri url = new Uri(String.Concat(this.UrlServerPrefix, product.Website));
-            WebPage resultpage = FetchPage(url);
+            WebPage resultpage = FetchPage(new Uri(String.Concat(this.UrlServerPrefix, product.Website)));
             HtmlNode infoListNode = resultpage.Html.CssSelect(".info-list-container").First().FirstChild;
 
             if (int.TryParse(infoListNode.ChildNodes[9].InnerText, out int parsedAvailable) && parsedAvailable > 0)
