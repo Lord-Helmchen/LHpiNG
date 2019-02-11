@@ -11,13 +11,8 @@ namespace LHpiNG.Cardmarket
     public class Expansion : ExpansionEntity
     {
         public int? ProductCount { get; set; }
-        public DateTime? ReleaseDateTime
-        {
-            get;
-            set;
-        }
-        //        public DateTime? ReleaseDateTime { get => ReleaseDateTime.Value.Date; set => ReleaseDateTime = value; }
-        public IEnumerable<Product> Products { get; set; }
+        public DateTime? ReleaseDateTime { get; set; }
+        public ICollection<Product> Products { get; set; }
         public string UrlSuffix { get; set; }
         public string ProductsUrlSuffix { get; set; }
 

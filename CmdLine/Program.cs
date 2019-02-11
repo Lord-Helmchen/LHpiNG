@@ -46,15 +46,15 @@ namespace LHpiNG
                         Console.WriteLine(String.Format("{0} Expansions in List", expansionList.Expansions.Count));
                         break;
                     case "1":
-                        expansionList = LoadExpansion(database);
+                        expansionList = database.LoadExpansionList();
                         Console.WriteLine(String.Format("{0} Expansions loaded", expansionList.Expansions.Count));
                         break;
                     case "2":
-                        SaveExpansionList(expansionList, database);
+                        database.SaveExpansionList(expansionList);
                         Console.WriteLine(String.Format("{0} Expansions saved", expansionList.Expansions.Count));
                         break;
                     case "3":
-                        expansionList = ScrapeExpansionList(importer);
+                        expansionList = importer.ImportExpansionList();
                         Console.WriteLine(String.Format("{0} Expansions scraped", expansionList.Expansions.Count));
                         break;
                     case "4"://null list
@@ -62,8 +62,9 @@ namespace LHpiNG
                         Console.WriteLine(String.Format("{0} Expansions in List", expansionList.Expansions.Count));
                         break;
                     case "5":
+                        //expansionList = importer.ImportProducts(expansionList); //<- correct way for whole list
                         Expansion expansion = TestScrapeProducts(importer, expansionList);
-                        Console.WriteLine(String.Format("{0} Products scraped", expansion.Products.Count()));
+                        Console.WriteLine(String.Format("{0} Products scraped", expansion?.Products?.Count() ?? 0));
                         break;
                     case "6":
                         //ProductEntity prod = TestScrapePrice(importer, expansionList);
@@ -73,7 +74,7 @@ namespace LHpiNG
                     case "8":
                         break;
                     case "9":
-                        Test(expansionList, importer);
+                        Test();
                         Console.WriteLine(String.Format("Test() done"));
                         break;
                     case "q":
@@ -90,39 +91,14 @@ namespace LHpiNG
             // Go to http://aka.ms/dotnet-get-started-console to continue learning how to build a console app! 
         }
 
-        private static void Test(ExpansionList expansionList, Importer importer)
+        private static void Test()
         {
-          //  expansionList.Expansions = importer.ImportProducts(expansionList.Expansions).Cast<Expansion>().ToList();
         }
 
-        private static ExpansionList LoadExpansion(EFContext database)
-        {
-            ExpansionList expansions = database.LoadExpansionList();
-            return expansions;
-        }
-
-        private static void SaveExpansionList(ExpansionList expansionList, EFContext database)
-        {
-            database.SaveExpansionList(expansionList);
-        }
-
-        private static ExpansionList ScrapeExpansionList(Importer importer)
-        {
-            ExpansionList expansions = importer.ImportExpansionList();
-            return expansions;
-        }
-
-        // "correct" implementation
-        private static ExpansionList ScrapeProducts(Importer importer, ExpansionList expansionList)
-        {
-            importer.ImportProducts(expansionList);
-            return expansionList;
-        }
-        //shorten expansion list an call ScrapeProducts(...)
         private static Expansion TestScrapeProducts(Importer importer, ExpansionList expansionList)
         {
             expansionList.Expansions = expansionList.Expansions.Where(x => x.EnName == "Ugin's Fate Promos").ToList();
-            expansionList = ScrapeProducts(importer, expansionList);
+            expansionList = importer.ImportProducts(expansionList);
             return expansionList.Expansions.SingleOrDefault(x => x.EnName == "Ugin's Fate Promos");
         }
 

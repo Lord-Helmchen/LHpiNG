@@ -113,6 +113,13 @@ namespace LHpiNG.db.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("State");
+
+                    b.HasData(
+                        new
+                        {
+                            Id = 1,
+                            ExpansionListFetchDate = new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified)
+                        });
                 });
 
             modelBuilder.Entity("LHpiNG.Cardmarket.Expansion", b =>

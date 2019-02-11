@@ -21,7 +21,7 @@ namespace LHpiNG.Web
             throw new NotImplementedException();
         }
 
-        public IEnumerable<ProductEntity> ImportProducts(ExpansionEntity expansion)
+        public ICollection<ProductEntity> ImportProducts(ExpansionEntity expansion)
         {
             throw new NotImplementedException();
         }

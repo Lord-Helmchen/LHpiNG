@@ -60,21 +60,40 @@ namespace LHpiNG.Web
                 else if ((int)HttpStatusCode.OK == result.RawResponse.StatusCode)
                 {
                     //recursively work around flood protection
-                    DelayMiliseconds = DelayMiliseconds * 2;// remember delay globally
+                    DelayMiliseconds = DelayMiliseconds * 2;
                     return FetchPage(uri, DelayMiliseconds);
                 }
                 else
                 {
                     string message = String.Format("unhandled response status: {0} ({1})", result.RawResponse.StatusCode, result.RawResponse.StatusDescription);
-                    Console.WriteLine(message);
                     throw new HttpException(result.RawResponse.StatusCode, result.RawResponse.StatusDescription);
                 }
             }
+#pragma warning disable CS0162 // Unreachable code detected
             catch (HttpException ex)
             {
                 Console.WriteLine(ex.ToString());
+#if DEBUG
                 throw;
+#endif
+                return null;
             }
+            catch (AggregateException ex)
+            {
+                if (ex.InnerExceptions.Single() is WebException)
+                {
+                    Console.WriteLine(ex.InnerException.Message);
+#if DEBUG
+                    throw;
+#endif
+                    return null;
+                }
+                else
+                {
+                    throw;
+                }
+            }
+#pragma warning restore CS0162 // Unreachable code detected
         }
 
         private void DelayRequest(int delay = 0)
@@ -138,7 +157,7 @@ namespace LHpiNG.Web
         }
 
         #region expansions
-        
+
         /// <summary>
         /// implements interface IFromCardmarket
         /// </summary>
@@ -204,7 +223,7 @@ namespace LHpiNG.Web
 
             if (doGuess)
             {
-                return Regex.Replace(expansion.UrlSuffix, @"^.*[^/]/", "en/Magic/Products/Singles/");
+                return Regex.Replace(expansion.UrlSuffix, @"^.*[^/]/", "/en/Magic/Products/Singles/");
             }
             else
             {
@@ -230,14 +249,12 @@ namespace LHpiNG.Web
         /// <summary>
         /// implements interface IFromCardmarket
         /// </summary>
-        public IEnumerable<ProductEntity> ImportProducts(ExpansionEntity expansion)
+        public ICollection<ProductEntity> ImportProducts(ExpansionEntity expansion)
         {
             if (!(expansion is Expansion))
             {
                 throw new ArgumentException("Need Expansion instead of only ExpansionEntity");
             }
-
-            if (expansion.EnName != "Ugin's Fate Promos") return null;
 
             List<ProductEntity> products = new List<ProductEntity>();
             string baseProductsUrl = String.Concat(UrlServerPrefix, ((Expansion)expansion).ProductsUrlSuffix, "?", UrlResultsPerPageSuffix);
@@ -245,8 +262,8 @@ namespace LHpiNG.Web
             Uri url = new Uri(baseProductsUrl);
             WebPage resultpage = FetchPage(url);
 
-            HtmlNode Table = resultpage.Html.CssSelect("div.table-body").First();
-            foreach (HtmlNode row in Table.ChildNodes)
+            HtmlNode Table = resultpage?.Html?.CssSelect("div.table-body")?.First();
+            foreach (HtmlNode row in Table?.ChildNodes ?? Enumerable.Empty<HtmlNode>())
             {
                 ProductEntity product = new Product
                 {
@@ -268,14 +285,6 @@ namespace LHpiNG.Web
                 //TODO can I scrape reprintCount ? -> yes, but only from priceGuide page
                 products.Add(product);
             }
-            if (products.All(p => p.Number.HasValue))
-            {
-                products.OrderBy(x => x.Number);
-            }
-            else
-            {
-                products.OrderBy(x => x.EnName);
-            }
 
             if (products.Count() != ((Expansion)expansion).ProductCount)
             {
@@ -284,8 +293,14 @@ namespace LHpiNG.Web
                 Console.WriteLine(msg);
                 throw new ScrapingException(msg);
             }
-
-            return products;
+            if (products.All(p => p.Number.HasValue))
+            {
+                return products.OrderBy(x => x.Number).ToList();
+            }
+            else
+            {
+                return products.OrderBy(x => x.EnName).ToList();
+            }
         }
 
         #endregion

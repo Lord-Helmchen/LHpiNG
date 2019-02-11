@@ -44,8 +44,8 @@ namespace LHpiNg.Web
             {
                 try
                 {
-                    IEnumerable<ProductEntity> products = Datasource.ImportProducts(expansion);
-                    expansion.Products = products.Cast<Product>();// if that is not good, try = products.ConvertAll(x => new Product(x))
+                    ICollection<ProductEntity> products = Datasource.ImportProducts(expansion);
+                    expansion.Products = products.Cast<Product>().ToList();
                 }
                 catch (ScrapingException ex)
                 {
@@ -64,7 +64,7 @@ namespace LHpiNg.Web
             return expansionList;
         }
 
-        public IEnumerable<Product> ImportPrices(IEnumerable<Product> products)
+        public ICollection<Product> ImportPrices(ICollection<Product> products)
         {
             foreach (Product product in products)
             {

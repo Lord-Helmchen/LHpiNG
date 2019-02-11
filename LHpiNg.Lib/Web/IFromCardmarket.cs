@@ -21,7 +21,7 @@ namespace LHpiNG.Web
         /// </summary>
         /// <param name="expansion"></param>
         /// <returns>products for the expansion</returns>
-        IEnumerable<ProductEntity> ImportProducts(ExpansionEntity expansion);
+        ICollection<ProductEntity> ImportProducts(ExpansionEntity expansion);
 
         /// <summary>
         /// fetch latest prices for a product

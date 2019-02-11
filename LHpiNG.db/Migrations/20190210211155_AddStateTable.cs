@@ -21,6 +21,12 @@ namespace LHpiNG.db.Migrations
                 {
                     table.PrimaryKey("PK_State", x => x.Id);
                 });
+
+            migrationBuilder.InsertData(
+                schema: "LHpi",
+                table: "State",
+                columns: new[] { "Id", "ExpansionListFetchDate" },
+                values: new object[] { 1, new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified) });
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)

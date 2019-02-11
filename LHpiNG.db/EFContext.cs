@@ -93,6 +93,10 @@ namespace LHpiNG.db
                 .OnDelete(DeleteBehavior.ClientSetNull)
             ;
 
+            modelBuilder.Entity<State>().HasData(new { Id = 1, ExpansionListFetchDate = DateTime.MinValue } );
+
+            ;
+
         }
 
         // ILHpiDatabase methods
@@ -107,13 +111,9 @@ namespace LHpiNG.db
             {
                 var expansionList = new ExpansionList
                 {
-                    Expansions = Expansions.ToList()
+                    Expansions = Expansions.Include(e => e.Products).ToList()
                 };
-                //foreach (Expansion expansion in expansionList)
-                //{
-                //    expansion.Products = LoadProducts(expansion);
-                //}
-                expansionList.FetchedOn = State.Last().ExpansionListFetchDate;
+                expansionList.FetchedOn = State.LastOrDefault()?.ExpansionListFetchDate ?? DateTime.MinValue;
                 return expansionList;
             }
             catch (DbException) //should catch both SqlExcelption and SqliteException
@@ -130,7 +130,7 @@ namespace LHpiNG.db
                 {
                     AddOrUpdateExpansion(expansion);
                 }
-                State.Last().ExpansionListFetchDate = expansionList.FetchedOn;
+                State.LastOrDefault().ExpansionListFetchDate = expansionList.FetchedOn;
                 SaveChanges();
             }
             catch (DbException)
@@ -139,12 +139,12 @@ namespace LHpiNG.db
             }
         }
 
+        [Obsolete]
         public Expansion LoadExpansion(Expansion expansion)
         {
             try
             {
                 expansion = Expansions.Find(expansion.EnName);
-                //expansion.Products = LoadProducts(expansion);
                 return expansion;
             }
             catch (DbException)
@@ -166,7 +166,6 @@ namespace LHpiNG.db
                 {
                     Expansions.Add(expansion);
                 }
-                //SaveProducts(expansion);
                 SaveChanges();
             }
             catch (DbException)
@@ -174,15 +173,20 @@ namespace LHpiNG.db
                 throw;
             }
         }
+
+        [Obsolete]
         public Product LoadProduct(Product product)
         {
             return Products.Find(new { product.EnName, product.ExpansionName });
         }
+
+        [Obsolete]
         public IEnumerable<Product> LoadProducts(Expansion expansion)
         {
             return Products.Where(x => x.ExpansionName == expansion.EnName);
         }
 
+        [Obsolete]
         public void AddOrUpdateProduct(Product product)
         {
             try
@@ -204,6 +208,7 @@ namespace LHpiNG.db
             }
         }
 
+        [Obsolete]
         public void SaveProducts(Expansion expansion)
         {
             if (expansion.Products != null)

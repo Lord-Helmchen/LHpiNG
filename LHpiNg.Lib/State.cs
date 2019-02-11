@@ -13,7 +13,6 @@ namespace LHpiNG.db
 
         public State()
         {
-            Id = 0;
         }
     }
 }
