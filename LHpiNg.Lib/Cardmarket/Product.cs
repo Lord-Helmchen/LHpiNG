@@ -9,6 +9,7 @@ namespace LHpiNG.Cardmarket
     {
         // keep price history
         public IList<PriceGuide> PriceGuides { get; set; }
+        public int? CollNr { get; set; }
 
         public Product() : base()
         {
