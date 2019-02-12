@@ -280,7 +280,7 @@ namespace LHpiNG.Web
                 Console.WriteLine(msg);
                 throw new ScrapingException(msg);
             }
-            if (products.All(p => p.Number.HasValue))
+            if (products.All(p => p.Number.Length > 0))
             {
                 return products.OrderBy(x => x.Number).ToList();
             }
@@ -309,14 +309,15 @@ namespace LHpiNG.Web
                 {
                     EnName = row.ChildNodes[3].FirstChild.FirstChild.FirstChild.InnerText,
                     ExpansionName = expansion.EnName,
+                    Number = row.ChildNodes[3].FirstChild.ChildNodes[1].InnerText,
                     Website = row.ChildNodes[3].FirstChild.FirstChild.FirstChild.GetAttributeValue("href"),
                     Expansion = expansion
                 };
-                string numberString = row.ChildNodes[3].FirstChild.ChildNodes[1].InnerText;
-                if (int.TryParse(numberString, out int parsedNumber))
+                if (int.TryParse(product.Number, out int parsedNumber))
                 {
-                    product.Number = parsedNumber;
+                    ((Product)product).CollNr = parsedNumber;
                 }
+
                 string rarityString = row.ChildNodes[3].FirstChild.ChildNodes[2].FirstChild.GetAttributeValue("data-original-title");
                 if (Enum.TryParse(rarityString, true, out Rarity parsedRarity))
                 {

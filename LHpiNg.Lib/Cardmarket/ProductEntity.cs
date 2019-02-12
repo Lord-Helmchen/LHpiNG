@@ -24,7 +24,7 @@ namespace LHpiNG.Cardmarket
         public string GameName { get; set; }                        // the game's name
         [NotMapped]
         public string CategoryName { get; set; }                    // the category's name
-        public int? Number { get; set; }                            // Number of product within the expansion (where applicable)
+        public string Number { get; set; }                            // Number of product within the expansion (where applicable)
         public Rarity Rarity { get; set; }                          // Rarity of product (where applicable)
         public string ExpansionName { get; set; }                   // Expansion's name 
         [NotMapped]
