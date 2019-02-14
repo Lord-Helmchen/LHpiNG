@@ -57,6 +57,10 @@
     <Compile Include="Migrations\20190210211155_AddStateTable.designer.cs">
       <DependentUpon>20190210211155_AddStateTable.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\20190214192241_addCollNrToProducts.cs" />
+    <Compile Include="Migrations\20190214192241_addCollNrToProducts.designer.cs">
+      <DependentUpon>20190214192241_addCollNrToProducts.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\SQLContextModelSnapshot.cs" />
     <Compile Include="SQLContext.cs" />
     <Compile Include="SQLiteContext.cs" />

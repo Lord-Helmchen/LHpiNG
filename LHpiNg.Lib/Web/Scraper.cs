@@ -89,10 +89,7 @@ namespace LHpiNG.Web
             {
                 return CheckResult(page, targetUrl);
             }
-            catch (HttpException)
-            {
-                throw;
-            }
+            catch (HttpException) { throw; }
         }
 
         private WebPage SubmitForm(PageWebForm form, int delay = 0)
@@ -141,10 +138,7 @@ namespace LHpiNG.Web
             {
                 return CheckResult(page, targetUrl);
             }
-            catch (HttpException)
-            {
-                throw;
-            }
+            catch (HttpException) { throw; }
         }
 
         private bool CheckResult(WebPage page, string targetUrl)
@@ -299,7 +293,8 @@ namespace LHpiNG.Web
             while (urlSuffix != String.Empty)
             {
                 string productsUrl = String.Concat(UrlServerPrefix, urlSuffix);
-                urlSuffix = ParseProducts(expansion, products, productsUrl);
+                urlSuffix = ParseProducts(expansion, productsUrl, out List<ProductEntity> parsedProducts);
+                products.AddRange(parsedProducts);
             }
 
             if (products.Count() != ((Expansion)expansion).ProductCount)
@@ -310,11 +305,11 @@ namespace LHpiNG.Web
             }
             if (products.All(p => p.Number.Length > 0))
             {
-                return products.OrderBy(x => x.Number).ToList();
+                return products.OrderBy(p => ((Product)p).CollNr ?? 0).ThenBy(p => p.Number).ToList();
             }
             else
             {
-                return products.OrderBy(x => x.EnName).ToList();
+                return products.OrderBy(p => p.EnName).ToList();
             }
         }
 
@@ -322,12 +317,13 @@ namespace LHpiNG.Web
         /// 
         /// </summary>
         /// <param name="expansion">the Products' expansion</param>
-        /// <param name="products">parsed Products are added here</param>
-        /// <param name="productsUrl">url without </param>
-        /// <returns>next pagination url or null when last</returns>
-        private String ParseProducts(ExpansionEntity expansion, List<ProductEntity> products, string url)
+        /// <param name="url"></param>
+        /// <param name="products"></param>
+        /// <returns>next pagination url or null when last</returns>        
+        private String ParseProducts(ExpansionEntity expansion, string url, out List<ProductEntity> products)
         {
             WebPage resultpage = FetchPage(new Uri(url));
+            products = new List<ProductEntity>();
             if (resultpage == null) return String.Empty;
 
             HtmlNode table = resultpage?.Html?.CssSelect("div.table-body")?.First();
