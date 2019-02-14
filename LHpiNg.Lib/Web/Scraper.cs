@@ -83,9 +83,75 @@ namespace LHpiNG.Web
                 else { throw; }
             }
 
+            string targetUrl = uri.AbsoluteUri;
+
+            try
+            {
+                return CheckResult(page, targetUrl);
+            }
+            catch (HttpException)
+            {
+                throw;
+            }
+        }
+
+        private WebPage SubmitForm(PageWebForm form, int delay = 0)
+        {
+            try
+            {
+                WebPage result;
+                bool fetchedPage = false;
+                do
+                {
+                    DelayRequest(delay);
+                    fetchedPage = TrySubmitForm(form, out result);
+                }
+                while (!fetchedPage);
+                return result;
+            }
+            catch (Exception ex) when (ex is HttpException || ex is WebException)
+            {
+                Console.WriteLine(ex.Message);
+#if DEBUG
+                throw;
+#endif
+#pragma warning disable CS0162 // Unreachable code detected
+                return null;
+#pragma warning restore CS0162 // Unreachable code detected
+            }
+        }
+
+        private bool TrySubmitForm(PageWebForm form, out WebPage page)
+        {
+            try
+            {
+                page = form.Submit();
+            }
+            catch (AggregateException ex)
+            {
+                if (ex.InnerExceptions.Single() is WebException)
+                {
+                    throw ex.InnerException;
+                }
+                else { throw; }
+            }
+
+            string targetUrl = form.Action;
+            try
+            {
+                return CheckResult(page, targetUrl);
+            }
+            catch (HttpException)
+            {
+                throw;
+            }
+        }
+
+        private bool CheckResult(WebPage page, string targetUrl)
+        {
             if ((int)HttpStatusCode.OK == page?.RawResponse.StatusCode && page.RawResponse.Body.Length > 0)
             {
-                string msg = String.Format("got {0} with status {1}", uri.AbsoluteUri, page.RawResponse.StatusCode);
+                string msg = String.Format("got {0} with status {1}", targetUrl, page.RawResponse.StatusCode);
                 int msgSpaces = Console.WindowWidth - msg.Length - 3;
                 msgSpaces = (msgSpaces > 0) ? msgSpaces : 0;
                 Console.Write(String.Concat("\r", msg, new String(' ', msgSpaces)));
@@ -104,10 +170,10 @@ namespace LHpiNG.Web
             }
         }
 
+        //wait for flood protection to calm down
         private void DelayRequest(int delay = 0)
         {
             DelayMiliseconds = delay > 0 ? delay : DelayMiliseconds;
-            //wait for flood protection to calm down
             if (DelayMiliseconds > 0)
             {
                 if (DelayMiliseconds > 999)
@@ -122,46 +188,8 @@ namespace LHpiNG.Web
                     {
                         break;
                     }
-                    Thread.Sleep(1); //so processor can rest for a while
+                    Thread.Sleep(1);
                 }
-            }
-        }
-
-        //TODO unroll SubmitForm recursion, reuse code from FetchPage as much as possible
-        private WebPage SubmitForm(PageWebForm form, int delay = 0)
-        {
-            DelayRequest();
-            try
-            {
-                WebPage result = form.Submit();
-
-                if ((int)HttpStatusCode.OK == result.RawResponse.StatusCode && result.RawResponse.Body.Length > 0)
-                {
-                    string msg = String.Format("got reply to form {0} with status {1}", form.Action, result.RawResponse.StatusCode);
-                    int msgSpaces = Console.WindowWidth - msg.Length - 3;
-                    msgSpaces = (msgSpaces > 0) ? msgSpaces : 0;
-                    Console.Write(String.Concat("\r", msg, new String(' ', msgSpaces)));
-                    DelayMiliseconds = DelayMiliseconds == 1 ? 1 : DelayMiliseconds / 2;
-                    return result;
-                }
-                else if ((int)HttpStatusCode.OK == result.RawResponse.StatusCode)
-                {
-                    //recursively work around flood protection
-                    DelayMiliseconds = DelayMiliseconds * 2;
-                    return SubmitForm(form, DelayMiliseconds);
-                }
-                else
-                {
-                    string message = String.Format("unhandled response status: {0} ({1})", result.RawResponse.StatusCode, result.RawResponse.StatusDescription);
-                    Console.WriteLine(message);
-                    throw new HttpException(result.RawResponse.StatusCode, result.RawResponse.StatusDescription);
-                }
-
-            }
-            catch (HttpException ex)
-            {
-                Console.WriteLine(ex.ToString());
-                throw;
             }
         }
 
