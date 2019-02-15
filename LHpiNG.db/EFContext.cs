@@ -93,7 +93,7 @@ namespace LHpiNG.db
                 .OnDelete(DeleteBehavior.ClientSetNull)
             ;
 
-            modelBuilder.Entity<State>().HasData(new { Id = 1, ExpansionListFetchDate = DateTime.MinValue } );
+            modelBuilder.Entity<State>().HasData(new { Id = 1, ExpansionListFetchDate = DateTime.MinValue });
 
             ;
 
@@ -111,9 +111,24 @@ namespace LHpiNG.db
             {
                 var expansionList = new ExpansionList
                 {
-                    Expansions = Expansions.Include(e => e.Products).ToList()
+                    Expansions = Expansions
+                        .Include(e => e.Products)
+                            .ThenInclude(p => p.PriceGuides)
+                        .Include(e => e.Products)
+                        .ToList()
                 };
                 expansionList.FetchedOn = State.LastOrDefault()?.ExpansionListFetchDate ?? DateTime.MinValue;
+                foreach (Expansion expansion in expansionList)
+                {
+                    foreach (Product product in expansion.Products)
+                    {
+                        if (product.PriceGuides.Count > 0)
+                        {
+                            product.PriceGuide = product.PriceGuides
+                                .Aggregate((minItem, nextItem) => minItem.FetchDate.Date < nextItem.FetchDate.Date ? minItem : nextItem);
+                        }
+                    }
+                }
                 return expansionList;
             }
             catch (DbException) //should catch both SqlExcelption and SqliteException

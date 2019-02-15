@@ -69,7 +69,7 @@ namespace LHpiNG
                         //Console.WriteLine(String.Format("{0} Products scraped", expansion?.Products?.Count() ?? 0));
                         break;
                     case "6":
-                        //ProductEntity prod = TestScrapePrice(importer, expansionList);
+                        TestScrapePrice(importer, expansionList);
                         break;
                     case "7":
                         break;
@@ -116,15 +116,13 @@ namespace LHpiNG
             return expansionList.Expansions.SingleOrDefault(x => x.EnName == "Ugin's Fate Promos");
         }
 
-        //private static ProductEntity TestScrapePrice(Importer importer, ExpansionList expansionList)
-        //{
-            //Expansion expansion = expansionList.Expansions.SingleOrDefault(x => x.EnName == "Ugin's Fate Promos");
-            //ProductEntity product = expansion.Products.Where(x => x.EnName == "Ghostfire Blade").Single();
-            //PriceGuideEntity priceGuide = scraper.ImportPriceGuide(product);
-            //product.PriceGuide = priceGuide;
-            //return product;
-
-        //}
+        private static ExpansionList TestScrapePrice(Importer importer, ExpansionList expansionList)
+        {
+            expansionList.Expansions = expansionList.Expansions.Where(x => x.EnName == "Ugin's Fate Promos").ToList();
+            expansionList.Expansions.Single().Products = expansionList.Expansions.Single().Products.Where(x => x.EnName == "Ghostfire Blade").ToList();
+            importer.ImportPrices(expansionList);
+            return expansionList;
+        }
 
         [Obsolete]
         private static void TestDb(EFContext database)

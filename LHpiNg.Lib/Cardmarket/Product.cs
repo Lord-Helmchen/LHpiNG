@@ -13,6 +13,7 @@ namespace LHpiNG.Cardmarket
 
         public Product() : base()
         {
+            PriceGuides = new List<PriceGuide>();
         }
         //constructor from API reply
         public Product(string jsonEntity) : base(jsonEntity)

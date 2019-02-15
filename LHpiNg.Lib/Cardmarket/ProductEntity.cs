@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 
 namespace LHpiNG.Cardmarket
 {
@@ -40,8 +41,10 @@ namespace LHpiNG.Cardmarket
         {
             this.GameName = "Magic";
             this.Rarity = Rarity.None;
-            this.Links = null;//not used yet
+            this.Links = Enumerable.Empty<string>();//not used yet
             this.CategoryName = "Singles";
+            this.Localization = Enumerable.Empty<LocalizationEntity>();
+
         }
         //constructor from API reply
         public ProductEntity(string jsonEntity)

@@ -342,10 +342,14 @@ namespace LHpiNG.Web
                     ((Product)product).CollNr = parsedNumber;
                 }
 
-                string rarityString = row.ChildNodes[3].FirstChild.ChildNodes[2].FirstChild.GetAttributeValue("data-original-title");
+                string rarityString = row.ChildNodes[3].FirstChild.ChildNodes[2].FirstChild.FirstChild.GetAttributeValue("data-original-title");
                 if (Enum.TryParse(rarityString, true, out Rarity parsedRarity))
                 {
                     product.Rarity = parsedRarity;
+                }
+                else
+                {
+                    product.Rarity = Rarity.None;
                 }
                 //TODO can I scrape reprintCount ? -> yes, but only from priceGuide page
                 products.Add(product);
@@ -386,11 +390,8 @@ namespace LHpiNG.Web
         /// </summary>
         public PriceGuideEntity ImportPriceGuide(ProductEntity product)
         {
-            PriceGuide priceGuide = new PriceGuide()
-            {
-                Product = product as Product,
-                IdProduct = product.IdProduct
-            };
+            PriceGuide priceGuide = new PriceGuide();
+
 
             WebPage resultpage = FetchPage(new Uri(String.Concat(this.UrlServerPrefix, product.Website)));
             HtmlNode infoListNode = resultpage.Html.CssSelect(".info-list-container").First().FirstChild;
@@ -414,7 +415,7 @@ namespace LHpiNG.Web
                 //}
                 //else
                 //{
-                //    throw new ScrapingException("Could not parse LowexPlus");
+                //    throw new ScrapingException("Could not parse Trend");
                 //}
             }
             string javaScriptString = Regex.Replace(resultpage.Html.CssSelect(".chart-wrapper").First().ChildNodes[1].InnerText, "\\\"", "");

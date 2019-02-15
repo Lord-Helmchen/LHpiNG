@@ -11,7 +11,7 @@ namespace LHpiNG.Cardmarket
     [Table("PriceGuides")]
     public class PriceGuide : PriceGuideProEntity
     {
-        public DateTime FetchDate { get => FetchDate.Date; set => FetchDate = value; }
+        public DateTime FetchDate { get; set; }
         public PriceGuide PreviousPriceGuide { get; set; }
         public Product Product { get; set; }
 
@@ -31,7 +31,12 @@ namespace LHpiNG.Cardmarket
         }
         public PriceGuide(PriceGuideEntity entity) : base(entity)
         {
-            //just use copy constructor from base class
+            if (entity is PriceGuide guide)
+            {
+                FetchDate = guide.FetchDate;
+                PreviousPriceGuide = guide.PreviousPriceGuide;
+                Product = guide.Product;
+            }
         }
 
     }

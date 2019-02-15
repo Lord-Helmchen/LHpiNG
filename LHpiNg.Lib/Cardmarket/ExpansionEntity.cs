@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Linq;
 
 namespace LHpiNG.Cardmarket
 {
@@ -26,8 +28,9 @@ namespace LHpiNG.Cardmarket
         public ExpansionEntity()
         {
             this.IdGame = 1; //Magic
-            this.Links = null;//not used yet
+            this.Links = Enumerable.Empty<string>();//not used yet
             this.Icon = null;//not relevant
+            this.Localization = Enumerable.Empty<LocalizationEntity>();
         }
         //constructor from API reply
         public ExpansionEntity(string jsonEntity)

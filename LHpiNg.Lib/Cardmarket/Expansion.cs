@@ -18,6 +18,7 @@ namespace LHpiNG.Cardmarket
 
         public Expansion() : base()
         {
+            Products = new List<Product>();
         }
         //constructor from API reply
         public Expansion(string jsonEntity) : base(jsonEntity)

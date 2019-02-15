@@ -68,7 +68,28 @@ namespace LHpiNg.Web
         {
             foreach (Product product in products)
             {
-                product.PriceGuide = Datasource.ImportPriceGuide(product);
+                PriceGuide priceGuide = new PriceGuide(Datasource.ImportPriceGuide(product))
+                {
+                    Product = product,
+                    IdProduct = product.IdProduct,
+
+                };
+                priceGuide.FetchDate = priceGuide.FetchDate > DateTime.MinValue ? priceGuide.FetchDate : DateTime.Now;
+
+                PriceGuide existingPriceGuide = product.PriceGuide as PriceGuide;
+
+                if (existingPriceGuide == null || priceGuide.FetchDate.Date > existingPriceGuide.FetchDate.Date)
+                {
+                    priceGuide.PreviousPriceGuide = existingPriceGuide;
+                }
+                else
+                {
+                    priceGuide.PreviousPriceGuide = existingPriceGuide.PreviousPriceGuide;
+                    product.PriceGuides.Remove(product.PriceGuides.SingleOrDefault(g => g.FetchDate.Date == priceGuide.FetchDate.Date));
+
+                }
+                product.PriceGuides.Add(priceGuide);
+                product.PriceGuide = priceGuide;
             }
             return products;
         }
