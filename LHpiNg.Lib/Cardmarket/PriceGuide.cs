@@ -12,14 +12,10 @@ namespace LHpiNG.Cardmarket
     public class PriceGuide : PriceGuideProEntity
     {
         public DateTime FetchDate { get; set; }
-        public PriceGuide PreviousPriceGuide { get; set; }
         public Product Product { get; set; }
 
-        //public virtual PriceGuide PreviousPriceGuide { get; set; }
-        //public int PreviousPriceGuideUid { get; set; }
         //public string ProductName { get; set; }
         //public string ExpansionName { get; set; }
-
 
         public PriceGuide() : base()
         {
@@ -31,11 +27,10 @@ namespace LHpiNG.Cardmarket
         }
         public PriceGuide(PriceGuideEntity entity) : base(entity)
         {
-            if (entity is PriceGuide guide)
+            if (entity is PriceGuide priceGuide)
             {
-                FetchDate = guide.FetchDate;
-                PreviousPriceGuide = guide.PreviousPriceGuide;
-                Product = guide.Product;
+                FetchDate = priceGuide.FetchDate;
+                Product = priceGuide.Product;
             }
         }
 

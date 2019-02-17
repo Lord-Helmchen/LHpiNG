@@ -61,6 +61,14 @@
     <Compile Include="Migrations\20190214192241_addCollNrToProducts.designer.cs">
       <DependentUpon>20190214192241_addCollNrToProducts.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\20190217005725_RemovePreviousPriceGuideColumn.cs" />
+    <Compile Include="Migrations\20190217005725_RemovePreviousPriceGuideColumn.designer.cs">
+      <DependentUpon>20190217005725_RemovePreviousPriceGuideColumn.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\20190217100211_MakePricesNullable.cs" />
+    <Compile Include="Migrations\20190217100211_MakePricesNullable.designer.cs">
+      <DependentUpon>20190217100211_MakePricesNullable.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\SQLContextModelSnapshot.cs" />
     <Compile Include="SQLContext.cs" />
     <Compile Include="SQLiteContext.cs" />

@@ -26,29 +26,9 @@ namespace LHpiNG.Web
             throw new NotImplementedException();
         }
 
-        public PriceGuideEntity ImportPriceGuide(ProductEntity product)
+        public IEnumerable<PriceGuide> ImportPriceGuides(ProductEntity product)
         {
             throw new NotImplementedException();
         }
-
-        public IList<PriceGuide> ImportPriceGuides(ProductEntity product)
-        {
-            IList<PriceGuide> priceGuides = new List<PriceGuide>();
-            PriceGuide priceGuide = new PriceGuide(this.ImportPriceGuide(product))
-            {
-                IdProduct = product.IdProduct,
-                FetchDate = DateTime.Now
-            };
-            PriceGuide oldGuide = product.PriceGuide as PriceGuide;
-            if ((oldGuide).FetchDate.Date < priceGuide.FetchDate)
-            {
-                priceGuide.PreviousPriceGuide = oldGuide;
-                priceGuides.Add(oldGuide);
-            }
-            priceGuides.Add(priceGuide);
-
-            return priceGuides;
-        }
-
     }
 }

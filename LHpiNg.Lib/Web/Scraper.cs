@@ -82,9 +82,7 @@ namespace LHpiNG.Web
                 }
                 else { throw; }
             }
-
             string targetUrl = uri.AbsoluteUri;
-
             try
             {
                 return CheckResult(page, targetUrl);
@@ -132,7 +130,6 @@ namespace LHpiNG.Web
                 }
                 else { throw; }
             }
-
             string targetUrl = form.Action;
             try
             {
@@ -204,7 +201,7 @@ namespace LHpiNG.Web
                 Expansion expansion = ParseExpansion(node);
                 expansionList.Add(expansion);
             }
-            expansionList.FetchedOn = DateTime.Now;
+            expansionList.FetchedOn = DateTime.Today;
 
             return expansionList;
         }
@@ -233,7 +230,7 @@ namespace LHpiNG.Web
                 {
                     throw new FormatException("Failed to parse Release Date!");
                 }
-                expansion.IsReleased = parsedDate.Date < DateTime.Now.Date;
+                expansion.IsReleased = parsedDate.Date < DateTime.Today;
                 expansion.ProductsUrlSuffix = ScrapeProductsUrlSuffix(expansion); ;
 
                 return expansion;
@@ -378,20 +375,147 @@ namespace LHpiNG.Web
         /// <summary>
         /// implements interface IFromCardmarket
         /// </summary>
-        public IList<PriceGuide> ImportPriceGuides(ProductEntity product)
+        public IEnumerable<PriceGuide> ImportPriceGuides(ProductEntity product)
         {
-            //TODO recreate previous priceGuidePros from graph
-            //probably want to split common parts of ImportPriceGuide for this
-            throw new NotImplementedException();
+            IList<PriceGuide> priceGuides = new List<PriceGuide>();
+
+            WebPage resultpage = FetchPage(new Uri(String.Concat(this.UrlServerPrefix, product.Website)));
+            HtmlNode infoListNode = resultpage.Html.CssSelect(".info-list-container").First().FirstChild;
+
+            PriceGuide priceGuide = new PriceGuide
+            {
+                FetchDate = DateTime.Today,
+            };
+
+            if (int.TryParse(infoListNode.ChildNodes[9].InnerText, out int parsedAvailable) && parsedAvailable > 0)
+            {
+                string LowexPlus = Regex.Replace(infoListNode.ChildNodes[11].InnerText, @"^(\d+)[.,](\d+).*", "$1$2");
+                if (decimal.TryParse(LowexPlus, out decimal LowexPlusParsed))
+                {
+                    priceGuide.LowexPlus = LowexPlusParsed / 100;
+                }
+                else
+                {
+                    throw new ScrapingException("Could not parse LowexPlus");
+                }
+                string trend = Regex.Replace(infoListNode.ChildNodes[13].FirstChild.InnerText, @"^(\d+)[.,](\d+).*", "$1$2");
+                if (decimal.TryParse(trend, out decimal trendParsed))
+                {
+                    priceGuide.Trend = trendParsed / 100;
+                }
+                else
+                {
+                    throw new ScrapingException("Could not parse Trend");
+                }
+            }
+
+            PageWebForm form = resultpage.FindFormById("FilterForm");
+            form["extra[isFoil]"] = "Y";
+            WebPage foilResultPage = SubmitForm(form);
+            Browser.ClearCookies(); // reset session, so the (foil-)filter will be reset
+            HtmlNode foilInfoListNode = foilResultPage.Html.CssSelect(".info-list-container").First().FirstChild;
+            if (int.TryParse(foilInfoListNode.ChildNodes[9].InnerText, out int parsedFoilAvailable) && parsedFoilAvailable > 0)
+            {
+                string lowFoil = Regex.Replace(foilInfoListNode.ChildNodes[11].InnerText, @"^(\d+)[.,](\d+).*", "$1$2");
+                if (decimal.TryParse(lowFoil, out decimal lowFoilParsed))
+                {
+                    priceGuide.LowFoil = lowFoilParsed / 100;
+                }
+                else
+                {
+                    throw new ScrapingException("Could not parse LowexPlus");
+                }
+                string foilTrend = Regex.Replace(foilInfoListNode.ChildNodes[13].FirstChild.InnerText, @"^(\d+)[.,](\d+).*", "$1$2");
+                if (decimal.TryParse(foilTrend, out decimal foilTrendParsed))
+                {
+                    priceGuide.FoilTrend = foilTrendParsed / 100;
+                }
+                else
+                {
+                    throw new ScrapingException("Could not parse FoilTrend");
+                }
+            }
+            priceGuides.Add(priceGuide);
+
+            string javaScriptString = Regex.Replace(resultpage.Html.CssSelect(".chart-wrapper").First().ChildNodes[1].InnerText, "\\\"", "");
+            string[] dateArray = Regex.Match(javaScriptString, @"labels:\[([^\]]+)]").Groups[1].Value.Split(',');
+            string[] sellArray = Regex.Match(javaScriptString, @"Avg\. Sell Price,data:\[([^\]]+)]").Groups[1].Value.Split(',');
+            string[] trendArray = Regex.Match(javaScriptString, @"Price Trend,data:\[([^\]]+)]").Groups[1].Value.Split(',');
+            string foilJavaScriptString = Regex.Replace(foilResultPage.Html.CssSelect(".chart-wrapper").First().ChildNodes[1].InnerText, "\\\"", "");
+            string[] foilDateArray = Regex.Match(foilJavaScriptString, @"labels:\[([^\]]+)]").Groups[1].Value.Split(',');
+            string[] foilSellArray = Regex.Match(foilJavaScriptString, @"Avg\. Sell Price,data:\[([^\]]+)]").Groups[1].Value.Split(',');
+            string[] foilTrendArray = Regex.Match(foilJavaScriptString, @"Price Trend,data:\[([^\]]+)]").Groups[1].Value.Split(',');
+
+            for (int i = 0; i < dateArray.Length; i++)
+            {
+                priceGuide = new PriceGuide();
+                if (DateTime.TryParse(dateArray[i], out DateTime parsedDate))
+                {
+                    priceGuide.FetchDate = parsedDate.Date;
+                }
+                else
+                {
+                    throw new ScrapingException("Could not parse Date from graph");
+                }
+                if (decimal.TryParse(sellArray[i], out decimal parsedSell))
+                {
+                    priceGuide.Sell = parsedSell;
+                }
+                else
+                {
+                    throw new ScrapingException("Could not parse Sell from graph");
+                }
+                if (decimal.TryParse(trendArray[i], out decimal parsedTrend))
+                {
+                    priceGuide.Trend = parsedTrend;
+                }
+                else
+                {
+                    throw new ScrapingException("Could not parse Trend from graph");
+                }
+                priceGuides.Add(priceGuide);
+            }
+
+            for (int i = 0; i < foilDateArray.Length; i++)
+            {
+                priceGuide = new PriceGuide();
+                if (DateTime.TryParse(foilDateArray[i], out DateTime parsedFoilDate))
+                {
+                    priceGuide.FetchDate = parsedFoilDate.Date;
+                }
+                else
+                {
+                    throw new ScrapingException("Could not parse Date from graph");
+                }
+                if (decimal.TryParse(sellArray[i], out decimal parsedFoilSell))
+                {
+                    priceGuide.FoilSell = parsedFoilSell;
+                }
+                else
+                {
+                    throw new ScrapingException("Could not parse FoilSell from graph");
+                }
+                if (decimal.TryParse(foilTrendArray[i], out decimal parsedFoilTrend))
+                {
+                    priceGuide.FoilTrend = parsedFoilTrend;
+                }
+                else
+                {
+                    throw new ScrapingException("Could not parse FoilTrend from graph");
+                }
+                priceGuides.Add(priceGuide);
+            }
+
+            return priceGuides;
         }
 
         /// <summary>
         /// implements interface IFromCardmarket
         /// </summary>
+        [Obsolete]
         public PriceGuideEntity ImportPriceGuide(ProductEntity product)
         {
             PriceGuide priceGuide = new PriceGuide();
-
 
             WebPage resultpage = FetchPage(new Uri(String.Concat(this.UrlServerPrefix, product.Website)));
             HtmlNode infoListNode = resultpage.Html.CssSelect(".info-list-container").First().FirstChild;
@@ -444,7 +568,7 @@ namespace LHpiNG.Web
             }
             else
             {
-                priceGuide.FetchDate = DateTime.Now;
+                priceGuide.FetchDate = DateTime.Today;
                 throw new ScrapingException("Could not parse Date from graph");
             }
 

@@ -4,14 +4,16 @@ using LHpiNG.db;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace LHpiNG.db.Migrations
 {
     [DbContext(typeof(SQLContext))]
-    partial class SQLContextModelSnapshot : ModelSnapshot
+    [Migration("20190217005725_RemovePreviousPriceGuideColumn")]
+    partial class RemovePreviousPriceGuideColumn
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -49,20 +51,20 @@ namespace LHpiNG.db.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<decimal?>("Avg");
+                    b.Property<decimal>("Avg");
 
                     b.Property<string>("Discriminator")
                         .IsRequired();
 
-                    b.Property<decimal?>("Low");
+                    b.Property<decimal>("Low");
 
-                    b.Property<decimal?>("LowFoil");
+                    b.Property<decimal>("LowFoil");
 
-                    b.Property<decimal?>("LowexPlus");
+                    b.Property<decimal>("LowexPlus");
 
-                    b.Property<decimal?>("Sell");
+                    b.Property<decimal>("Sell");
 
-                    b.Property<decimal?>("Trend");
+                    b.Property<decimal>("Trend");
 
                     b.HasKey("Uid");
 

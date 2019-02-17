@@ -28,7 +28,14 @@ namespace LHpiNG.Cardmarket
         //copy constructor
         public Expansion(ExpansionEntity entity) : base(entity)
         {
-            //just use copy constructor from base class
+            if (entity is Expansion expansion)
+            {
+                ProductCount = expansion.ProductCount;
+                ReleaseDateTime = expansion.ReleaseDateTime;
+                Products = expansion.Products;
+                UrlSuffix = expansion.UrlSuffix;
+                ProductsUrlSuffix = expansion.ProductsUrlSuffix;
+            }
         }
     }
 }

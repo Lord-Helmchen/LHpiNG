@@ -1,4 +1,5 @@
 ﻿using LHpiNG.Cardmarket;
+using LHpiNG.Util;
 using LHpiNG.Web;
 using ScrapySharp.Exceptions;
 using System;
@@ -68,32 +69,26 @@ namespace LHpiNg.Web
         {
             foreach (Product product in products)
             {
-                PriceGuide priceGuide = new PriceGuide(Datasource.ImportPriceGuide(product))
+                IEnumerable<PriceGuide> priceGuides  =  Datasource.ImportPriceGuides(product);
+                Dictionary<DateTime, PriceGuide> PriceGuidesByDate = product.PriceGuides.ToDictionary(g => g.FetchDate);
+
+                foreach(PriceGuide priceGuide in priceGuides)
                 {
-                    Product = product,
-                    IdProduct = product.IdProduct,
-
-                };
-                priceGuide.FetchDate = priceGuide.FetchDate > DateTime.MinValue ? priceGuide.FetchDate : DateTime.Now;
-
-                PriceGuide existingPriceGuide = product.PriceGuide as PriceGuide;
-
-                if (existingPriceGuide == null || priceGuide.FetchDate.Date > existingPriceGuide.FetchDate.Date)
-                {
-                    priceGuide.PreviousPriceGuide = existingPriceGuide;
+                    priceGuide.Product = product;
+                    priceGuide.IdProduct = product.IdProduct;
+                    if (PriceGuidesByDate.ContainsKey(priceGuide.FetchDate))
+                    {
+                        PriceGuidesByDate[priceGuide.FetchDate].InjectNonNull(priceGuide);
+                    }
+                    else
+                    {
+                        PriceGuidesByDate.Add(priceGuide.FetchDate, priceGuide);
+                    }
                 }
-                else
-                {
-                    priceGuide.PreviousPriceGuide = existingPriceGuide.PreviousPriceGuide;
-                    product.PriceGuides.Remove(product.PriceGuides.SingleOrDefault(g => g.FetchDate.Date == priceGuide.FetchDate.Date));
-
-                }
-                product.PriceGuides.Add(priceGuide);
-                product.PriceGuide = priceGuide;
+                product.PriceGuides = PriceGuidesByDate.Values;
             }
             return products;
         }
-
 
     }
 }

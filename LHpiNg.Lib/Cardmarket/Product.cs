@@ -8,7 +8,7 @@ namespace LHpiNG.Cardmarket
     public class Product : ProductEntity
     {
         // keep price history
-        public IList<PriceGuide> PriceGuides { get; set; }
+        public ICollection<PriceGuide> PriceGuides { get; set; }
         public int? CollNr { get; set; }
 
         public Product() : base()
@@ -23,7 +23,11 @@ namespace LHpiNG.Cardmarket
         //copy constructor
         public Product(ProductEntity entity) : base(entity)
         {
-            //just use copy constructor from base class
+            if (entity is Product product)
+            {
+                PriceGuides = product.PriceGuides;
+                CollNr = product.CollNr;
+            }
         }
     }
 }

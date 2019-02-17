@@ -23,17 +23,10 @@ namespace LHpiNG.Web
         ICollection<ProductEntity> ImportProducts(ExpansionEntity expansion);
 
         /// <summary>
-        /// fetch latest prices for a product
-        /// </summary>
-        /// <param name="product"></param>
-        /// <returns>latest priceGuide for the product</returns>
-        PriceGuideEntity ImportPriceGuide(ProductEntity product);
-
-        /// <summary>
-        /// fetch price history for a product
+        /// fetch prices for a product
         /// </summary>
         /// <param name="product"></param>
         /// <returns></returns>
-        IList<PriceGuide> ImportPriceGuides(ProductEntity product);
+        IEnumerable<PriceGuide> ImportPriceGuides(ProductEntity product);
     }
 }

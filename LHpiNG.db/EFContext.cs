@@ -85,13 +85,6 @@ namespace LHpiNG.db
                 .IsRequired(true)
                 .OnDelete(DeleteBehavior.Cascade)
             ;
-            modelBuilder.Entity<PriceGuide>()
-                .HasOne<PriceGuide>(g => g.PreviousPriceGuide)
-                .WithOne()//no navigational property on other end
-                .HasForeignKey<PriceGuide>("PreviousPriceGuideUid")//shadow property (db columns but no field in model)
-                .IsRequired(false)
-                .OnDelete(DeleteBehavior.ClientSetNull)
-            ;
 
             modelBuilder.Entity<State>().HasData(new { Id = 1, ExpansionListFetchDate = DateTime.MinValue });
 
@@ -114,21 +107,10 @@ namespace LHpiNG.db
                     Expansions = Expansions
                         .Include(e => e.Products)
                             .ThenInclude(p => p.PriceGuides)
-                        .Include(e => e.Products)
                         .ToList()
                 };
                 expansionList.FetchedOn = State.LastOrDefault()?.ExpansionListFetchDate ?? DateTime.MinValue;
-                foreach (Expansion expansion in expansionList)
-                {
-                    foreach (Product product in expansion.Products)
-                    {
-                        if (product.PriceGuides.Count > 0)
-                        {
-                            product.PriceGuide = product.PriceGuides
-                                .Aggregate((minItem, nextItem) => minItem.FetchDate.Date < nextItem.FetchDate.Date ? minItem : nextItem);
-                        }
-                    }
-                }
+
                 return expansionList;
             }
             catch (DbException) //should catch both SqlExcelption and SqliteException
