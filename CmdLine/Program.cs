@@ -9,33 +9,105 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using LHpiNg.MAFiles;
 
 namespace LHpiNG
 {
     class Program
     {
+        public static Importer Importer { get; set; }
+        public static EFContext Database { get; set; }
+        public static MAReader Reader { get; set; }
+
+        public static ExpansionList ExpansionList { get; set; }
+        public static IEnumerable<Album.Language> AlbumLanguages { get; set; }
+        public static IEnumerable<Album.Set> AlbumSets { get; set; }
+
         static void Main(string[] args)
         {
-            Importer importer = new Importer();
-            EFContext database = new SQLContext();
 
-            ExpansionList expansionList = new ExpansionList();
+            Database = new SQLContext();
+            ExpansionList = new ExpansionList();
 
             Console.WriteLine("Program started!");
-            Console.WriteLine("Choose which method to run:");
-            Console.WriteLine("\t0 - Print expansionList.Length");
-            Console.WriteLine("\t1 - Load Expansions from DB");
-            Console.WriteLine("\t2 - Save Expansions to Database");
-            Console.WriteLine("\t3 - Fetch Expansions from Web");
-            Console.WriteLine("\t4 - null expansionList");
+            MainMenu();
 
-            Console.WriteLine("\t5 - test product list scraping");
-            Console.WriteLine("\t6 - test priceguide scraping");
+            //Console.WriteLine("Press any key to close the window!");
+            //Console.ReadKey();
+            // Go to http://aka.ms/dotnet-get-started-console to continue learning how to build a console app! 
+        }
+
+        private static void PrintMainMenu()
+        {
+            Console.WriteLine("\nMain Menu");
+            Console.WriteLine("choose modeule:");
+            Console.WriteLine("\t1 - NoOp");
+            Console.WriteLine("\t2 - Market");
+            Console.WriteLine("\t3 - Album");
+            Console.WriteLine("\t4 - Mapping");
+            Console.WriteLine("\t9 - Test()");
+            Console.WriteLine("\t0 - quit");
+        }
+
+        private static void MainMenu()
+        {
+            PrintMainMenu();
+            bool back = false;
+            while (!back)
+            {
+                Console.Write("Your option? ");
+                switch (Console.ReadLine())
+                {
+                    case "1":
+                        Console.WriteLine("NoOp");
+                        break;
+                    case "2":
+                        MarketMenu();
+                        PrintMainMenu();
+                        break;
+                    case "3":
+                        AlbumMenu();
+                        PrintMainMenu();
+                        break;
+                    case "4":
+                        Console.WriteLine("Mapping Menu not implemented yet!");
+                        break;
+                    case "9":
+                        Test();
+                        Console.WriteLine(String.Format("Test() done"));
+                        break;
+                    case "0":
+                        back = true;
+                        break;
+                    default:
+                        Console.WriteLine(String.Format("invalid choice"));
+                        break;
+                }
+            }
+        }
+
+        private static void PrintMarketMenu()
+        {
+            Console.WriteLine("\nMarket Menu");
+            Console.WriteLine("Choose which method to run:");
+            Console.WriteLine("\t1 - Print expansionList.Length");
+            Console.WriteLine("\t2 - Load Expansions from DB");
+            Console.WriteLine("\t3 - Save Expansions to Database");
+            Console.WriteLine("\t4 - Fetch Expansions from Web");
+            Console.WriteLine("\t5 - null expansionList");
+
+            Console.WriteLine("\t6 - test product list scraping");
+            Console.WriteLine("\t7 - test priceguide scraping");
 
             Console.WriteLine("\t8 - reduce expansionList to debug-worthy cases");
-            Console.WriteLine("\t9 - variable Test(...) method");
-            Console.WriteLine("\tq - quit");
+            Console.WriteLine("\t0 - return");
+        }
 
+        private static void MarketMenu()
+        {
+            PrintMarketMenu();
+
+            Importer = Importer ?? new Importer();
 
             bool quit = false;
             while (!quit)
@@ -43,43 +115,37 @@ namespace LHpiNG
                 Console.Write("Your option? ");
                 switch (Console.ReadLine())
                 {
-                    case "0"://noop
-                        Console.WriteLine(String.Format("{0} Expansions in List", expansionList.Expansions.Count));
-                        break;
-                    case "1":
-                        expansionList = database.LoadExpansionList();
-                        Console.WriteLine(String.Format("{0} Expansions loaded", expansionList.Expansions.Count));
+                    case "1"://noop
+                        Console.WriteLine(String.Format("{0} Expansions in List", ExpansionList.Expansions.Count));
                         break;
                     case "2":
-                        database.SaveExpansionList(expansionList);
-                        Console.WriteLine(String.Format("{0} Expansions saved", expansionList.Expansions.Count));
+                        ExpansionList = Database.LoadExpansionList();
+                        Console.WriteLine(String.Format("{0} Expansions loaded", ExpansionList.Expansions.Count));
                         break;
                     case "3":
-                        expansionList = importer.ImportExpansionList();
-                        Console.WriteLine(String.Format("{0} Expansions scraped", expansionList.Expansions.Count));
+                        Database.SaveExpansionList(ExpansionList);
+                        Console.WriteLine(String.Format("{0} Expansions saved", ExpansionList.Expansions.Count));
                         break;
-                    case "4"://null list
-                        expansionList = new ExpansionList();
-                        Console.WriteLine(String.Format("{0} Expansions in List", expansionList.Expansions.Count));
+                    case "4":
+                        ExpansionList = Importer.ImportExpansionList();
+                        Console.WriteLine(String.Format("{0} Expansions scraped", ExpansionList.Expansions.Count));
                         break;
-                    case "5":
-                        expansionList = CullExpansionList(expansionList);
-                        expansionList = importer.ImportProducts(expansionList);
+                    case "5"://null list
+                        ExpansionList = new ExpansionList();
+                        Console.WriteLine(String.Format("{0} Expansions in List", ExpansionList.Expansions.Count));
                         break;
                     case "6":
-                        TestScrapePrice(importer, expansionList);
+                        ExpansionList = CullExpansionList(ExpansionList);
+                        ExpansionList = Importer.ImportProducts(ExpansionList);
                         break;
                     case "7":
+                        TestScrapePrice(Importer, ExpansionList);
                         break;
                     case "8":
-                        CullExpansionList(expansionList);
-                        Console.WriteLine(String.Format("{0} Expansions selected", expansionList.Expansions.Count));
+                        CullExpansionList(ExpansionList);
+                        Console.WriteLine(String.Format("{0} Expansions selected", ExpansionList.Expansions.Count));
                         break;
-                    case "9":
-                        Test();
-                        Console.WriteLine(String.Format("Test() done"));
-                        break;
-                    case "q":
+                    case "0":
                         quit = true;
                         break;
                     default:
@@ -87,10 +153,46 @@ namespace LHpiNG
                         break;
                 }
             }
+        }
 
-            //Console.WriteLine("Press any key to close the window!");
-            //Console.ReadKey();
-            // Go to http://aka.ms/dotnet-get-started-console to continue learning how to build a console app! 
+        private static void AlbumMenu()
+        {
+            Console.WriteLine("\nAlbum Menu");
+            Console.WriteLine("Choose which method to run:");
+            Console.WriteLine("\t1 - Load Languages from database");
+            Console.WriteLine("\t2 - Read Languages from file");
+            Console.WriteLine("\t3 - Check for and enter abbreviations");
+            Console.WriteLine("\t4 - Save Languages to Database");
+            Console.WriteLine("\t0 - return");
+
+            Reader = Reader ?? new MAReader();
+
+            bool quit = false;
+            while (!quit)
+            {
+                Console.Write("Your option? ");
+                switch (Console.ReadLine())
+                {
+                    case "1":
+                        AlbumLanguages = Database.LoadLanguages();
+                        break;
+                    case "2":
+                        AlbumLanguages = Reader.ReadLanguages();
+                        break;
+                    case "3":
+                        AlbumLanguages = Reader.CheckLanguageDetails(AlbumLanguages);
+                        break;
+                    case "4":
+                        Database.SaveLanguages(AlbumLanguages);
+                        break;
+                    case "0":
+                        quit = true;
+                        break;
+                    default:
+                        Console.WriteLine(String.Format("invalid choice"));
+                        break;
+                }
+            }
         }
 
         private static void Test()

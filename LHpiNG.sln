@@ -9,6 +9,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LHpiNG.db", "LHpiNG.db\LHpi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CmdLine", "CmdLine\CmdLine.csproj", "{D6D2DA1B-59B6-41B6-9DBC-A0DFADF4A7A0}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "virtual_MADatabaseFolder", "virtual_MADatabaseFolder", "{3F40EC0F-FE90-45EF-B2E5-D0192508CF79}"
+	ProjectSection(SolutionItems) = preProject
+		MADatabaseExport\AlbumDatabase.csv = MADatabaseExport\AlbumDatabase.csv
+		MADatabaseExport\AlbumDatabase.txt = MADatabaseExport\AlbumDatabase.txt
+		MADatabaseExport\Languages.txt = MADatabaseExport\Languages.txt
+		MADatabaseExport\Sets.txt = MADatabaseExport\Sets.txt
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

@@ -47,7 +47,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Album\CardInfo.cs" />
+    <Compile Include="Album\AlbumObject.cs" />
+    <Compile Include="Album\Foilage.cs" />
     <Compile Include="Album\InventoryCard.cs" />
     <Compile Include="Album\Language.cs" />
     <Compile Include="Album\ObjectType.cs" />
@@ -65,6 +66,7 @@
     <Compile Include="Cardmarket\ProductEntity.cs" />
     <Compile Include="Cardmarket\Rarity.cs" />
     <Compile Include="Cardmarket\ReprintEntity.cs" />
+    <Compile Include="MAFiles\MAReader.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="State.cs" />
     <Compile Include="Util\FuzzyMatch.cs" />
@@ -85,6 +87,9 @@
     <PackageReference Include="HtmlAgilityPack">
       <Version>1.8.14</Version>
     </PackageReference>
+    <PackageReference Include="LumenWorks.Framework.IO">
+      <Version>3.8.0</Version>
+    </PackageReference>
     <PackageReference Include="ScrapySharp">
       <Version>3.0.0</Version>
     </PackageReference>
@@ -92,5 +97,6 @@
       <Version>4.5.0</Version>
     </PackageReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

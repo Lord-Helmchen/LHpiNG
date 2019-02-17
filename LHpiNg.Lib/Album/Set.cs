@@ -1,19 +1,23 @@
-﻿namespace LHpiNG.Album
+﻿using LHpiNg.Album;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace LHpiNG.Album
 {
-    class Set
+    public class Set
     {
         //identification
-        private string TLA { get; set; }//primary key
-        private int MAId { get; set; }//key
-        private string Name { get; set; }//key
-
+        public string TLA { get; set; }//primary key
+        public int Id { get; set; }//key
+        public string Name { get; set; }//key
         //information
-        private int CardCount { get; set; }
-        private int TokenCount { get; set; }
-        private int NontraditionalCount { get; set; }
-        private int InsertCount { get; set; }
-        private int ReplicaCount { get; set; }
-        private bool HasFoil { get; set; }
-        private bool HasNonfoil { get; set; }
+        public ICollection<AlbumObject> AlbumObjects { get; set; }
+        //public ICollection<Language> Languages { get; set; }//postponed, many-to-many in EFCore needs join table
+        public int? CardCount { get; set; }
+        public int? TokenCount { get; set; }
+        public int? NontraditionalCount { get; set; }
+        public int? InsertCount { get; set; }
+        public int? ReplicaCount { get; set; }
+        public Foilage Foilage { get; set; }
     }
 }

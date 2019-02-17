@@ -8,19 +8,28 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using LHpiNG.db.EFConfigs;
+using LHpiNG.Album;
 
 namespace LHpiNG.db
 {
     public abstract class EFContext : DbContext, ICardmarketData, IAlbumData
     {
+        public DbSet<State> State { get; set; }
+        // Cardmarket related
         public DbSet<Expansion> Expansions { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<PriceGuide> PriceGuides { get; set; }
-        public DbSet<State> State { get; set; }
+        //Album related
+        public DbSet<Language> Languages { get; set; }
+        public DbSet<Set> Sets { get; set; }
+        public DbSet<AlbumObject> AlbumObjects { get; set; }
 
         protected EFContext() : base()
         {// just pass along to DbContext()
-            //this.Database.Migrate();//https://docs.microsoft.com/en-us/ef/core/managing-schemas/migrations/#apply-migrations-at-runtime
+
+            //TODO check whether we can and want to automatically migrate (we probably do to reduce end-user work)
+            //https://docs.microsoft.com/en-us/ef/core/managing-schemas/migrations/#apply-migrations-at-runtime
+            this.Database.Migrate();
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -34,6 +43,8 @@ namespace LHpiNG.db
             modelBuilder.ApplyConfiguration(new ProductConfiguration());
             modelBuilder.ApplyConfiguration(new PriceGuideEntityConfiguration());
             modelBuilder.ApplyConfiguration(new PriceGuideConfiguration());
+            modelBuilder.ApplyConfiguration(new AlbumObjectConfiguration());
+            modelBuilder.ApplyConfiguration(new SetConfiguration());
 
             modelBuilder.Entity<State>().HasData(new { Id = 1, ExpansionListFetchDate = DateTime.MinValue });
 
@@ -84,25 +95,11 @@ namespace LHpiNG.db
             }
         }
 
-        [Obsolete]
-        public Expansion LoadExpansion(Expansion expansion)
-        {
-            try
-            {
-                expansion = Expansions.Find(expansion.EnName);
-                return expansion;
-            }
-            catch (DbException)
-            {
-                throw;
-            }
-        }
-
         public void AddOrUpdateExpansion(Expansion expansion)
         {
             try
             {
-                Expansion existing = Expansions.SingleOrDefault(x => x.EnName == expansion.EnName);
+                Expansion existing = Expansions.SingleOrDefault(e => e.EnName == expansion.EnName);
                 if (existing != null)
                 {
                     existing.InjectNonNull(expansion);
@@ -112,6 +109,20 @@ namespace LHpiNG.db
                     Expansions.Add(expansion);
                 }
                 SaveChanges();
+            }
+            catch (DbException)
+            {
+                throw;
+            }
+        }
+
+        [Obsolete]
+        public Expansion LoadExpansion(Expansion expansion)
+        {
+            try
+            {
+                expansion = Expansions.Find(expansion.EnName);
+                return expansion;
             }
             catch (DbException)
             {
@@ -167,6 +178,84 @@ namespace LHpiNG.db
         #endregion
 
         #region Album
+        public IEnumerable<Language> LoadLanguages()
+        {
+            try
+            {
+                var languages = new List<Language>();
+                languages = Languages.ToList();
+                return languages;
+            }
+            catch (DbException) //should catch both SqlExcelption and SqliteException
+            {
+                throw;
+            }
+        }
+        public IEnumerable<Set> LoadSets()
+        {
+            try
+            {
+                var sets = new List<Set>();
+                sets = Sets
+                    .Include(s => s.AlbumObjects)
+                    .ToList();
+                return sets;
+
+            }
+            catch (DbException) //should catch both SqlExcelption and SqliteException
+            {
+                throw;
+            }
+        }
+
+        public void SaveLanguages(IEnumerable<Language> languages)
+        {
+            foreach (Language language in languages)
+            {
+                try
+                {
+                    Language existing = Languages.SingleOrDefault(l => l.Id == language.Id);
+                    if (existing != null)
+                    {
+                        existing.InjectNonNull(language);
+                    }
+                    else
+                    {
+                        Languages.Add(language);
+                    }
+                    SaveChanges();
+                }
+                catch (DbException)
+                {
+                    throw;
+                }
+
+            }
+        }
+        public void SaveSets(IEnumerable<Set> sets)
+        {
+            foreach (Set set in sets)
+            {
+                try
+                {
+                    Set existing = Sets.SingleOrDefault(l => l.Id == set.Id);
+                    if (existing != null)
+                    {
+                        existing.InjectNonNull(set);
+                    }
+                    else
+                    {
+                        Sets.Add(set);
+                    }
+                    SaveChanges();
+                }
+                catch (DbException)
+                {
+                    throw;
+                }
+
+            }
+        }
 
         #endregion
     }

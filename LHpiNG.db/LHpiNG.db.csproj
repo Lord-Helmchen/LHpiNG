@@ -46,8 +46,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="EFConfigs\LanguageConfiguration.cs" />
+    <Compile Include="EFConfigs\SetConfiguration.cs" />
     <Compile Include="EFConfigs\ExpansionConfiguration.cs" />
     <Compile Include="EFConfigs\PriceGuideConfiguration.cs" />
+    <Compile Include="EFConfigs\AlbumObjectConfiguration.cs" />
     <Compile Include="EFConfigs\ProductConfiguration.cs" />
     <Compile Include="EFContext.cs" />
     <Compile Include="IAlbumData.cs" />
@@ -71,6 +74,10 @@
     <Compile Include="Migrations\20190217100211_MakePricesNullable.cs" />
     <Compile Include="Migrations\20190217100211_MakePricesNullable.designer.cs">
       <DependentUpon>20190217100211_MakePricesNullable.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\20190217214216_AddAlbumObjects.cs" />
+    <Compile Include="Migrations\20190217214216_AddAlbumObjects.designer.cs">
+      <DependentUpon>20190217214216_AddAlbumObjects.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\SQLContextModelSnapshot.cs" />
     <Compile Include="SQLContext.cs" />

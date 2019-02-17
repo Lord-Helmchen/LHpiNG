@@ -2,11 +2,11 @@
 {
     internal enum ObjectType
     {
-        All = 0,
-        Card = 1,
-        Tokens = 2,
-        Nontraditional = 3,
-        Insert = 4,
-        Replicas = 5,
+        None            = 0b000000,
+        Card            = 0b000001,
+        Token           = 0b000010,
+        Nontraditional  = 0b000100,
+        Insert          = 0b001000,
+        Replica         = 0b001000,
     }
 }

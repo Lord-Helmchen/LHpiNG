@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 
 namespace LHpiNG.Album
 {
-    class InventoryCard : CardInfo
+    class InventoryCard
     {
+        public AlbumObject Card { get; set; }
         public int OwnedFoil { get; set; }
         public int OwnedNonfoil { get; set; }
         public int Bought { get; set; }
