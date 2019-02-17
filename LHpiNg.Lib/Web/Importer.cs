@@ -65,7 +65,7 @@ namespace LHpiNg.Web
             return expansionList;
         }
 
-        public ICollection<Product> ImportPrices(ICollection<Product> products)
+        private ICollection<Product> ImportPrices(ICollection<Product> products)
         {
             foreach (Product product in products)
             {

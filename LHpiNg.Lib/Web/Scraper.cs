@@ -361,17 +361,6 @@ namespace LHpiNG.Web
 
         #region prices
 
-        [Obsolete]
-        public IEnumerable<ProductEntity> ImportPriceGuides(IEnumerable<ProductEntity> products)
-        {
-            foreach (Product product in products)
-            {
-                product.PriceGuide = ImportPriceGuide(product);
-                //would have to add to price history (or probably do it in called method)
-            }
-            return products;
-        }
-
         /// <summary>
         /// implements interface IFromCardmarket
         /// </summary>
@@ -509,96 +498,6 @@ namespace LHpiNG.Web
             return priceGuides;
         }
 
-        /// <summary>
-        /// implements interface IFromCardmarket
-        /// </summary>
-        [Obsolete]
-        public PriceGuideEntity ImportPriceGuide(ProductEntity product)
-        {
-            PriceGuide priceGuide = new PriceGuide();
-
-            WebPage resultpage = FetchPage(new Uri(String.Concat(this.UrlServerPrefix, product.Website)));
-            HtmlNode infoListNode = resultpage.Html.CssSelect(".info-list-container").First().FirstChild;
-
-            if (int.TryParse(infoListNode.ChildNodes[9].InnerText, out int parsedAvailable) && parsedAvailable > 0)
-            {
-                string LowexPlus = Regex.Replace(infoListNode.ChildNodes[11].InnerText, @"^(\d+)[.,](\d+).*", "$1$2");
-                if (decimal.TryParse(LowexPlus, out decimal LowexPlusParsed))
-                {
-                    priceGuide.LowexPlus = LowexPlusParsed / 100;
-                }
-                else
-                {
-                    throw new ScrapingException("Could not parse LowexPlus");
-                }
-                //scraping trend from graph works even when 0 available, so we'll prefer that.
-                //string trend = Regex.Replace(infoListNode.ChildNodes[13].FirstChild.InnerText, @"^(\d+)[.,](\d+).*", "$1$2");
-                //if (decimal.TryParse(trend, out decimal trendParsed))
-                //{
-                //    guideEntity.Trend = trendParsed / 100;
-                //}
-                //else
-                //{
-                //    throw new ScrapingException("Could not parse Trend");
-                //}
-            }
-            string javaScriptString = Regex.Replace(resultpage.Html.CssSelect(".chart-wrapper").First().ChildNodes[1].InnerText, "\\\"", "");
-            string[] sellArray = Regex.Match(javaScriptString, @"Avg\. Sell Price,data:\[([^\]]+)]").Groups[1].Value.Split(',');
-            if (decimal.TryParse(sellArray.Last(), out decimal parsedSell))
-            {
-                priceGuide.Sell = parsedSell;
-            }
-            else
-            {
-                throw new ScrapingException("Could not parse Sell from graph");
-            }
-            string[] trendArray = Regex.Match(javaScriptString, @"Price Trend,data:\[([^\]]+)]").Groups[1].Value.Split(',');
-            if (decimal.TryParse(trendArray.Last(), out decimal parsedTrend))
-            {
-                priceGuide.Trend = parsedTrend;
-            }
-            else
-            {
-                throw new ScrapingException("Could not parse Trend from graph");
-            }
-            string[] dateArray = Regex.Match(javaScriptString, @"labels:\[([^\]]+)]").Groups[1].Value.Split(',');
-            if (DateTime.TryParse(dateArray.Last(), out DateTime parsedDate))
-            {
-                priceGuide.FetchDate = parsedDate;
-            }
-            else
-            {
-                priceGuide.FetchDate = DateTime.Today;
-                throw new ScrapingException("Could not parse Date from graph");
-            }
-
-            PageWebForm form = resultpage.FindFormById("FilterForm");
-            form["extra[isFoil]"] = "Y";
-            WebPage foilResultPagex = SubmitForm(form);
-            Browser.ClearCookies(); // reset session, so the (foil-)filter will be reset
-
-            javaScriptString = Regex.Replace(foilResultPagex.Html.CssSelect(".chart-wrapper").First().ChildNodes[1].InnerText, "\\\"", "_");
-            string[] foilSellArray = Regex.Match(javaScriptString, @"Avg\. Sell Price_,_data_:\[([^\]]+)]").Groups[1].Value.Split(',');
-            if (decimal.TryParse(sellArray.Last(), out decimal parsedFoilSell))
-            {
-                priceGuide.FoilSell = parsedFoilSell;
-            }
-            else
-            {
-                throw new ScrapingException("Could not parse FoilSell from graph");
-            }
-            string[] foilTrendArray = Regex.Match(javaScriptString, @"Price Trend_,_data_:\[([^\]]+)]").Groups[1].Value.Split(',');
-            if (decimal.TryParse(foilTrendArray.Last(), out decimal parsedFoilTrend))
-            {
-                priceGuide.FoilTrend = parsedFoilTrend;
-            }
-            else
-            {
-                throw new ScrapingException("Could not parse FoilTrend from graph");
-            }
-
-            return priceGuide;
-        }
         #endregion
 
 

@@ -64,9 +64,7 @@ namespace LHpiNG
                         break;
                     case "5":
                         expansionList = CullExpansionList(expansionList);
-                        expansionList = importer.ImportProducts(expansionList); //<- correct way for whole list
-                        //Expansion expansion = TestScrapeProducts(importer, expansionList);
-                        //Console.WriteLine(String.Format("{0} Products scraped", expansion?.Products?.Count() ?? 0));
+                        expansionList = importer.ImportProducts(expansionList);
                         break;
                     case "6":
                         TestScrapePrice(importer, expansionList);
