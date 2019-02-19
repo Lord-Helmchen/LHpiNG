@@ -12,15 +12,15 @@ namespace LHpiNG.db.Migrations
                 schema: "LHpi",
                 columns: table => new
                 {
-                    Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    Abbr = table.Column<string>(nullable: true),
-                    M15Abbr = table.Column<string>(nullable: true),
-                    Name = table.Column<string>(nullable: true)
+                    Id = table.Column<int>(nullable: false),
+                    TLA = table.Column<string>(maxLength: 3, nullable: false),
+                    M15Abbr = table.Column<string>(maxLength: 2, nullable: true),
+                    Name = table.Column<string>(nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Languages", x => x.Id);
+                    table.UniqueConstraint("AK_Languages_TLA", x => x.TLA);
                 });
 
             migrationBuilder.CreateTable(
@@ -51,8 +51,8 @@ namespace LHpiNG.db.Migrations
                 {
                     OracleName = table.Column<string>(nullable: false),
                     Version = table.Column<string>(nullable: false),
-                    Set = table.Column<string>(nullable: false),
-                    Language = table.Column<int>(nullable: false),
+                    Set = table.Column<string>(maxLength: 3, nullable: false),
+                    Language = table.Column<string>(maxLength: 3, nullable: false),
                     Uid = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     Number = table.Column<string>(nullable: true),
@@ -70,7 +70,7 @@ namespace LHpiNG.db.Migrations
                         column: x => x.Language,
                         principalSchema: "LHpi",
                         principalTable: "Languages",
-                        principalColumn: "Id",
+                        principalColumn: "TLA",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_AlbumObjects_Sets_Set",

@@ -75,9 +75,9 @@
     <Compile Include="Migrations\20190217100211_MakePricesNullable.designer.cs">
       <DependentUpon>20190217100211_MakePricesNullable.cs</DependentUpon>
     </Compile>
-    <Compile Include="Migrations\20190217214216_AddAlbumObjects.cs" />
-    <Compile Include="Migrations\20190217214216_AddAlbumObjects.designer.cs">
-      <DependentUpon>20190217214216_AddAlbumObjects.cs</DependentUpon>
+    <Compile Include="Migrations\20190219125159_AddAlbumObjects.cs" />
+    <Compile Include="Migrations\20190219125159_AddAlbumObjects.designer.cs">
+      <DependentUpon>20190219125159_AddAlbumObjects.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\SQLContextModelSnapshot.cs" />
     <Compile Include="SQLContext.cs" />

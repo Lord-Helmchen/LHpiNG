@@ -1,6 +1,8 @@
 ﻿/// This file is licensed as https://creativecommons.org/licenses/by-sa/3.0/ 
 /// source: https://stackoverflow.com/questions/17385472/entity-framework-only-update-values-that-are-not-null
-/// author https://stackoverflow.com/users/1715579/p-s-w-g
+/// author: https://stackoverflow.com/users/1715579/p-s-w-g
+/// source: https://stackoverflow.com/questions/863881/how-do-i-tell-if-a-type-is-a-simple-type-i-e-holds-a-single-value
+/// author: https://stackoverflow.com/users/2658202/stefan-steinegger
 
 
 using System;
@@ -31,10 +33,23 @@ namespace LHpiNG.Util
                     propertyPair.Item1.SetValue(dest, fromValue, null);
                 }
             }
-
             return dest;
         }
+
+        static bool IsSimple(this Type type)
+        {
+            if (type.IsGenericType && type.GetGenericTypeDefinition() == typeof(Nullable<>))
+            {
+                // nullable type, check if the nested type is simple.
+                return IsSimple(type.GetGenericArguments()[0]);
+            }
+            return type.IsPrimitive
+              || type.IsEnum
+              || type.Equals(typeof(string))
+              || type.Equals(typeof(decimal));
+        }
     }
+
     //building a list the of properties up front, so we only have to use reflection once:
     internal static class PropertyLister<T1, T2>
     {

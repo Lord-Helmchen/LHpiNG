@@ -28,8 +28,9 @@ namespace LHpiNG.db
         {// just pass along to DbContext()
 
             //TODO check whether we can and want to automatically migrate (we probably do to reduce end-user work)
+            //update: we definitely don't want it in the constructor, as this messes with removing migrations
             //https://docs.microsoft.com/en-us/ef/core/managing-schemas/migrations/#apply-migrations-at-runtime
-            this.Database.Migrate();
+            //this.Database.Migrate();
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -45,6 +46,7 @@ namespace LHpiNG.db
             modelBuilder.ApplyConfiguration(new PriceGuideConfiguration());
             modelBuilder.ApplyConfiguration(new AlbumObjectConfiguration());
             modelBuilder.ApplyConfiguration(new SetConfiguration());
+            modelBuilder.ApplyConfiguration(new LanguageConfiguration());
 
             modelBuilder.Entity<State>().HasData(new { Id = 1, ExpansionListFetchDate = DateTime.MinValue });
 
@@ -99,14 +101,66 @@ namespace LHpiNG.db
         {
             try
             {
-                Expansion existing = Expansions.SingleOrDefault(e => e.EnName == expansion.EnName);
+                Expansion existing = Expansions.Find(expansion.EnName);
                 if (existing != null)
                 {
+                    //foreach (Product product in expansion.Products)
+                    //{
+                    //    AddOrUpdateProduct(product);
+                    //}
+                    //expansion.Products = existing.Products;
                     existing.InjectNonNull(expansion);
                 }
                 else
                 {
                     Expansions.Add(expansion);
+                }
+                SaveChanges();
+            }
+            catch (DbException)
+            {
+                throw;
+            }
+        }
+        public void AddOrUpdateProduct(Product product)
+        {
+            try
+            {
+                Product existing = Products.Find(product.EnName, product.ExpansionName);
+                if (existing != null)
+                {
+                    //foreach (PriceGuide priceGuide in product.PriceGuides)
+                    //{
+                    //    AddOrUpdatePriceGuide(priceGuide);
+                    //}
+                    //product.PriceGuides = existing.PriceGuides;
+                    existing.InjectNonNull(product);
+                }
+                else
+                {
+                    Products.Add(product);
+                }
+                SaveChanges();
+            }
+            catch (DbException)
+            {
+                throw;
+            }
+        }
+        public void AddOrUpdatePriceGuide(PriceGuide priceGuide)
+        {
+            try
+            {
+                PriceGuide existing = PriceGuides.SingleOrDefault(g => g.Product.EnName == priceGuide.Product.EnName
+                                                                    && g.Product.ExpansionName == priceGuide.Product.ExpansionName
+                                                                    && g.FetchDate == priceGuide.FetchDate);
+                if (existing != null)
+                {
+                    existing.InjectNonNull(priceGuide);
+                }
+                else
+                {
+                    PriceGuides.Add(priceGuide);
                 }
                 SaveChanges();
             }
@@ -140,28 +194,6 @@ namespace LHpiNG.db
         public IEnumerable<Product> LoadProducts(Expansion expansion)
         {
             return Products.Where(x => x.ExpansionName == expansion.EnName);
-        }
-
-        [Obsolete]
-        public void AddOrUpdateProduct(Product product)
-        {
-            try
-            {
-                Product existing = Products.SingleOrDefault(x => x.EnName == product.EnName && x.ExpansionName == product.ExpansionName);
-                if (existing != null)
-                {
-                    existing.InjectNonNull(product);
-                }
-                else
-                {
-                    Products.Add(product);
-                }
-                SaveChanges();
-            }
-            catch (DbException)
-            {
-                throw;
-            }
         }
 
         [Obsolete]

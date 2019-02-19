@@ -28,12 +28,14 @@ namespace LHpiNG.db.EFConfigs
                 .Property(o => o.SetTLA)
                 .HasColumnName("Set")
                 .IsRequired()
+                .HasMaxLength(3)
                 .ValueGeneratedNever()
             ;
             modelBuilder
-                .Property(o => o.LanguageId)
+                .Property(o => o.LanguageTLA)
                 .HasColumnName("Language")
                 .IsRequired()
+                .HasMaxLength(3)
                 .ValueGeneratedNever()
             ;
             modelBuilder
@@ -41,7 +43,7 @@ namespace LHpiNG.db.EFConfigs
                 .ValueGeneratedOnAdd()
             ;
             modelBuilder
-                .HasKey(o => new { o.OracleName, o.Version, o.SetTLA, o.LanguageId })
+                .HasKey(o => new { o.OracleName, o.Version, o.SetTLA, o.LanguageTLA })
             ;
             modelBuilder
                 .HasAlternateKey(o => o.Uid)
@@ -55,7 +57,7 @@ namespace LHpiNG.db.EFConfigs
             modelBuilder
                 .HasOne<Language>(o => o.Language)
                 .WithMany()
-                .HasForeignKey(o => o.LanguageId)
+                .HasPrincipalKey(l => l.TLA)
                 .OnDelete(DeleteBehavior.Restrict)
             ;
         }

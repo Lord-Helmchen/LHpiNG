@@ -163,6 +163,9 @@ namespace LHpiNG
             Console.WriteLine("\t2 - Read Languages from file");
             Console.WriteLine("\t3 - Check for and enter abbreviations");
             Console.WriteLine("\t4 - Save Languages to Database");
+            Console.WriteLine("\t5 - Load Sets from database");
+            Console.WriteLine("\t6 - Read Sets from file");
+            Console.WriteLine("\t7 - Save Sets to Database");
             Console.WriteLine("\t0 - return");
 
             Reader = Reader ?? new MAReader();
@@ -185,6 +188,15 @@ namespace LHpiNG
                     case "4":
                         Database.SaveLanguages(AlbumLanguages);
                         break;
+                    case "5":
+                        AlbumSets = Database.LoadSets();
+                        break;
+                    case "6":
+                        AlbumSets = Reader.ReadSets();
+                        break;
+                    case "7":
+                        Database.SaveSets(AlbumSets);
+                        break;
                     case "0":
                         quit = true;
                         break;
@@ -203,7 +215,7 @@ namespace LHpiNG
         {
             expansionList.Expansions = expansionList.Expansions.Where(
                 x => x.EnName == "Ugin's Fate Promos"
-                || x.EnName == "Explorers of Ixalan"
+                //|| x.EnName == "Explorers of Ixalan"
                 ).ToList();
             return expansionList;
         }

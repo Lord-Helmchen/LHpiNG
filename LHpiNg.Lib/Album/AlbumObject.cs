@@ -16,7 +16,7 @@ namespace LHpiNG.Album
         public string Version { get; set; }
         public string SetTLA { get; set; }
         public Set Set { get; set; }
-        public int LanguageId { get; set; }
+        public string LanguageTLA { get; set; }
         public Language Language { get; set; }
         //information
         public string Number { get; set; }

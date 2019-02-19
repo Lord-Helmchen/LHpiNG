@@ -10,15 +10,33 @@ using System.Threading.Tasks;
 
 namespace LHpiNG.db.EFConfigs
 {
-    class Languageonfiguration : IEntityTypeConfiguration<Language>
+    class LanguageConfiguration : IEntityTypeConfiguration<Language>
     {
         public void Configure(EntityTypeBuilder<Language> modelBuilder)
         {
+            modelBuilder
+                .Property(l => l.Id)
+                .IsRequired()
+                .ValueGeneratedNever()
+            ;
             modelBuilder
                 .Property(l => l.Name)
                 .IsRequired()
                 .ValueGeneratedNever()
             ;
+            modelBuilder
+                .Property(l => l.TLA)
+                .IsRequired()
+                .ValueGeneratedNever()
+                .HasMaxLength(3)
+            ;
+            modelBuilder
+                .Property(l => l.M15Abbr)
+                .HasMaxLength(2)
+            ;
+            modelBuilder
+                .HasAlternateKey(l => l.TLA)
+                ;
         }
     }
 }

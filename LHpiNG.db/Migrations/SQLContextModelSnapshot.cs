@@ -27,10 +27,12 @@ namespace LHpiNG.db.Migrations
                     b.Property<string>("Version");
 
                     b.Property<string>("SetTLA")
-                        .HasColumnName("Set");
+                        .HasColumnName("Set")
+                        .HasMaxLength(3);
 
-                    b.Property<int>("LanguageId")
-                        .HasColumnName("Language");
+                    b.Property<string>("LanguageTLA")
+                        .HasColumnName("Language")
+                        .HasMaxLength(3);
 
                     b.Property<int?>("CollNr");
 
@@ -46,11 +48,11 @@ namespace LHpiNG.db.Migrations
                         .ValueGeneratedOnAdd()
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.HasKey("OracleName", "Version", "SetTLA", "LanguageId");
+                    b.HasKey("OracleName", "Version", "SetTLA", "LanguageTLA");
 
                     b.HasAlternateKey("Uid");
 
-                    b.HasIndex("LanguageId");
+                    b.HasIndex("LanguageTLA");
 
                     b.HasIndex("SetTLA");
 
@@ -59,15 +61,17 @@ namespace LHpiNG.db.Migrations
 
             modelBuilder.Entity("LHpiNG.Album.Language", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                    b.Property<int>("Id");
 
-                    b.Property<string>("Abbr");
+                    b.Property<string>("M15Abbr")
+                        .HasMaxLength(2);
 
-                    b.Property<string>("M15Abbr");
+                    b.Property<string>("Name")
+                        .IsRequired();
 
-                    b.Property<string>("Name");
+                    b.Property<string>("TLA")
+                        .IsRequired()
+                        .HasMaxLength(3);
 
                     b.HasKey("Id");
 
@@ -268,7 +272,8 @@ namespace LHpiNG.db.Migrations
                 {
                     b.HasOne("LHpiNG.Album.Language", "Language")
                         .WithMany()
-                        .HasForeignKey("LanguageId")
+                        .HasForeignKey("LanguageTLA")
+                        .HasPrincipalKey("TLA")
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("LHpiNG.Album.Set", "Set")

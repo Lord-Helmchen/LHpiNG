@@ -35,10 +35,10 @@ namespace LHpiNG.db.EFConfigs
                 .HasKey(s => s.Id)
             ;
             modelBuilder
-                .HasAlternateKey(S => S.TLA)
+                .HasAlternateKey(s => s.TLA)
             ;
             modelBuilder
-                .HasIndex(S => S.Name)
+                .HasIndex(s => s.Name)
                 .IsUnique()
             ;
             modelBuilder
