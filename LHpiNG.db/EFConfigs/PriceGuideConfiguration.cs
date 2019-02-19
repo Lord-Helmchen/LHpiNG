@@ -33,6 +33,11 @@ namespace LHpiNG.db.EFConfigs
                 .IsRequired(true)
                 .OnDelete(DeleteBehavior.Cascade)
             ;
+            modelBuilder
+                .HasIndex("ProductName", "ExpansionName", "FetchDate")
+                .HasFilter("FetchDate not null and ProductName not null and ExpansionName not null")
+                .IsUnique()
+                ;
         }
     }
 }

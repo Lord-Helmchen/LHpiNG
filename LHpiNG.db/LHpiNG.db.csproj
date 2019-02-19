@@ -79,6 +79,10 @@
     <Compile Include="Migrations\20190219125159_AddAlbumObjects.designer.cs">
       <DependentUpon>20190219125159_AddAlbumObjects.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\20190219131202_IndexPriceGuide.cs" />
+    <Compile Include="Migrations\20190219131202_IndexPriceGuide.designer.cs">
+      <DependentUpon>20190219131202_IndexPriceGuide.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\SQLContextModelSnapshot.cs" />
     <Compile Include="SQLContext.cs" />
     <Compile Include="SQLiteContext.cs" />
@@ -86,6 +90,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="ClassDiagram1.cd" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\LHpiNg.Lib\LHpiNG.Lib.csproj">
