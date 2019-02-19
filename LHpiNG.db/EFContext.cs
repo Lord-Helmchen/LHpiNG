@@ -305,27 +305,31 @@ namespace LHpiNG.db
         }
         public void SaveAlbumObjects(IEnumerable<AlbumObject> albumObjects)
         {
+            int i = 1;
             foreach (AlbumObject albumObject in albumObjects)
             {
+                Console.Write($"\r {i}");
                 try
                 {
-                    AlbumObject existing = AlbumObjects.Find( albumObject.OracleName, albumObject.Version, albumObject.SetTLA, albumObject.LanguageTLA );
+                    AlbumObject existing = AlbumObjects.Find( albumObject.OracleName, albumObject.Version, albumObject.SetTLA, albumObject.ObjectType, albumObject.LanguageTLA );
                     if (existing != null)
                     {
+                        //for debugging, truncate table and set break here
                         existing.InjectNonNull(albumObject);
                     }
                     else
                     {
                         AlbumObjects.Add(albumObject);
                     }
-
                 }
                 catch (DbException)
                 {
                     throw;
                 }
+                i++;
             }
             SaveChanges();
+            Console.WriteLine();
         }
 
         #endregion

@@ -85,10 +85,6 @@ namespace LHpiNg.MAFiles
                     string[] headers = csv.GetFieldHeaders();
                     foreach (var row in csv)
                     {
-                        if (row.Count() != 21)
-                        {
-                            ;
-                        }
                         AlbumObject albumObject = new AlbumObject
                         {
                             //Set	Name (Oracle)	Version	Language	Rarity	Color	Cost	P/T	Type (Oracle)	Number	
@@ -144,6 +140,15 @@ namespace LHpiNg.MAFiles
                             var x = csv.CurrentRecordIndex;
                             Console.WriteLine($"Empty Strings for csv index {x}");
                         }
+                        if ((albumObject.Legality ?? String.Empty) != string.Empty)
+                        {
+                            albumObject.ObjectType = ObjectType.Card;
+                        }
+                        else
+                        {
+                            // TODO real object types would be better...
+                            albumObject.ObjectType = ObjectType.None;
+                        }
                         albumObjects.Add(albumObject);
                     }
                 }
@@ -152,8 +157,16 @@ namespace LHpiNg.MAFiles
             {
                 throw;
             }
-            return albumObjects;
+            return albumObjects; // found 244731, which matches MA and csv
         }
+
+        //public void SetDerivedSetAttributes(IEnumerable<Set> sets)
+        //{
+        //    foreach (Set set in sets)
+        //    {
+        //        set.CardCount = set.AlbumObjects.Where(o => o.ty)
+        //    }
+        //}
 
         [Obsolete]//due to Goblin Hero gracefully adding TLAs to Languages.txt
         public IEnumerable<Language> CheckLanguageDetails(IEnumerable<Language> languages)

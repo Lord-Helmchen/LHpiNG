@@ -1,12 +1,12 @@
 ﻿namespace LHpiNG.Album
 {
-    internal enum ObjectType
+    public enum ObjectType
     {
-        None            = 0b000000,
-        Card            = 0b000001,
-        Token           = 0b000010,
-        Nontraditional  = 0b000100,
-        Insert          = 0b001000,
-        Replica         = 0b001000,
+        None            = 0b00000,
+        Card            = 0b00001,
+        Token           = 0b00010,
+        Nontraditional  = 0b00100,
+        Insert          = 0b01000,
+        Replica         = 0b10000,
     }
 }

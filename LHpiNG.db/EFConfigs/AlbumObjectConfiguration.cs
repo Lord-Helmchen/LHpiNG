@@ -40,7 +40,7 @@ namespace LHpiNG.db.EFConfigs
             ;
 
             modelBuilder
-                .HasKey(o => new { o.OracleName, o.Version, o.SetTLA, o.LanguageTLA })
+                .HasKey(o => new { o.OracleName, o.Version, o.SetTLA, o.ObjectType, o.LanguageTLA })
             ;
             modelBuilder
                 .HasOne<Set>(o => o.Set)

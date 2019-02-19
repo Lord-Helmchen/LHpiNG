@@ -91,6 +91,10 @@
     <Compile Include="Migrations\20190219144842_RemoveObjectUid.designer.cs">
       <DependentUpon>20190219144842_RemoveObjectUid.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\20190219180627_AddObjectTypeToKey.cs" />
+    <Compile Include="Migrations\20190219180627_AddObjectTypeToKey.designer.cs">
+      <DependentUpon>20190219180627_AddObjectTypeToKey.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\SQLContextModelSnapshot.cs" />
     <Compile Include="SQLContext.cs" />
     <Compile Include="SQLiteContext.cs" />

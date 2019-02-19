@@ -17,6 +17,7 @@ namespace LHpiNG.Album
         public Set Set { get; set; }
         public string LanguageTLA { get; set; }
         public Language Language { get; set; }
+        public ObjectType ObjectType { get; set; }
         //information
         public string Number { get; set; }
         public int? CollNr { get; set; }
