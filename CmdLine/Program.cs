@@ -22,6 +22,7 @@ namespace LHpiNG
         public static ExpansionList ExpansionList { get; set; }
         public static IEnumerable<Album.Language> AlbumLanguages { get; set; }
         public static IEnumerable<Album.Set> AlbumSets { get; set; }
+        public static IEnumerable<Album.AlbumObject> AlbumObjects {get;set;}
 
         static void Main(string[] args)
         {
@@ -161,11 +162,13 @@ namespace LHpiNG
             Console.WriteLine("Choose which method to run:");
             Console.WriteLine("\t1 - Load Languages from database");
             Console.WriteLine("\t2 - Read Languages from file");
-            Console.WriteLine("\t3 - Check for and enter abbreviations");
-            Console.WriteLine("\t4 - Save Languages to Database");
-            Console.WriteLine("\t5 - Load Sets from database");
-            Console.WriteLine("\t6 - Read Sets from file");
-            Console.WriteLine("\t7 - Save Sets to Database");
+            Console.WriteLine("\t3 - Save Languages to Database");
+            Console.WriteLine("\t4 - Load Sets from database");
+            Console.WriteLine("\t5 - Read Sets from file");
+            Console.WriteLine("\t6 - Save Sets to Database");
+            Console.WriteLine("\t7 - Load Objects from database");
+            Console.WriteLine("\t8 - Read Objects from file");
+            Console.WriteLine("\t9 - Save Objects to Database");
             Console.WriteLine("\t0 - return");
 
             Reader = Reader ?? new MAReader();
@@ -183,19 +186,25 @@ namespace LHpiNG
                         AlbumLanguages = Reader.ReadLanguages();
                         break;
                     case "3":
-                        AlbumLanguages = Reader.CheckLanguageDetails(AlbumLanguages);
-                        break;
-                    case "4":
                         Database.SaveLanguages(AlbumLanguages);
                         break;
-                    case "5":
+                    case "4":
                         AlbumSets = Database.LoadSets();
                         break;
-                    case "6":
+                    case "5":
                         AlbumSets = Reader.ReadSets();
                         break;
-                    case "7":
+                    case "6":
                         Database.SaveSets(AlbumSets);
+                        break;
+                    case "7":
+                        AlbumObjects = Database.LoadObjects();
+                        break;
+                    case "8":
+                        AlbumObjects = Reader.ReadObjects();
+                        break;
+                    case "9":
+                        Database.SaveAlbumObjects(AlbumObjects);
                         break;
                     case "0":
                         quit = true;

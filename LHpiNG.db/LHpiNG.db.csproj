@@ -83,6 +83,14 @@
     <Compile Include="Migrations\20190219131202_IndexPriceGuide.designer.cs">
       <DependentUpon>20190219131202_IndexPriceGuide.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\20190219144305_ChangeObjectRarityType.cs" />
+    <Compile Include="Migrations\20190219144305_ChangeObjectRarityType.designer.cs">
+      <DependentUpon>20190219144305_ChangeObjectRarityType.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\20190219144842_RemoveObjectUid.cs" />
+    <Compile Include="Migrations\20190219144842_RemoveObjectUid.designer.cs">
+      <DependentUpon>20190219144842_RemoveObjectUid.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\SQLContextModelSnapshot.cs" />
     <Compile Include="SQLContext.cs" />
     <Compile Include="SQLiteContext.cs" />

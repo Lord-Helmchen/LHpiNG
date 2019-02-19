@@ -7,9 +7,9 @@ namespace LHpiNG.Album
     public class Set
     {
         //identification
-        public string TLA { get; set; }//primary key
-        public int Id { get; set; }//key
-        public string Name { get; set; }//key
+        public string TLA { get; set; }
+        public int Id { get; set; }
+        public string Name { get; set; }
         //information
         public ICollection<AlbumObject> AlbumObjects { get; set; }
         //public ICollection<Language> Languages { get; set; }//postponed, many-to-many in EFCore needs join table

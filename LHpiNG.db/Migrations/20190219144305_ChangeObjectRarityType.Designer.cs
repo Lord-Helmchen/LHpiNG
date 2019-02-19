@@ -4,14 +4,16 @@ using LHpiNG.db;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace LHpiNG.db.Migrations
 {
     [DbContext(typeof(SQLContext))]
-    partial class SQLContextModelSnapshot : ModelSnapshot
+    [Migration("20190219144305_ChangeObjectRarityType")]
+    partial class ChangeObjectRarityType
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -44,7 +46,13 @@ namespace LHpiNG.db.Migrations
 
                     b.Property<string>("Rarity");
 
+                    b.Property<int>("Uid")
+                        .ValueGeneratedOnAdd()
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
                     b.HasKey("OracleName", "Version", "SetTLA", "LanguageTLA");
+
+                    b.HasAlternateKey("Uid");
 
                     b.HasIndex("LanguageTLA");
 

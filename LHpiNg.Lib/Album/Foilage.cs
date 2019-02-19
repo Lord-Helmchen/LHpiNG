@@ -9,7 +9,7 @@ namespace LHpiNg.Album
     [Flags]
     public enum Foilage
     {
-        Foil = 0b000001,
-        Nonfoil= 0b000010,
+        Foil = 0b01,
+        Nonfoil= 0b10,
     }
 }

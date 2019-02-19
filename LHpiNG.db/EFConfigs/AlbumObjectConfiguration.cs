@@ -38,25 +38,21 @@ namespace LHpiNG.db.EFConfigs
                 .HasMaxLength(3)
                 .ValueGeneratedNever()
             ;
-            modelBuilder
-                .Property(o => o.Uid)
-                .ValueGeneratedOnAdd()
-            ;
+
             modelBuilder
                 .HasKey(o => new { o.OracleName, o.Version, o.SetTLA, o.LanguageTLA })
             ;
             modelBuilder
-                .HasAlternateKey(o => o.Uid)
-            ;
-            modelBuilder
                 .HasOne<Set>(o => o.Set)
                 .WithMany(s => s.AlbumObjects)
+                .HasForeignKey(o => o.SetTLA)
                 .HasPrincipalKey(s => s.TLA)
                 .OnDelete(DeleteBehavior.Cascade)
             ;
             modelBuilder
                 .HasOne<Language>(o => o.Language)
                 .WithMany()
+                .HasForeignKey(o => o.LanguageTLA)
                 .HasPrincipalKey(l => l.TLA)
                 .OnDelete(DeleteBehavior.Restrict)
             ;

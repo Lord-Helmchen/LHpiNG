@@ -10,7 +10,6 @@ namespace LHpiNG.Album
 {
     public class AlbumObject
     {
-        public int Uid { get; set; }
         //MA identification
         public string OracleName { get; set; }
         public string Version { get; set; }
@@ -22,7 +21,7 @@ namespace LHpiNG.Album
         public string Number { get; set; }
         public int? CollNr { get; set; }
         public Foilage Foilage { get; set; }
-        public Album.Rarity Rarity { get; set; }
+        public string Rarity { get; set; }
         public string Color { get; set; }//enum?
         [NotMapped]
         public string Cost { get; set; }

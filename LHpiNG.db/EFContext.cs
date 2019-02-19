@@ -230,8 +230,24 @@ namespace LHpiNG.db
                 var sets = new List<Set>();
                 sets = Sets
                     .Include(s => s.AlbumObjects)
+                        .ThenInclude(o => o.Language)
                     .ToList();
                 return sets;
+
+            }
+            catch (DbException) //should catch both SqlExcelption and SqliteException
+            {
+                throw;
+            }
+        }
+        public IEnumerable<AlbumObject> LoadObjects()
+        {
+            try
+            {
+                var albumObjects = new List<AlbumObject>();
+                albumObjects = AlbumObjects
+                    .ToList();
+                return albumObjects;
 
             }
             catch (DbException) //should catch both SqlExcelption and SqliteException
@@ -246,7 +262,7 @@ namespace LHpiNG.db
             {
                 try
                 {
-                    Language existing = Languages.SingleOrDefault(l => l.Id == language.Id);
+                    Language existing = Languages.Find(language.Id);
                     if (existing != null)
                     {
                         existing.InjectNonNull(language);
@@ -255,22 +271,22 @@ namespace LHpiNG.db
                     {
                         Languages.Add(language);
                     }
-                    SaveChanges();
                 }
                 catch (DbException)
                 {
                     throw;
                 }
-
             }
+            SaveChanges();
         }
+
         public void SaveSets(IEnumerable<Set> sets)
         {
             foreach (Set set in sets)
             {
                 try
                 {
-                    Set existing = Sets.SingleOrDefault(l => l.Id == set.Id);
+                    Set existing = Sets.Find(set.Id);
                     if (existing != null)
                     {
                         existing.InjectNonNull(set);
@@ -279,14 +295,37 @@ namespace LHpiNG.db
                     {
                         Sets.Add(set);
                     }
-                    SaveChanges();
                 }
                 catch (DbException)
                 {
                     throw;
                 }
-
             }
+            SaveChanges();
+        }
+        public void SaveAlbumObjects(IEnumerable<AlbumObject> albumObjects)
+        {
+            foreach (AlbumObject albumObject in albumObjects)
+            {
+                try
+                {
+                    AlbumObject existing = AlbumObjects.Find( albumObject.OracleName, albumObject.Version, albumObject.SetTLA, albumObject.LanguageTLA );
+                    if (existing != null)
+                    {
+                        existing.InjectNonNull(albumObject);
+                    }
+                    else
+                    {
+                        AlbumObjects.Add(albumObject);
+                    }
+
+                }
+                catch (DbException)
+                {
+                    throw;
+                }
+            }
+            SaveChanges();
         }
 
         #endregion
