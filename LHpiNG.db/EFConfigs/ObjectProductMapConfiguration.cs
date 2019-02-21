@@ -11,16 +11,19 @@ namespace LHpiNG.db.EFConfigs
         public void Configure(EntityTypeBuilder<ObjectProductMap> modelBuilder)
         {
             modelBuilder
+                .HasKey(m => new { m.AlbumObjectUid, m.ProductUid });
+            modelBuilder
                 .HasOne<AlbumObject>(m => m.AlbumObject)
                 .WithOne()
+                .HasPrincipalKey<AlbumObject>(o => o.Uid)
                 .OnDelete(DeleteBehavior.Cascade)
             ;
             modelBuilder
                 .HasOne<Product>(m => m.Product)
                 .WithOne()
+                .HasPrincipalKey<Product>(p => p.Uid)
                 .OnDelete(DeleteBehavior.Cascade)
             ;
-            
 
         }
 

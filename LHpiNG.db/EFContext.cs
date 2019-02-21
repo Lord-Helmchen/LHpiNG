@@ -45,6 +45,8 @@ namespace LHpiNG.db
             modelBuilder.ApplyConfiguration(new AlbumObjectConfiguration());
             modelBuilder.ApplyConfiguration(new SetConfiguration());
             modelBuilder.ApplyConfiguration(new LanguageConfiguration());
+            modelBuilder.ApplyConfiguration(new ObjectProductMapConfiguration());
+            modelBuilder.ApplyConfiguration(new SetExpansionMapConfiguration());
 
             modelBuilder.Entity<State>().HasData(new { Id = 1, ExpansionListFetchDate = DateTime.MinValue });
 

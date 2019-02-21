@@ -10,6 +10,8 @@ using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using LHpiNg.MAFiles;
+using LHpiNG.Album;
+using LHpiNG.Util;
 
 namespace LHpiNG
 {
@@ -71,7 +73,8 @@ namespace LHpiNG
                         PrintMainMenu();
                         break;
                     case "4":
-                        Console.WriteLine("Mapping Menu not implemented yet!");
+                        MappingMenu();
+                        PrintMainMenu();
                         break;
                     case "9":
                         Test();
@@ -215,6 +218,72 @@ namespace LHpiNG
                 }
             }
         }
+
+        private static void MappingMenu()
+        {
+            Console.WriteLine("\nMapping Menu");
+            Console.WriteLine("Choose which method to run:");
+            Console.WriteLine("\t1 - Test Fuzzy Match sets to expansions");
+            Console.WriteLine("\t0 - return");
+
+            Reader = Reader ?? new MAReader();
+
+            bool quit = false;
+            while (!quit)
+            {
+                Console.Write("Your option? ");
+                switch (Console.ReadLine())
+                {
+                    case "0":
+                        quit = true;
+                        break;
+                    case "1":
+                        FuzzyMatchSets();
+                        break;
+                    case "2":
+                    case "3":
+                    case "4":
+                    case "5":
+                    case "6":
+                    case "7":
+                    case "8":
+                    case "9":
+                    default:
+                        Console.WriteLine(String.Format("invalid choice"));
+                        break;
+                }
+            }
+        }
+            internal class FuzzyMatch
+        {
+            internal string Set { get; set; }
+            internal string Expansion { get; set; }
+            internal int Score { get; set; }
+        }
+        private static void FuzzyMatchSets()
+        {
+            List<FuzzyMatch> fuzzyMatches = new List<FuzzyMatch>();
+            var sets = AlbumSets;
+            var expansions = ExpansionList.Expansions;
+            foreach (Set set in AlbumSets)
+            {
+                foreach (Expansion expansion in ExpansionList)
+                {
+                    set.Name.FuzzyMatch(expansion.EnName, out int outScore);
+                    FuzzyMatch fuzzyMatch = new FuzzyMatch
+                    {
+                        Set = set.Name,
+                        Expansion = expansion.EnName,
+                        Score = outScore
+                    };
+                    fuzzyMatches.Add(fuzzyMatch);
+                }
+            }
+            ;
+            var positive = fuzzyMatches.Where(x => x.Score > 50);
+
+        }
+
 
         private static void Test()
         {
