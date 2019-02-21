@@ -9,23 +9,39 @@ using System.Threading.Tasks;
 
 namespace LHpiNG.db.EFConfigs
 {
-    class PriceGuideEntityConfiguration : IEntityTypeConfiguration<PriceGuideEntity>
-    {
-        public void Configure(EntityTypeBuilder<PriceGuideEntity> modelBuilder)
-        {
-            modelBuilder
-                .Property(g => g.Uid)
-                .ValueGeneratedOnAdd()
-            ;
-            modelBuilder
-               .HasKey(g => g.Uid)
-            ;
-        }
-    }
     class PriceGuideConfiguration : IEntityTypeConfiguration<PriceGuide>
     {
         public void Configure(EntityTypeBuilder<PriceGuide> modelBuilder)
         {
+            //from PriceGuideEntity
+            modelBuilder
+                .Property(g => g.FetchDate)
+                .IsRequired()
+                .ValueGeneratedNever()
+            ;
+            modelBuilder
+                .Property("ProductName")
+                .IsRequired()
+                .ValueGeneratedNever()
+            ;
+            modelBuilder
+                .Property("ExpansionName")
+                .IsRequired()
+                .ValueGeneratedNever()
+            ;
+
+            modelBuilder
+                .HasKey("ProductName", "ExpansionName", "FetchDate")
+            ;
+            //additional for PriceGuide
+            modelBuilder
+                .Property(o => o.Uid)
+                .IsRequired()
+                .ValueGeneratedOnAdd()
+            ;
+            modelBuilder
+                .HasAlternateKey(o => o.Uid)
+            ;
             modelBuilder
                 .HasOne<Product>(g => g.Product)
                 .WithMany(p => p.PriceGuides)
@@ -33,11 +49,6 @@ namespace LHpiNG.db.EFConfigs
                 .IsRequired(true)
                 .OnDelete(DeleteBehavior.Cascade)
             ;
-            modelBuilder
-                .HasIndex("ProductName", "ExpansionName", "FetchDate")
-                .HasFilter("FetchDate not null and ProductName not null and ExpansionName not null")
-                .IsUnique()
-                ;
         }
     }
 }

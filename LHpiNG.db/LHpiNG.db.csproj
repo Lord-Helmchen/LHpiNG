@@ -47,6 +47,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="EFConfigs\LanguageConfiguration.cs" />
+    <Compile Include="EFConfigs\ObjectProductMapConfiguration.cs" />
     <Compile Include="EFConfigs\SetConfiguration.cs" />
     <Compile Include="EFConfigs\ExpansionConfiguration.cs" />
     <Compile Include="EFConfigs\PriceGuideConfiguration.cs" />
@@ -94,6 +95,10 @@
     <Compile Include="Migrations\20190219180627_AddObjectTypeToKey.cs" />
     <Compile Include="Migrations\20190219180627_AddObjectTypeToKey.designer.cs">
       <DependentUpon>20190219180627_AddObjectTypeToKey.cs</DependentUpon>
+    </Compile>
+    <Compile Include="Migrations\20190221162156_BaseClassesNotMapped.cs" />
+    <Compile Include="Migrations\20190221162156_BaseClassesNotMapped.designer.cs">
+      <DependentUpon>20190221162156_BaseClassesNotMapped.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\SQLContextModelSnapshot.cs" />
     <Compile Include="SQLContext.cs" />

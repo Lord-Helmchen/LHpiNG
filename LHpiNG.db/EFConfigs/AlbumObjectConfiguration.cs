@@ -38,9 +38,17 @@ namespace LHpiNG.db.EFConfigs
                 .HasMaxLength(3)
                 .ValueGeneratedNever()
             ;
+            modelBuilder
+                .Property(o => o.Uid)
+                .IsRequired()
+                .ValueGeneratedOnAdd()
+            ;
 
             modelBuilder
                 .HasKey(o => new { o.OracleName, o.Version, o.SetTLA, o.ObjectType, o.LanguageTLA })
+            ;
+            modelBuilder
+                .HasAlternateKey(o => o.Uid)
             ;
             modelBuilder
                 .HasOne<Set>(o => o.Set)

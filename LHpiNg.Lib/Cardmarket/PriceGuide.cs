@@ -11,6 +11,7 @@ namespace LHpiNG.Cardmarket
     [Table("PriceGuides")]
     public class PriceGuide : PriceGuideProEntity
     {
+        public int Uid { get; set; }
         public DateTime FetchDate { get; set; }
         public Product Product { get; set; }
 
@@ -29,6 +30,7 @@ namespace LHpiNG.Cardmarket
         {
             if (entity is PriceGuide priceGuide)
             {
+                Uid = priceGuide.Uid;
                 FetchDate = priceGuide.FetchDate;
                 Product = priceGuide.Product;
             }

@@ -9,10 +9,11 @@ using System.Threading.Tasks;
 
 namespace LHpiNG.db.EFConfigs
 {
-    class ProductEntityConfiguration : IEntityTypeConfiguration<ProductEntity>
+    class ProductConfiguration : IEntityTypeConfiguration<Product>
     {
-        public void Configure(EntityTypeBuilder<ProductEntity> modelBuilder)
+        public void Configure(EntityTypeBuilder<Product> modelBuilder)
         {
+            // from ProductEntity
             modelBuilder
                 .Property(p => p.EnName)
                 .HasColumnName("Name")
@@ -34,12 +35,15 @@ namespace LHpiNG.db.EFConfigs
                 .HasConstraintName("FK_Products_Expansions_ExpansionName")
                 .OnDelete(DeleteBehavior.Cascade)
             ;
-        }
-    }
-    class ProductConfiguration : IEntityTypeConfiguration<Product>
-    {
-        public void Configure(EntityTypeBuilder<Product> modelBuilder)
-        {
+            //additional for Product
+            modelBuilder
+                .Property(o => o.Uid)
+                .IsRequired()
+                .ValueGeneratedOnAdd()
+            ;
+            modelBuilder
+                .HasAlternateKey(o => o.Uid)
+            ;
             modelBuilder
                 .HasMany<PriceGuide>(p => p.PriceGuides)
                 .WithOne(g => g.Product)

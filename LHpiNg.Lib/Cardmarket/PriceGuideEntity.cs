@@ -14,9 +14,6 @@ namespace LHpiNG.Cardmarket
         public decimal? Avg { get; set; }                    // Current average non-foil price of all available articles of this product
         public decimal? Trend { get; set; }                  // Current trend price
 
-        [Key]
-        public int Uid { get; set; }                       // Entity Framework Primary Key
-
         public PriceGuideEntity()
         {
         }
@@ -34,7 +31,6 @@ namespace LHpiNG.Cardmarket
             LowFoil = entity.LowexPlus;
             Avg = entity.Avg;
             Trend = entity.Trend;
-            Uid = entity.Uid;
         }
     }
 }

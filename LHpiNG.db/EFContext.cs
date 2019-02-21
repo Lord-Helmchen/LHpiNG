@@ -40,9 +40,7 @@ namespace LHpiNG.db
 
             modelBuilder.ApplyConfiguration(new ExpansionEntityConfiguration());
             modelBuilder.ApplyConfiguration(new ExpansionConfiguration());
-            modelBuilder.ApplyConfiguration(new ProductEntityConfiguration());
             modelBuilder.ApplyConfiguration(new ProductConfiguration());
-            modelBuilder.ApplyConfiguration(new PriceGuideEntityConfiguration());
             modelBuilder.ApplyConfiguration(new PriceGuideConfiguration());
             modelBuilder.ApplyConfiguration(new AlbumObjectConfiguration());
             modelBuilder.ApplyConfiguration(new SetConfiguration());

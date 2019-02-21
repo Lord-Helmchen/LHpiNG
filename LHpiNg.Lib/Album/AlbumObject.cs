@@ -10,6 +10,7 @@ namespace LHpiNG.Album
 {
     public class AlbumObject
     {
+        public int Uid { get; set; }
         //MA identification
         public string OracleName { get; set; }
         public string Version { get; set; }
