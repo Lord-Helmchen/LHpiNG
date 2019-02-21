@@ -128,26 +128,19 @@ namespace LHpiNg.MAFiles
                         {
                             albumObject.CollNr = parsedNumber;
                         }
-                        if (albumObject.OracleName == null || albumObject.Version == null || albumObject.SetTLA == null || albumObject.LanguageTLA == null)
+                        if (Enum.TryParse(row.ElementAt(21), true, out ObjectType parsedObjectType))
                         {
-                            ;
-                            var x = csv.CurrentRecordIndex;
-                            Console.WriteLine($"Null columns for csv index {x}");
-                        }
-                        if (albumObject.OracleName == string.Empty || albumObject.SetTLA == string.Empty || albumObject.LanguageTLA == string.Empty)
-                        {
-                            ;
-                            var x = csv.CurrentRecordIndex;
-                            Console.WriteLine($"Empty Strings for csv index {x}");
-                        }
-                        if ((albumObject.Legality ?? String.Empty) != string.Empty)
-                        {
-                            albumObject.ObjectType = ObjectType.Card;
+                            albumObject.ObjectType = parsedObjectType;
                         }
                         else
                         {
-                            // TODO real object types would be better...
-                            albumObject.ObjectType = ObjectType.None;
+                            ;
+                            //throw new FormatException("ObjectType not parsed");
+                        }
+                        if (albumObject.OracleName == null || albumObject.Version == null || albumObject.SetTLA == null || albumObject.LanguageTLA == null
+                            || albumObject.OracleName == string.Empty || albumObject.SetTLA == string.Empty || albumObject.LanguageTLA == string.Empty)
+                        {
+                            throw new FormatException("Key field not parsed");
                         }
                         albumObjects.Add(albumObject);
                     }
