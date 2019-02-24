@@ -105,6 +105,10 @@
     <Compile Include="Migrations\20190221165455_AddMaps.designer.cs">
       <DependentUpon>20190221165455_AddMaps.cs</DependentUpon>
     </Compile>
+    <Compile Include="Migrations\20190224193046_AddRarityEnumToAlbumObjects.cs" />
+    <Compile Include="Migrations\20190224193046_AddRarityEnumToAlbumObjects.designer.cs">
+      <DependentUpon>20190224193046_AddRarityEnumToAlbumObjects.cs</DependentUpon>
+    </Compile>
     <Compile Include="Migrations\SQLContextModelSnapshot.cs" />
     <Compile Include="SQLContext.cs" />
     <Compile Include="SQLiteContext.cs" />
@@ -112,7 +116,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="ClassDiagram1.cd" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\LHpiNg.Lib\LHpiNG.Lib.csproj">

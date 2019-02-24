@@ -23,7 +23,8 @@ namespace LHpiNG.Album
         public string Number { get; set; }
         public int? CollNr { get; set; }
         public Foilage Foilage { get; set; }
-        public string Rarity { get; set; }
+        public string RarityString { get; set; }
+        public Rarity Rarity { get; set; }
         public string Color { get; set; }//enum?
         [NotMapped]
         public string Cost { get; set; }

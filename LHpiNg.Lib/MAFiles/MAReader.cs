@@ -94,7 +94,7 @@ namespace LHpiNg.MAFiles
                             SetTLA = row.ElementAt(0),
                             Version = row.ElementAt(2),
                             LanguageTLA = row.ElementAt(3),
-                            Rarity = row.ElementAt(4),
+                            RarityString = row.ElementAt(4),
                             Color = row.ElementAt(5),
                             Cost = row.ElementAt(6),
                             PowerToughness = row.ElementAt(7),
@@ -124,6 +124,50 @@ namespace LHpiNg.MAFiles
                                 albumObject.Foilage |= Album.Foilage.Nonfoil;//SetFlag
                                 break;
                         }
+                        switch (row.ElementAt(4))
+                        {
+                            case "L":
+                                albumObject.Rarity = Rarity.BasicLand;
+                                break;
+                            case "C":
+                            case "C1":
+                            case "C2":
+                            case "C3":
+                            case "C4":
+                            case "C5":
+                            case "CT":// Planar Chaos timeshifted
+                                albumObject.Rarity = Rarity.Common;
+                                break;
+                            case "U":
+                            case "U2":
+                            case "U3":
+                            case "U4":
+                            case "UT":// Planar Chaos timeshifted
+                                albumObject.Rarity = Rarity.Uncommon;
+                                break;
+                            case "R":
+                            case "U1":
+                            case "RT":// Planar Chaos timeshifted
+                                albumObject.Rarity = Rarity.Rare;
+                                break;
+                            case "M":
+                                albumObject.Rarity = Rarity.Mythic;
+                                break;
+                            case "T":
+                            case "E":// some Emblems
+                            case "O":// fnm doublesided promo tokens
+                                albumObject.Rarity = Rarity.Token;
+                                break;
+                            case "S":// Inventions,Invocations, some Championship Prizes
+                                albumObject.Rarity = Rarity.Special;
+                                break;
+                            case "P":// some Promos
+                                albumObject.Rarity = Rarity.Other;
+                                break;
+                            default:
+                                albumObject.Rarity = Rarity.None;
+                                break;
+                        }
                         string matchedNumber = Regex.Match(albumObject.Number ?? "", @"^T? ?(\d+)").Groups[0].Value;
                         if (int.TryParse(matchedNumber, out int parsedNumber))
                         {
@@ -135,8 +179,7 @@ namespace LHpiNg.MAFiles
                         }
                         else
                         {
-                            ;
-                            //throw new FormatException("ObjectType not parsed");
+                            throw new FormatException("ObjectType not parsed");
                         }
                         if (albumObject.OracleName == null || albumObject.Version == null || albumObject.SetTLA == null || albumObject.LanguageTLA == null
                             || albumObject.OracleName == string.Empty || albumObject.SetTLA == string.Empty || albumObject.LanguageTLA == string.Empty)

@@ -9,6 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using LHpiNG.db.EFConfigs;
 using LHpiNG.Album;
+using LHpiNG.Maps;
 
 namespace LHpiNG.db
 {
@@ -23,6 +24,9 @@ namespace LHpiNG.db
         public DbSet<Language> Languages { get; set; }
         public DbSet<Set> Sets { get; set; }
         public DbSet<AlbumObject> AlbumObjects { get; set; }
+        //Maps
+        public DbSet<ObjectProductMap> ObjectProductMap { get; set; }
+        public DbSet<SetExpansionMap> SetExpansionMap { get; set; }
 
         protected EFContext() : base()
         {// just pass along to DbContext()
@@ -89,7 +93,7 @@ namespace LHpiNG.db
                     AddOrUpdateExpansion(expansion);
                 }
                 State.LastOrDefault().ExpansionListFetchDate = expansionList.FetchedOn;
-                SaveChanges();
+                //SaveChanges();
             }
             catch (DbException)
             {
@@ -104,18 +108,18 @@ namespace LHpiNG.db
                 Expansion existing = Expansions.Find(expansion.EnName);
                 if (existing != null)
                 {
-                    //foreach (Product product in expansion.Products)
-                    //{
-                    //    AddOrUpdateProduct(product);
-                    //}
-                    //expansion.Products = existing.Products;
+                    foreach (Product product in expansion.Products)
+                    {
+                        AddOrUpdateProduct(product);
+                    }
+                    expansion.Products = existing.Products;
                     existing.InjectNonNull(expansion);
                 }
                 else
                 {
                     Expansions.Add(expansion);
                 }
-                SaveChanges();
+                //SaveChanges();
             }
             catch (DbException)
             {
@@ -129,18 +133,20 @@ namespace LHpiNG.db
                 Product existing = Products.Find(product.EnName, product.ExpansionName);
                 if (existing != null)
                 {
-                    //foreach (PriceGuide priceGuide in product.PriceGuides)
-                    //{
-                    //    AddOrUpdatePriceGuide(priceGuide);
-                    //}
-                    //product.PriceGuides = existing.PriceGuides;
+                    product.Uid = existing.Uid;
+                    foreach (PriceGuide priceGuide in product.PriceGuides)
+                    {
+                        AddOrUpdatePriceGuide(priceGuide);
+                    }
+                    product.PriceGuides = existing.PriceGuides;
                     existing.InjectNonNull(product);
                 }
                 else
                 {
                     Products.Add(product);
                 }
-                SaveChanges();
+                //Console.WriteLine($"saving {product.EnName} in {product.ExpansionName}");
+                //SaveChanges();
             }
             catch (DbException)
             {
@@ -156,13 +162,14 @@ namespace LHpiNG.db
                                                                     && g.FetchDate == priceGuide.FetchDate);
                 if (existing != null)
                 {
+                    priceGuide.Uid = existing.Uid;
                     existing.InjectNonNull(priceGuide);
                 }
                 else
                 {
                     PriceGuides.Add(priceGuide);
                 }
-                SaveChanges();
+                //SaveChanges();
             }
             catch (DbException)
             {
@@ -184,29 +191,6 @@ namespace LHpiNG.db
             }
         }
 
-        [Obsolete]
-        public Product LoadProduct(Product product)
-        {
-            return Products.Find(new { product.EnName, product.ExpansionName });
-        }
-
-        [Obsolete]
-        public IEnumerable<Product> LoadProducts(Expansion expansion)
-        {
-            return Products.Where(x => x.ExpansionName == expansion.EnName);
-        }
-
-        [Obsolete]
-        public void SaveProducts(Expansion expansion)
-        {
-            if (expansion.Products != null)
-            {
-                foreach (Product product in expansion.Products)
-                {
-                    AddOrUpdateProduct(product);
-                }
-            }
-        }
         #endregion
 
         #region Album
@@ -289,6 +273,11 @@ namespace LHpiNG.db
                     Set existing = Sets.Find(set.Id);
                     if (existing != null)
                     {
+                        foreach (AlbumObject albumObject in set.AlbumObjects)
+                        {
+                            AddOrUpdateAlbumObject(albumObject);
+                        }
+                        set.AlbumObjects = existing.AlbumObjects;
                         existing.InjectNonNull(set);
                     }
                     else
@@ -301,7 +290,7 @@ namespace LHpiNG.db
                     throw;
                 }
             }
-            SaveChanges();
+            //SaveChanges();
         }
         public void SaveAlbumObjects(IEnumerable<AlbumObject> albumObjects)
         {
@@ -309,27 +298,32 @@ namespace LHpiNG.db
             foreach (AlbumObject albumObject in albumObjects)
             {
                 Console.Write($"\r {i}");
-                try
-                {
-                    AlbumObject existing = AlbumObjects.Find( albumObject.OracleName, albumObject.Version, albumObject.SetTLA, albumObject.ObjectType, albumObject.LanguageTLA );
-                    if (existing != null)
-                    {
-                        //for debugging, truncate table and set break here
-                        existing.InjectNonNull(albumObject);
-                    }
-                    else
-                    {
-                        AlbumObjects.Add(albumObject);
-                    }
-                }
-                catch (DbException)
-                {
-                    throw;
-                }
+                AddOrUpdateAlbumObject(albumObject);
                 i++;
             }
-            SaveChanges();
             Console.WriteLine();
+        }
+
+        private void AddOrUpdateAlbumObject(AlbumObject albumObject)
+        {
+            try
+            {
+                AlbumObject existing = AlbumObjects.Find(albumObject.OracleName, albumObject.Version, albumObject.SetTLA, albumObject.ObjectType, albumObject.LanguageTLA);
+                if (existing != null)
+                {
+                    albumObject.Uid = existing.Uid;
+                    existing.InjectNonNull(albumObject);
+                }
+                else
+                {
+                    AlbumObjects.Add(albumObject);
+                }
+                //SaveChanges();
+            }
+            catch (DbException)
+            {
+                throw;
+            }
         }
 
         #endregion
