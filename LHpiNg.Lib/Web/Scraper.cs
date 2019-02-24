@@ -143,7 +143,7 @@ namespace LHpiNG.Web
             if ((int)HttpStatusCode.OK == page?.RawResponse.StatusCode && page.RawResponse.Body.Length > 0)
             {
                 string msg = String.Format("got {0} with status {1}", targetUrl, page.RawResponse.StatusCode);
-                int msgSpaces = Console.WindowWidth - msg.Length - 3;
+                int msgSpaces = Console.WindowWidth - msg.Length - 1;
                 msgSpaces = (msgSpaces > 0) ? msgSpaces : 0;
                 Console.Write(String.Concat("\r", msg, new String(' ', msgSpaces)));
                 DelayMiliseconds = DelayMiliseconds == 1 ? 1 : DelayMiliseconds / 2;
@@ -285,7 +285,8 @@ namespace LHpiNG.Web
             }
 
             List<ProductEntity> products = new List<ProductEntity>();
-            string urlSuffix = String.Concat(((Expansion)expansion).ProductsUrlSuffix, UrlResultsPerPageSuffix);
+            string urlSuffix = ((Expansion)expansion).ProductsUrlSuffix ?? String.Empty;
+            urlSuffix = urlSuffix == String.Empty ? String.Empty : String.Concat(urlSuffix, UrlResultsPerPageSuffix);
 
             while (urlSuffix != String.Empty)
             {
@@ -340,6 +341,7 @@ namespace LHpiNG.Web
                 }
 
                 string rarityString = row.ChildNodes[3].FirstChild.ChildNodes[2].FirstChild.FirstChild.GetAttributeValue("data-original-title");
+                rarityString = Regex.Replace(rarityString, " ", "");
                 if (Enum.TryParse(rarityString, true, out Rarity parsedRarity))
                 {
                     product.Rarity = parsedRarity;

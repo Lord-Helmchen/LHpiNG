@@ -18,8 +18,8 @@ namespace LHpiNg.MAFiles
 
         public MAReader()
         {
-            //AlbumFilePath = @"D:\devel\VisualStudioProjects\LHpiNG\MADatabaseExport";
-            AlbumFilePath = @"C:\Users\svc-sp_admin\Source\Repos\LHpiNG\MADatabaseExport";
+            AlbumFilePath = @"D:\devel\VisualStudioProjects\LHpiNG\MADatabaseExport";
+            //AlbumFilePath = @"C:\Users\svc-sp_admin\Source\Repos\LHpiNG\MADatabaseExport";
             AlbumExportFileName = String.Concat(AlbumFilePath, "\\", "AlbumDatabase.csv");
         }
 

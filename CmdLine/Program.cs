@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using LHpiNg.MAFiles;
 using LHpiNG.Album;
 using LHpiNG.Util;
+using LHpiNG.Maps;
 
 namespace LHpiNG
 {
@@ -24,7 +25,9 @@ namespace LHpiNG
         public static ExpansionList ExpansionList { get; set; }
         public static IEnumerable<Album.Language> AlbumLanguages { get; set; }
         public static IEnumerable<Album.Set> AlbumSets { get; set; }
-        public static IEnumerable<Album.AlbumObject> AlbumObjects {get;set;}
+        public static IEnumerable<Album.AlbumObject> AlbumObjects { get; set; }
+        public static IEnumerable<ObjectProductMap> CardMap { get; set; }
+        public static IEnumerable<SetExpansionMap> SetMap { get; set; }
 
         static void Main(string[] args)
         {
@@ -48,6 +51,8 @@ namespace LHpiNG
             Console.WriteLine("\t2 - Market");
             Console.WriteLine("\t3 - Album");
             Console.WriteLine("\t4 - Mapping");
+            Console.WriteLine("\t5 - Save changes to Database");
+            Console.WriteLine("\t6 - Load Sets and Expansions from Database");
             Console.WriteLine("\t9 - Test()");
             Console.WriteLine("\t0 - quit");
         }
@@ -76,6 +81,13 @@ namespace LHpiNG
                         MappingMenu();
                         PrintMainMenu();
                         break;
+                    case "5":
+                        Database.SaveChanges();
+                        break;
+                    case "6":
+                        ExpansionList = Database.LoadExpansionList();
+                        AlbumSets = Database.LoadSets();
+                        break;
                     case "9":
                         Test();
                         Console.WriteLine(String.Format("Test() done"));
@@ -96,11 +108,11 @@ namespace LHpiNG
             Console.WriteLine("Choose which method to run:");
             Console.WriteLine("\t1 - Print expansionList.Length");
             Console.WriteLine("\t2 - Load Expansions from DB");
-            Console.WriteLine("\t3 - Save Expansions to Database");
-            Console.WriteLine("\t4 - Fetch Expansions from Web");
+            Console.WriteLine("\t3 - Sync Expansions to DbSet");
+            Console.WriteLine("\t4 - Scrape Expansions from Web");
             Console.WriteLine("\t5 - null expansionList");
 
-            Console.WriteLine("\t6 - test product list scraping");
+            Console.WriteLine("\t6 - Scrape Products from Web");
             Console.WriteLine("\t7 - test priceguide scraping");
 
             Console.WriteLine("\t8 - reduce expansionList to debug-worthy cases");
@@ -139,7 +151,8 @@ namespace LHpiNG
                         Console.WriteLine(String.Format("{0} Expansions in List", ExpansionList.Expansions.Count));
                         break;
                     case "6":
-                        ExpansionList = CullExpansionList(ExpansionList);
+                        //ExpansionList.Expansions = ExpansionList.Expansions.Where(e => e.ProductCount != e.Products.Count()).ToList();
+                        //ExpansionList.Expansions = ExpansionList.Expansions.Where(e => e.Products.Any(p => p.Rarity == Cardmarket.Rarity.None)).ToList() ;
                         ExpansionList = Importer.ImportProducts(ExpansionList);
                         break;
                     case "7":
@@ -165,13 +178,13 @@ namespace LHpiNG
             Console.WriteLine("Choose which method to run:");
             Console.WriteLine("\t1 - Load Languages from database");
             Console.WriteLine("\t2 - Read Languages from file");
-            Console.WriteLine("\t3 - Save Languages to Database");
+            Console.WriteLine("\t3 - Sync Languages to DbSet");
             Console.WriteLine("\t4 - Load Sets from database");
             Console.WriteLine("\t5 - Read Sets from file");
-            Console.WriteLine("\t6 - Save Sets to Database");
+            Console.WriteLine("\t6 - Sync Sets to DbSet");
             Console.WriteLine("\t7 - Load Objects from database");
             Console.WriteLine("\t8 - Read Objects from file");
-            Console.WriteLine("\t9 - Save Objects to Database");
+            Console.WriteLine("\t9 - Sync Objects to DbSet");
             Console.WriteLine("\t0 - return");
 
             Reader = Reader ?? new MAReader();
@@ -224,6 +237,8 @@ namespace LHpiNG
             Console.WriteLine("\nMapping Menu");
             Console.WriteLine("Choose which method to run:");
             Console.WriteLine("\t1 - Test Fuzzy Match sets to expansions");
+            Console.WriteLine("\t2 - try card mapping");
+            Console.WriteLine("\t3 - Sync maps to DbSet");
             Console.WriteLine("\t0 - return");
 
             Reader = Reader ?? new MAReader();
@@ -241,7 +256,11 @@ namespace LHpiNG
                         FuzzyMatchSets();
                         break;
                     case "2":
+                        CreateMaps();
+                        break;
                     case "3":
+                        Database.ObjectProductMap.AddRange(CardMap);
+                        break;
                     case "4":
                     case "5":
                     case "6":
@@ -254,7 +273,26 @@ namespace LHpiNG
                 }
             }
         }
-            internal class FuzzyMatch
+
+        private static List<ObjectProductMap> CreateMaps()
+        {
+            var maps = new List<ObjectProductMap>();
+            foreach (Set set in AlbumSets)
+            {
+                foreach (AlbumObject albumObject in set.AlbumObjects)
+                {
+                    Product match = Cartographer.FindMatch(albumObject, ExpansionList.Expansions);
+                    if (match != null)
+                    {
+                        ObjectProductMap map = new ObjectProductMap { AlbumObjectUid = albumObject.Uid, ProductUid = match.Uid };
+                        maps.Add(map);
+                    }
+                }
+            }
+            return maps;
+        }
+
+        internal class FuzzyMatch
         {
             internal string Set { get; set; }
             internal string Expansion { get; set; }
@@ -284,9 +322,16 @@ namespace LHpiNG
 
         }
 
-
         private static void Test()
         {
+            var arc = Album.Rarity.Common;
+            var mrc = Cardmarket.Rarity.Common;
+            Console.WriteLine(arc);
+            Console.WriteLine(mrc);
+            Console.WriteLine(arc.Equals(mrc));
+            Console.WriteLine(arc.Equals((int)mrc));
+            Console.WriteLine(arc.HasFlag(mrc));
+            Console.WriteLine((int)arc == (int)mrc);
         }
 
         private static ExpansionList CullExpansionList(ExpansionList expansionList)
@@ -333,7 +378,7 @@ namespace LHpiNG
         {
             IEnumerable<Expansion> almostall = all.Expansions.Where(e => e.ProductCount > 0);
             IEnumerable<Expansion> equal = almostall.Where(e => Regex.Replace(e.UrlSuffix, @"^.*[^/]/", "/") == Regex.Replace(e.ProductsUrlSuffix, @"^.*[^/]/", "/"));
-            int equalCount=  equal.Count();
+            int equalCount = equal.Count();
             IEnumerable<Expansion> different = almostall.Where(e => Regex.Replace(e.UrlSuffix, @"^.*[^/]/", "/") != Regex.Replace(e.ProductsUrlSuffix, @"^.*[^/]/", "/"));
             int diffCount = different.Count();
 
