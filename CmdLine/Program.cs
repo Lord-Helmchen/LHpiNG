@@ -1,7 +1,5 @@
-﻿using LHpiNg.Web;
-using LHpiNG.Cardmarket;
+﻿using LHpiNG.Cardmarket;
 using LHpiNG.db;
-using LHpiNG.Web;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -9,7 +7,6 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using LHpiNg.MAFiles;
 using LHpiNG.Album;
 using LHpiNG.Util;
 using LHpiNG.Maps;
@@ -20,7 +17,7 @@ namespace LHpiNG
     {
         public static Importer Importer { get; set; }
         public static EFContext Database { get; set; }
-        public static MAReader Reader { get; set; }
+        public static FileReader Reader { get; set; }
 
         public static ExpansionList ExpansionList { get; set; }
         public static IEnumerable<Album.Language> AlbumLanguages { get; set; }
@@ -187,7 +184,7 @@ namespace LHpiNG
             Console.WriteLine("\t9 - Sync Objects to DbSet");
             Console.WriteLine("\t0 - return");
 
-            Reader = Reader ?? new MAReader();
+            Reader = Reader ?? new FileReader();
 
             bool quit = false;
             while (!quit)
@@ -241,7 +238,7 @@ namespace LHpiNG
             Console.WriteLine("\t3 - Sync maps to DbSet");
             Console.WriteLine("\t0 - return");
 
-            Reader = Reader ?? new MAReader();
+            Reader = Reader ?? new FileReader();
 
             bool quit = false;
             while (!quit)

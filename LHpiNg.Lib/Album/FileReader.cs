@@ -1,5 +1,4 @@
-﻿using LHpiNG.Album;
-using LumenWorks.Framework.IO.Csv;
+﻿using LumenWorks.Framework.IO.Csv;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -9,14 +8,14 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 //using Microsoft.VisualBasic.FileIO;
 
-namespace LHpiNg.MAFiles
+namespace LHpiNG.Album
 {
-    public class MAReader
+    public class FileReader
     {
         private string AlbumFilePath { get; set; }
         private string AlbumExportFileName { get; set; }
 
-        public MAReader()
+        public FileReader()
         {
             AlbumFilePath = @"D:\devel\VisualStudioProjects\LHpiNG\MADatabaseExport";
             //AlbumFilePath = @"C:\Users\svc-sp_admin\Source\Repos\LHpiNG\MADatabaseExport";
@@ -114,14 +113,14 @@ namespace LHpiNg.MAFiles
                         switch (row.ElementAt(12))
                         {
                             case "Yes":
-                                albumObject.Foilage |= Album.Foilage.Foil;// SetFlag
+                                albumObject.Foilage |= Foilage.Foil;// SetFlag
                                 break;
                             case "No":
-                                albumObject.Foilage |= Album.Foilage.Foil;// SetFlag
-                                albumObject.Foilage |= Album.Foilage.Nonfoil;// SetFlag
+                                albumObject.Foilage |= Foilage.Foil;// SetFlag
+                                albumObject.Foilage |= Foilage.Nonfoil;// SetFlag
                                 break;
                             case "Only":
-                                albumObject.Foilage |= Album.Foilage.Nonfoil;//SetFlag
+                                albumObject.Foilage |= Foilage.Nonfoil;//SetFlag
                                 break;
                         }
                         switch (row.ElementAt(4))

@@ -8,7 +8,7 @@
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>LHpiNG</RootNamespace>
-    <AssemblyName>LHpiNg.Lib</AssemblyName>
+    <AssemblyName>LHpiNG.Lib</AssemblyName>
     <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <Deterministic>true</Deterministic>
@@ -66,7 +66,7 @@
     <Compile Include="Cardmarket\ProductEntity.cs" />
     <Compile Include="Cardmarket\Rarity.cs" />
     <Compile Include="Cardmarket\ReprintEntity.cs" />
-    <Compile Include="MAFiles\MAReader.cs" />
+    <Compile Include="Album\FileReader.cs" />
     <Compile Include="Maps\Cartographer.cs" />
     <Compile Include="Maps\ObjectProductMap.cs" />
     <Compile Include="Maps\SetExpansionMap.cs" />
@@ -76,10 +76,10 @@
     <Compile Include="Util\GenericExtensions.cs" />
     <Compile Include="Util\Sha256Helper.cs" />
     <Compile Include="Util\StringExtension.cs" />
-    <Compile Include="Web\IFromCardmarket.cs" />
-    <Compile Include="Web\Importer.cs" />
-    <Compile Include="Web\MkmApi.cs" />
-    <Compile Include="Web\Scraper.cs" />
+    <Compile Include="Cardmarket\IFromCardmarket.cs" />
+    <Compile Include="Cardmarket\Importer.cs" />
+    <Compile Include="Cardmarket\MkmApi.cs" />
+    <Compile Include="Cardmarket\Scraper.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

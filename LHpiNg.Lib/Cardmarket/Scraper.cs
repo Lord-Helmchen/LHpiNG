@@ -4,7 +4,6 @@ using System.Net;
 using System.Web;
 using System.Collections.Generic;
 using System.Linq;
-using LHpiNG.Cardmarket;
 using HtmlAgilityPack;
 using ScrapySharp.Extensions;
 using System.Text.RegularExpressions;
@@ -13,7 +12,7 @@ using System.Diagnostics;
 using System.Threading;
 using ScrapySharp.Html.Forms;
 
-namespace LHpiNG.Web
+namespace LHpiNG.Cardmarket
 {
     internal sealed class Scraper : IFromCardmarket
     {

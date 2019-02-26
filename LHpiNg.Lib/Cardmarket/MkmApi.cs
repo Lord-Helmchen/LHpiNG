@@ -1,8 +1,7 @@
-﻿using LHpiNG.Cardmarket;
-using System;
+﻿using System;
 using System.Collections.Generic;
 
-namespace LHpiNG.Web
+namespace LHpiNG.Cardmarket
 {
     internal sealed class MkmApi : IFromCardmarket
     {

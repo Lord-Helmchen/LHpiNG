@@ -1,6 +1,4 @@
-﻿using LHpiNG.Cardmarket;
-using LHpiNG.Util;
-using LHpiNG.Web;
+﻿using LHpiNG.Util;
 using ScrapySharp.Exceptions;
 using System;
 using System.Collections.Generic;
@@ -8,7 +6,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LHpiNg.Web
+namespace LHpiNG.Cardmarket
 {
     public class Importer
     {
