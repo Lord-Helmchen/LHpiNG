@@ -1,8 +1,13 @@
 ﻿/// This file is licensed as https://creativecommons.org/licenses/by-sa/3.0/ 
+/// InjectNonNull:
 /// source: https://stackoverflow.com/questions/17385472/entity-framework-only-update-values-that-are-not-null
 /// author: https://stackoverflow.com/users/1715579/p-s-w-g
+/// IsSimple:
 /// source: https://stackoverflow.com/questions/863881/how-do-i-tell-if-a-type-is-a-simple-type-i-e-holds-a-single-value
 /// author: https://stackoverflow.com/users/2658202/stefan-steinegger
+/// None:
+/// source: https://stackoverflow.com/questions/9027530/linq-not-any-vs-all-dont
+/// author: https://stackoverflow.com/users/71059/aakashm
 
 
 using System;
@@ -47,6 +52,17 @@ namespace LHpiNG.Util
               || type.IsEnum
               || type.Equals(typeof(string))
               || type.Equals(typeof(decimal));
+        }
+
+        public static bool None<TSource>(this IEnumerable<TSource> source)
+        {
+            return source == null ||  !source.Any();
+        }
+
+        public static bool None<TSource>(this IEnumerable<TSource> source,
+                                         Func<TSource, bool> predicate)
+        {
+            return source == null || !source.Any(predicate);
         }
     }
 

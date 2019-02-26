@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LHpiNG.db.Migrations
 {
     [DbContext(typeof(SQLContext))]
-    [Migration("20190224193046_AddRarityEnumToAlbumObjects")]
-    partial class AddRarityEnumToAlbumObjects
+    [Migration("20190226210343_RecreateFromScratch")]
+    partial class RecreateFromScratch
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -50,9 +50,9 @@ namespace LHpiNG.db.Migrations
 
                     b.Property<string>("RarityString");
 
-                    b.Property<int>("Uid")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                    b.Property<byte[]>("Uid")
+                        .IsRequired()
+                        .HasColumnType("binary(32)");
 
                     b.HasKey("OracleName", "Version", "SetTLA", "ObjectType", "LanguageTLA");
 
@@ -129,6 +129,10 @@ namespace LHpiNG.db.Migrations
 
                     b.Property<string>("ReleaseDate");
 
+                    b.Property<byte[]>("Uid")
+                        .IsRequired()
+                        .HasColumnType("binary(32)");
+
                     b.HasKey("EnName");
 
                     b.ToTable("Expansions");
@@ -196,9 +200,9 @@ namespace LHpiNG.db.Migrations
 
                     b.Property<int>("Rarity");
 
-                    b.Property<int>("Uid")
-                        .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                    b.Property<byte[]>("Uid")
+                        .IsRequired()
+                        .HasColumnType("binary(32)");
 
                     b.Property<string>("Website");
 
@@ -211,9 +215,11 @@ namespace LHpiNG.db.Migrations
 
             modelBuilder.Entity("LHpiNG.Maps.ObjectProductMap", b =>
                 {
-                    b.Property<int>("AlbumObjectUid");
+                    b.Property<byte[]>("AlbumObjectUid")
+                        .HasColumnType("binary(32)");
 
-                    b.Property<int>("ProductUid");
+                    b.Property<byte[]>("ProductUid")
+                        .HasColumnType("binary(32)");
 
                     b.HasKey("AlbumObjectUid", "ProductUid");
 
@@ -231,11 +237,12 @@ namespace LHpiNG.db.Migrations
                     b.Property<string>("SetTLA")
                         .HasMaxLength(3);
 
-                    b.Property<string>("ExpansionEnName");
+                    b.Property<byte[]>("ExpansionUid")
+                        .HasColumnType("binary(32)");
 
-                    b.HasKey("SetTLA", "ExpansionEnName");
+                    b.HasKey("SetTLA", "ExpansionUid");
 
-                    b.HasIndex("ExpansionEnName")
+                    b.HasIndex("ExpansionUid")
                         .IsUnique();
 
                     b.HasIndex("SetTLA")
@@ -338,7 +345,8 @@ namespace LHpiNG.db.Migrations
                 {
                     b.HasOne("LHpiNG.Cardmarket.Expansion", "Expansion")
                         .WithOne()
-                        .HasForeignKey("LHpiNG.Maps.SetExpansionMap", "ExpansionEnName")
+                        .HasForeignKey("LHpiNG.Maps.SetExpansionMap", "ExpansionUid")
+                        .HasPrincipalKey("LHpiNG.Cardmarket.Expansion", "Uid")
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("LHpiNG.Album.Set", "Set")

@@ -10,9 +10,9 @@ namespace LHpiNG.Maps
 {
     public class ObjectProductMap
     {
-        public int AlbumObjectUid { get; set; }
+        public byte[] AlbumObjectUid { get; set; }
         public AlbumObject AlbumObject { get; set; }
-        public int ProductUid { get; set; }
+        public byte[] ProductUid { get; set; }
         public Product Product { get; set; }
     }
 }

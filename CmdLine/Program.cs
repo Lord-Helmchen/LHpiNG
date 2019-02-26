@@ -324,14 +324,8 @@ namespace LHpiNG
 
         private static void Test()
         {
-            var arc = Album.Rarity.Common;
-            var mrc = Cardmarket.Rarity.Common;
-            Console.WriteLine(arc);
-            Console.WriteLine(mrc);
-            Console.WriteLine(arc.Equals(mrc));
-            Console.WriteLine(arc.Equals((int)mrc));
-            Console.WriteLine(arc.HasFlag(mrc));
-            Console.WriteLine((int)arc == (int)mrc);
+            Expansion exp = ExpansionList.Expansions.FirstOrDefault();
+            var foo = exp.EnName.GetHashCode();
         }
 
         private static ExpansionList CullExpansionList(ExpansionList expansionList)

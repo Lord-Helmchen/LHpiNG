@@ -57,57 +57,9 @@
     <Compile Include="EFContext.cs" />
     <Compile Include="IAlbumData.cs" />
     <Compile Include="ICardmarketData.cs" />
-    <Compile Include="Migrations\20190209001952_Initial.cs" />
-    <Compile Include="Migrations\20190209001952_Initial.designer.cs">
-      <DependentUpon>20190209001952_Initial.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\20190210211155_AddStateTable.cs" />
-    <Compile Include="Migrations\20190210211155_AddStateTable.designer.cs">
-      <DependentUpon>20190210211155_AddStateTable.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\20190214192241_addCollNrToProducts.cs" />
-    <Compile Include="Migrations\20190214192241_addCollNrToProducts.designer.cs">
-      <DependentUpon>20190214192241_addCollNrToProducts.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\20190217005725_RemovePreviousPriceGuideColumn.cs" />
-    <Compile Include="Migrations\20190217005725_RemovePreviousPriceGuideColumn.designer.cs">
-      <DependentUpon>20190217005725_RemovePreviousPriceGuideColumn.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\20190217100211_MakePricesNullable.cs" />
-    <Compile Include="Migrations\20190217100211_MakePricesNullable.designer.cs">
-      <DependentUpon>20190217100211_MakePricesNullable.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\20190219125159_AddAlbumObjects.cs" />
-    <Compile Include="Migrations\20190219125159_AddAlbumObjects.designer.cs">
-      <DependentUpon>20190219125159_AddAlbumObjects.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\20190219131202_IndexPriceGuide.cs" />
-    <Compile Include="Migrations\20190219131202_IndexPriceGuide.designer.cs">
-      <DependentUpon>20190219131202_IndexPriceGuide.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\20190219144305_ChangeObjectRarityType.cs" />
-    <Compile Include="Migrations\20190219144305_ChangeObjectRarityType.designer.cs">
-      <DependentUpon>20190219144305_ChangeObjectRarityType.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\20190219144842_RemoveObjectUid.cs" />
-    <Compile Include="Migrations\20190219144842_RemoveObjectUid.designer.cs">
-      <DependentUpon>20190219144842_RemoveObjectUid.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\20190219180627_AddObjectTypeToKey.cs" />
-    <Compile Include="Migrations\20190219180627_AddObjectTypeToKey.designer.cs">
-      <DependentUpon>20190219180627_AddObjectTypeToKey.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\20190221162156_BaseClassesNotMapped.cs" />
-    <Compile Include="Migrations\20190221162156_BaseClassesNotMapped.designer.cs">
-      <DependentUpon>20190221162156_BaseClassesNotMapped.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\20190221165455_AddMaps.cs" />
-    <Compile Include="Migrations\20190221165455_AddMaps.designer.cs">
-      <DependentUpon>20190221165455_AddMaps.cs</DependentUpon>
-    </Compile>
-    <Compile Include="Migrations\20190224193046_AddRarityEnumToAlbumObjects.cs" />
-    <Compile Include="Migrations\20190224193046_AddRarityEnumToAlbumObjects.designer.cs">
-      <DependentUpon>20190224193046_AddRarityEnumToAlbumObjects.cs</DependentUpon>
+    <Compile Include="Migrations\20190226210343_RecreateFromScratch.cs" />
+    <Compile Include="Migrations\20190226210343_RecreateFromScratch.designer.cs">
+      <DependentUpon>20190226210343_RecreateFromScratch.cs</DependentUpon>
     </Compile>
     <Compile Include="Migrations\SQLContextModelSnapshot.cs" />
     <Compile Include="SQLContext.cs" />

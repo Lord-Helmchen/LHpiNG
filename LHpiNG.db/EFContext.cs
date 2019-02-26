@@ -133,7 +133,6 @@ namespace LHpiNG.db
                 Product existing = Products.Find(product.EnName, product.ExpansionName);
                 if (existing != null)
                 {
-                    product.Uid = existing.Uid;
                     foreach (PriceGuide priceGuide in product.PriceGuides)
                     {
                         AddOrUpdatePriceGuide(priceGuide);
@@ -311,7 +310,6 @@ namespace LHpiNG.db
                 AlbumObject existing = AlbumObjects.Find(albumObject.OracleName, albumObject.Version, albumObject.SetTLA, albumObject.ObjectType, albumObject.LanguageTLA);
                 if (existing != null)
                 {
-                    albumObject.Uid = existing.Uid;
                     existing.InjectNonNull(albumObject);
                 }
                 else

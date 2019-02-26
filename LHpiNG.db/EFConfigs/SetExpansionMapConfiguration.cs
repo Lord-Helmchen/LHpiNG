@@ -15,7 +15,11 @@ namespace LHpiNG.db.EFConfigs
                 .HasMaxLength(3)
             ;
             modelBuilder
-                .HasKey(m => new { m.SetTLA, m.ExpansionEnName });
+                .Property(s => s.ExpansionUid)
+                .HasColumnType("binary(32)")
+            ;
+            modelBuilder
+                .HasKey(m => new { m.SetTLA, m.ExpansionUid });
             modelBuilder
                 .HasOne<Set>(m => m.Set)
                 .WithOne()
@@ -25,7 +29,7 @@ namespace LHpiNG.db.EFConfigs
             modelBuilder
                 .HasOne<Expansion>(m => m.Expansion)
                 .WithOne()
-                .HasPrincipalKey<Expansion>(e => e.EnName)
+                .HasPrincipalKey<Expansion>(e => e.Uid)
                 .OnDelete(DeleteBehavior.Cascade)
             ;
 

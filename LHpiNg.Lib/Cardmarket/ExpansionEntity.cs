@@ -25,6 +25,8 @@ namespace LHpiNG.Cardmarket
         [NotMapped]
         public IEnumerable<string> Links { get; set; }              // HATEOAS links
 
+        public byte[] Uid { get; set; }
+
         public ExpansionEntity()
         {
             this.IdGame = 1; //Magic
@@ -49,6 +51,7 @@ namespace LHpiNG.Cardmarket
             IsReleased = entity.IsReleased;
             IdGame = entity.IdGame;
             Links = entity.Links;
+            Uid = entity.Uid;
         }
 
     }

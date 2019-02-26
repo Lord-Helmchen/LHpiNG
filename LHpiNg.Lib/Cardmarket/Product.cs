@@ -7,7 +7,7 @@ namespace LHpiNG.Cardmarket
     [Table("Products")]
     public class Product : ProductEntity
     {
-        public int Uid { get; set; }
+        public byte[] Uid { get; set; }
         // keep price history
         public ICollection<PriceGuide> PriceGuides { get; set; }
         public int? CollNr { get; set; }

@@ -11,6 +11,14 @@ namespace LHpiNG.db.EFConfigs
         public void Configure(EntityTypeBuilder<ObjectProductMap> modelBuilder)
         {
             modelBuilder
+                .Property(m => m.AlbumObjectUid)
+                .HasColumnType("binary(32)")
+            ;
+            modelBuilder
+                .Property(m => m.ProductUid)
+                .HasColumnType("binary(32)")
+            ;
+            modelBuilder
                 .HasKey(m => new { m.AlbumObjectUid, m.ProductUid });
             modelBuilder
                 .HasOne<AlbumObject>(m => m.AlbumObject)

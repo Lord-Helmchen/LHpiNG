@@ -12,7 +12,7 @@ namespace LHpiNG.Maps
     {
         public string SetTLA { get; set; }
         public Set Set { get; set; }
-        public string ExpansionEnName { get; set; }
+        public byte[] ExpansionUid { get; set; }
         public Expansion Expansion { get; set; }
     }
 }

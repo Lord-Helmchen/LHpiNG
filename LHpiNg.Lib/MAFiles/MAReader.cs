@@ -186,6 +186,7 @@ namespace LHpiNg.MAFiles
                         {
                             throw new FormatException("Key field not parsed");
                         }
+                        albumObject.Uid = Sha256Helper.GenerateHashBytes(String.Concat(albumObject.OracleName, albumObject.Version, albumObject.SetTLA, albumObject.ObjectType, albumObject.LanguageTLA));
                         albumObjects.Add(albumObject);
                     }
                 }

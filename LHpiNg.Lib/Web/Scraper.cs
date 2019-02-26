@@ -231,7 +231,8 @@ namespace LHpiNG.Web
                     throw new FormatException("Failed to parse Release Date!");
                 }
                 expansion.IsReleased = parsedDate.Date < DateTime.Today;
-                expansion.ProductsUrlSuffix = ScrapeProductsUrlSuffix(expansion); ;
+                expansion.ProductsUrlSuffix = ScrapeProductsUrlSuffix(expansion);
+                expansion.Uid = Sha256Helper.GenerateHashBytes(expansion.EnName);
 
                 return expansion;
             }
@@ -351,6 +352,7 @@ namespace LHpiNG.Web
                     product.Rarity = Rarity.None;
                 }
                 //TODO can I scrape reprintCount ? -> yes, but only from priceGuide page
+                ((Product)product).Uid = Sha256Helper.GenerateHashBytes(String.Concat(product.EnName, product.ExpansionName));
                 products.Add(product);
             }
             HtmlNode pagination = resultpage?.Html?.CssSelect("div#pagination")?.First();

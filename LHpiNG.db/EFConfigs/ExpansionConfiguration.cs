@@ -22,6 +22,15 @@ namespace LHpiNG.db.EFConfigs
             modelBuilder
                  .HasKey(e => e.EnName)
             ;
+            modelBuilder
+                .Property(e => e.Uid)
+                .HasColumnType("binary(32)")
+                .IsRequired()
+                .ValueGeneratedNever()
+            ;
+            modelBuilder
+                .HasAlternateKey(e => e.Uid)
+            ;
         }
     }
     class ExpansionConfiguration : IEntityTypeConfiguration<Expansion>

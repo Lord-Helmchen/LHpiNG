@@ -40,8 +40,9 @@ namespace LHpiNG.db.EFConfigs
             ;
             modelBuilder
                 .Property(o => o.Uid)
+                .HasColumnType("binary(32)")
                 .IsRequired()
-                .ValueGeneratedOnAdd()
+                .ValueGeneratedNever()
             ;
 
             modelBuilder

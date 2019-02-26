@@ -74,6 +74,7 @@
     <Compile Include="State.cs" />
     <Compile Include="Util\FuzzyMatch.cs" />
     <Compile Include="Util\GenericExtensions.cs" />
+    <Compile Include="Util\Sha256Helper.cs" />
     <Compile Include="Util\StringExtension.cs" />
     <Compile Include="Web\IFromCardmarket.cs" />
     <Compile Include="Web\Importer.cs" />

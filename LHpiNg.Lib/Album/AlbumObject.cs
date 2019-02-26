@@ -10,7 +10,7 @@ namespace LHpiNG.Album
 {
     public class AlbumObject
     {
-        public int Uid { get; set; }
+        public byte[] Uid { get; set; }
         //MA identification
         public string OracleName { get; set; }
         public string Version { get; set; }
@@ -52,5 +52,6 @@ namespace LHpiNG.Album
         public string PriceFoil { get; set; }
         [NotMapped]
         public string Rating { get; set; }
+
     }
 }

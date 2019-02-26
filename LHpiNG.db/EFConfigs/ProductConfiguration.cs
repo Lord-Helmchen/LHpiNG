@@ -38,8 +38,9 @@ namespace LHpiNG.db.EFConfigs
             //additional for Product
             modelBuilder
                 .Property(o => o.Uid)
+                .HasColumnType("binary(32)")
                 .IsRequired()
-                .ValueGeneratedOnAdd()
+                .ValueGeneratedNever()
             ;
             modelBuilder
                 .HasAlternateKey(o => o.Uid)
