@@ -14,5 +14,14 @@ namespace LHpiNG.Maps
         public Set Set { get; set; }
         public byte[] ExpansionUid { get; set; }
         public Expansion Expansion { get; set; }
+
+        public SetExpansionMap(Set set, Expansion expansion): base()
+        {
+            Set = set;
+            SetTLA = set.TLA;
+            Expansion = expansion;
+            ExpansionUid = expansion.Uid;
+        }
     }
+
 }

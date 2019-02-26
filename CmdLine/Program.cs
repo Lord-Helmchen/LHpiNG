@@ -234,7 +234,7 @@ namespace LHpiNG
             Console.WriteLine("\nMapping Menu");
             Console.WriteLine("Choose which method to run:");
             Console.WriteLine("\t1 - Test Fuzzy Match sets to expansions");
-            Console.WriteLine("\t2 - try card mapping");
+            Console.WriteLine("\t2 - map expansions to sets");
             Console.WriteLine("\t3 - Sync maps to DbSet");
             Console.WriteLine("\t0 - return");
 
@@ -253,7 +253,7 @@ namespace LHpiNG
                         FuzzyMatchSets();
                         break;
                     case "2":
-                        CreateMaps();
+                        Cartographer.CreateMaps(AlbumSets, ExpansionList.Expansions);
                         break;
                     case "3":
                         Database.ObjectProductMap.AddRange(CardMap);
@@ -269,24 +269,6 @@ namespace LHpiNG
                         break;
                 }
             }
-        }
-
-        private static List<ObjectProductMap> CreateMaps()
-        {
-            var maps = new List<ObjectProductMap>();
-            foreach (Set set in AlbumSets)
-            {
-                foreach (AlbumObject albumObject in set.AlbumObjects)
-                {
-                    Product match = Cartographer.FindMatch(albumObject, ExpansionList.Expansions);
-                    if (match != null)
-                    {
-                        ObjectProductMap map = new ObjectProductMap { AlbumObjectUid = albumObject.Uid, ProductUid = match.Uid };
-                        maps.Add(map);
-                    }
-                }
-            }
-            return maps;
         }
 
         internal class FuzzyMatch

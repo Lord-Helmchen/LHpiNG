@@ -14,5 +14,13 @@ namespace LHpiNG.Maps
         public AlbumObject AlbumObject { get; set; }
         public byte[] ProductUid { get; set; }
         public Product Product { get; set; }
+
+        public ObjectProductMap(AlbumObject albumObject, Product product) : base()
+        {
+            AlbumObject = albumObject;
+            AlbumObjectUid = albumObject.Uid;
+            Product = product;
+            ProductUid = product.Uid;
+        }
     }
 }
