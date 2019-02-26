@@ -176,20 +176,6 @@ namespace LHpiNG.db
             }
         }
 
-        [Obsolete]
-        public Expansion LoadExpansion(Expansion expansion)
-        {
-            try
-            {
-                expansion = Expansions.Find(expansion.EnName);
-                return expansion;
-            }
-            catch (DbException)
-            {
-                throw;
-            }
-        }
-
         #endregion
 
         #region Album

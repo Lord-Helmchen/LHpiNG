@@ -17,10 +17,12 @@ namespace LHpiNG.db
         //public DbSet<CategoryEntity> CategoryEntities { get; set; }
         //public DbSet<LocalizationEntity> LocalizationEntities { get; set; }
         //public DbSet<ReprintEntity> ReprintEntities { get; set; }
+        DbSet<State> State { get; set; }// holds last fetch date for expansion list
 
         ExpansionList LoadExpansionList();
         void SaveExpansionList(ExpansionList expansionList);
         void AddOrUpdateExpansion(Expansion expansion);
-
+        void AddOrUpdatePriceGuide(PriceGuide priceGuide);
+        void AddOrUpdateProduct(Product product);
     }
 }

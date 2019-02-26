@@ -11,9 +11,16 @@ namespace LHpiNG.db
     public interface IAlbumData
     {
         //declare getters and setters as part of the interface to force me to remember to implement the fields
-        //DbSet<LHpiNG.Album.Set> Sets { get; set; }
-        //DbSet<LHpiNG.Album.CardInfo> CardInfos { get; set; }
-        //DbSet<LHpiNG.Album.InventoryCard> InventoryCard { get; set; }
+        DbSet<AlbumObject> AlbumObjects { get; set; }
+        DbSet<Language> Languages { get; set; }
+        DbSet<Set> Sets { get; set; }
+
+        IEnumerable<Language> LoadLanguages();
+        IEnumerable<AlbumObject> LoadObjects();
+        IEnumerable<Set> LoadSets();
+        void SaveAlbumObjects(IEnumerable<AlbumObject> albumObjects);
+        void SaveLanguages(IEnumerable<Language> languages);
+        void SaveSets(IEnumerable<Set> sets);
 
     }
 }
