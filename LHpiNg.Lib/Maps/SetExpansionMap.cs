@@ -5,10 +5,11 @@ using System.Text;
 using System.Threading.Tasks;
 using LHpiNG.Album;
 using LHpiNG.Cardmarket;
+using LHpiNG.Util;
 
 namespace LHpiNG.Maps
 {
-    public class SetExpansionMap
+    public class SetExpansionMap: IEquatable<SetExpansionMap>
     {
         public string SetTLA { get; set; }
         public Set Set { get; set; }
@@ -23,9 +24,23 @@ namespace LHpiNG.Maps
             Expansion = expansion;
             ExpansionUid = expansion.Uid;
         }
+
+        bool IEquatable<SetExpansionMap>.Equals(SetExpansionMap other)
+        {
+            if (other == null) return false;
+            return SetTLA == other.SetTLA
+                && ExpansionUid.ByteArrayCompare(other.ExpansionUid);
+        }
         public override bool Equals(object obj)
         {
-            return base.Equals(obj);
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != GetType()) return false;
+            return Equals(obj as SetExpansionMap);
+        }
+        public override int GetHashCode()
+        {
+            return (SetTLA, ExpansionUid).GetHashCode();
         }
     }
 
