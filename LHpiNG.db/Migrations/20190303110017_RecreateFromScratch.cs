@@ -153,7 +153,7 @@ namespace LHpiNG.db.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "SetExpansionMap",
+                name: "SetExpansionMaps",
                 schema: "LHpi",
                 columns: table => new
                 {
@@ -162,16 +162,16 @@ namespace LHpiNG.db.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_SetExpansionMap", x => new { x.SetTLA, x.ExpansionUid });
+                    table.PrimaryKey("PK_SetExpansionMaps", x => new { x.SetTLA, x.ExpansionUid });
                     table.ForeignKey(
-                        name: "FK_SetExpansionMap_Expansions_ExpansionUid",
+                        name: "FK_SetExpansionMaps_Expansions_ExpansionUid",
                         column: x => x.ExpansionUid,
                         principalSchema: "LHpi",
                         principalTable: "Expansions",
                         principalColumn: "Uid",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_SetExpansionMap_Sets_SetTLA",
+                        name: "FK_SetExpansionMaps_Sets_SetTLA",
                         column: x => x.SetTLA,
                         principalSchema: "LHpi",
                         principalTable: "Sets",
@@ -215,7 +215,7 @@ namespace LHpiNG.db.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "ObjectProductMap",
+                name: "ObjectProductMaps",
                 schema: "LHpi",
                 columns: table => new
                 {
@@ -224,16 +224,16 @@ namespace LHpiNG.db.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_ObjectProductMap", x => new { x.AlbumObjectUid, x.ProductUid });
+                    table.PrimaryKey("PK_ObjectProductMaps", x => new { x.AlbumObjectUid, x.ProductUid });
                     table.ForeignKey(
-                        name: "FK_ObjectProductMap_AlbumObjects_AlbumObjectUid",
+                        name: "FK_ObjectProductMaps_AlbumObjects_AlbumObjectUid",
                         column: x => x.AlbumObjectUid,
                         principalSchema: "LHpi",
                         principalTable: "AlbumObjects",
                         principalColumn: "Uid",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ObjectProductMap_Products_ProductUid",
+                        name: "FK_ObjectProductMaps_Products_ProductUid",
                         column: x => x.ProductUid,
                         principalSchema: "LHpi",
                         principalTable: "Products",
@@ -260,16 +260,16 @@ namespace LHpiNG.db.Migrations
                 column: "Set");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ObjectProductMap_AlbumObjectUid",
+                name: "IX_ObjectProductMaps_AlbumObjectUid",
                 schema: "LHpi",
-                table: "ObjectProductMap",
+                table: "ObjectProductMaps",
                 column: "AlbumObjectUid",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_ObjectProductMap_ProductUid",
+                name: "IX_ObjectProductMaps_ProductUid",
                 schema: "LHpi",
-                table: "ObjectProductMap",
+                table: "ObjectProductMaps",
                 column: "ProductUid",
                 unique: true);
 
@@ -280,16 +280,16 @@ namespace LHpiNG.db.Migrations
                 column: "ExpansionName");
 
             migrationBuilder.CreateIndex(
-                name: "IX_SetExpansionMap_ExpansionUid",
+                name: "IX_SetExpansionMaps_ExpansionUid",
                 schema: "LHpi",
-                table: "SetExpansionMap",
+                table: "SetExpansionMaps",
                 column: "ExpansionUid",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_SetExpansionMap_SetTLA",
+                name: "IX_SetExpansionMaps_SetTLA",
                 schema: "LHpi",
-                table: "SetExpansionMap",
+                table: "SetExpansionMaps",
                 column: "SetTLA",
                 unique: true);
 
@@ -304,7 +304,7 @@ namespace LHpiNG.db.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "ObjectProductMap",
+                name: "ObjectProductMaps",
                 schema: "LHpi");
 
             migrationBuilder.DropTable(
@@ -312,7 +312,7 @@ namespace LHpiNG.db.Migrations
                 schema: "LHpi");
 
             migrationBuilder.DropTable(
-                name: "SetExpansionMap",
+                name: "SetExpansionMaps",
                 schema: "LHpi");
 
             migrationBuilder.DropTable(

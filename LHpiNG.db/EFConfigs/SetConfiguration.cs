@@ -42,7 +42,7 @@ namespace LHpiNG.db.EFConfigs
                 .IsUnique()
             ;
             modelBuilder
-                .HasMany<AlbumObject>(s => s.AlbumObjects)
+                .HasMany<Card>(s => s.Cards)
                 .WithOne(o => o.Set)
                 .HasPrincipalKey(s => s.TLA)
                 .OnDelete(DeleteBehavior.Cascade)

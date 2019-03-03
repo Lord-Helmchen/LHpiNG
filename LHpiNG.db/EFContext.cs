@@ -23,10 +23,10 @@ namespace LHpiNG.db
         //Album related
         public DbSet<Language> Languages { get; set; }
         public DbSet<Set> Sets { get; set; }
-        public DbSet<AlbumObject> AlbumObjects { get; set; }
+        public DbSet<Card> Cards { get; set; }
         //Maps
-        public DbSet<ObjectProductMap> ObjectProductMap { get; set; }
-        public DbSet<SetExpansionMap> SetExpansionMap { get; set; }
+        public DbSet<SetExpansionMap> SetExpansionMaps { get; set; }
+        public DbSet<CardProductMap> CardProductMaps { get; set; }
 
         protected EFContext() : base()
         {// just pass along to DbContext()
@@ -46,10 +46,10 @@ namespace LHpiNG.db
             modelBuilder.ApplyConfiguration(new ExpansionConfiguration());
             modelBuilder.ApplyConfiguration(new ProductConfiguration());
             modelBuilder.ApplyConfiguration(new PriceGuideConfiguration());
-            modelBuilder.ApplyConfiguration(new AlbumObjectConfiguration());
+            modelBuilder.ApplyConfiguration(new CardConfiguration());
             modelBuilder.ApplyConfiguration(new SetConfiguration());
             modelBuilder.ApplyConfiguration(new LanguageConfiguration());
-            modelBuilder.ApplyConfiguration(new ObjectProductMapConfiguration());
+            modelBuilder.ApplyConfiguration(new CardProductMapConfiguration());
             modelBuilder.ApplyConfiguration(new SetExpansionMapConfiguration());
 
             modelBuilder.Entity<State>().HasData(new { Id = 1, ExpansionListFetchDate = DateTime.MinValue });
@@ -93,7 +93,6 @@ namespace LHpiNG.db
                     AddOrUpdateExpansion(expansion);
                 }
                 State.LastOrDefault().ExpansionListFetchDate = expansionList.FetchedOn;
-                //SaveChanges();
             }
             catch (DbException)
             {
@@ -119,7 +118,6 @@ namespace LHpiNG.db
                 {
                     Expansions.Add(expansion);
                 }
-                //SaveChanges();
             }
             catch (DbException)
             {
@@ -144,8 +142,6 @@ namespace LHpiNG.db
                 {
                     Products.Add(product);
                 }
-                //Console.WriteLine($"saving {product.EnName} in {product.ExpansionName}");
-                //SaveChanges();
             }
             catch (DbException)
             {
@@ -168,7 +164,6 @@ namespace LHpiNG.db
                 {
                     PriceGuides.Add(priceGuide);
                 }
-                //SaveChanges();
             }
             catch (DbException)
             {
@@ -198,7 +193,7 @@ namespace LHpiNG.db
             {
                 var sets = new List<Set>();
                 sets = Sets
-                    .Include(s => s.AlbumObjects)
+                    .Include(s => s.Cards)
                         .ThenInclude(o => o.Language)
                     .ToList();
                 return sets;
@@ -209,14 +204,14 @@ namespace LHpiNG.db
                 throw;
             }
         }
-        public IEnumerable<AlbumObject> LoadObjects()
+        public IEnumerable<Card> LoadObjects()
         {
             try
             {
-                var albumObjects = new List<AlbumObject>();
-                albumObjects = AlbumObjects
+                var cards = new List<Card>();
+                cards = Cards
                     .ToList();
-                return albumObjects;
+                return cards;
 
             }
             catch (DbException) //should catch both SqlExcelption and SqliteException
@@ -258,11 +253,11 @@ namespace LHpiNG.db
                     Set existing = Sets.Find(set.Id);
                     if (existing != null)
                     {
-                        foreach (AlbumObject albumObject in set.AlbumObjects)
+                        foreach (Card card in set.Cards)
                         {
-                            AddOrUpdateAlbumObject(albumObject);
+                            AddOrUpdateCard(card);
                         }
-                        set.AlbumObjects = existing.AlbumObjects;
+                        set.Cards = existing.Cards;
                         existing.InjectNonNull(set);
                     }
                     else
@@ -275,41 +270,105 @@ namespace LHpiNG.db
                     throw;
                 }
             }
-            //SaveChanges();
         }
-        public void SaveAlbumObjects(IEnumerable<AlbumObject> albumObjects)
+        public void SaveCards(IEnumerable<Card> cards)
         {
             int i = 1;
-            foreach (AlbumObject albumObject in albumObjects)
+            foreach (Card card in cards)
             {
                 Console.Write($"\r {i}");
-                AddOrUpdateAlbumObject(albumObject);
+                AddOrUpdateCard(card);
                 i++;
             }
             Console.WriteLine();
         }
 
-        private void AddOrUpdateAlbumObject(AlbumObject albumObject)
+        private void AddOrUpdateCard(Card card)
         {
             try
             {
-                AlbumObject existing = AlbumObjects.Find(albumObject.OracleName, albumObject.Version, albumObject.SetTLA, albumObject.ObjectType, albumObject.LanguageTLA);
+                Card existing = Cards.Find(card.OracleName, card.Version, card.SetTLA, card.ObjectType, card.LanguageTLA);
                 if (existing != null)
                 {
-                    existing.InjectNonNull(albumObject);
+                    existing.InjectNonNull(card);
                 }
                 else
                 {
-                    AlbumObjects.Add(albumObject);
+                    Cards.Add(card);
                 }
-                //SaveChanges();
             }
             catch (DbException)
             {
                 throw;
             }
         }
+        #endregion
 
+        #region maps
+        public HashSet<SetExpansionMap> LoadSetAtlas()
+        {
+            try
+            {
+                var setAtlas = new List<SetExpansionMap>();
+                setAtlas = SetExpansionMaps
+                    .Include(m => m.Set)
+                    .Include(m => m.Expansion)
+                    .ToList();
+                return setAtlas.ToHashSet();
+            }
+            catch (DbException) //should catch both SqlExcelption and SqliteException
+            {
+                throw;
+            }
+
+        }
+        public void SaveSetAtlas(ICollection<SetExpansionMap> setAtlas)
+        {
+            foreach (SetExpansionMap map in setAtlas)
+            {
+                SetExpansionMap existing = SetExpansionMaps.Find(map.SetTLA, map.ExpansionUid);
+                if (existing != null)
+                {
+
+                }
+                else
+                {
+                    SetExpansionMaps.Add(map);
+                }
+            }
+        }
+        public HashSet<CardProductMap> LoadCardAtlas()
+        {
+            try
+            {
+                var cardAtlas = new List<CardProductMap>();
+                cardAtlas = CardProductMaps
+                    .Include(m => m.Card)
+                    .Include(m => m.Product)
+                    .ToList();
+                return cardAtlas.ToHashSet();
+            }
+            catch (DbException) //should catch both SqlExcelption and SqliteException
+            {
+                throw;
+            }
+
+        }
+        public void SaveCardAtlas(ICollection<CardProductMap> cardAtlas)
+        {
+            foreach (CardProductMap map in cardAtlas)
+            {
+                CardProductMap existing = CardProductMaps.Find(map.CardUid, map.ProductUid);
+                if (existing != null)
+                {
+
+                }
+                else
+                {
+                    CardProductMaps.Add(map);
+                }
+            }
+        }
         #endregion
     }
 }

@@ -6,12 +6,12 @@ using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
 namespace LHpiNG.db.EFConfigs
 {
-    class ObjectProductMapConfiguration : IEntityTypeConfiguration<ObjectProductMap>
+    class CardProductMapConfiguration : IEntityTypeConfiguration<CardProductMap>
     {
-        public void Configure(EntityTypeBuilder<ObjectProductMap> modelBuilder)
+        public void Configure(EntityTypeBuilder<CardProductMap> modelBuilder)
         {
             modelBuilder
-                .Property(m => m.AlbumObjectUid)
+                .Property(m => m.CardUid)
                 .HasColumnType("binary(32)")
             ;
             modelBuilder
@@ -19,11 +19,11 @@ namespace LHpiNG.db.EFConfigs
                 .HasColumnType("binary(32)")
             ;
             modelBuilder
-                .HasKey(m => new { m.AlbumObjectUid, m.ProductUid });
+                .HasKey(m => new { m.CardUid, m.ProductUid });
             modelBuilder
-                .HasOne<AlbumObject>(m => m.AlbumObject)
+                .HasOne<Card>(m => m.Card)
                 .WithOne()
-                .HasPrincipalKey<AlbumObject>(o => o.Uid)
+                .HasPrincipalKey<Card>(o => o.Uid)
                 .OnDelete(DeleteBehavior.Cascade)
             ;
             modelBuilder

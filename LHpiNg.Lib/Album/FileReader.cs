@@ -74,9 +74,9 @@ namespace LHpiNG.Album
             return sets;
         }
 
-        public IEnumerable<AlbumObject> ReadObjects()
+        public IEnumerable<Card> ReadCards()
         {
-            List<AlbumObject> albumObjects = new List<AlbumObject>();
+            List<Card> cards = new List<Card>();
             try
             {
                 using (var csv = new CachedCsvReader(new StreamReader(AlbumExportFileName), true, '\t'))
@@ -85,7 +85,7 @@ namespace LHpiNG.Album
                     string[] headers = csv.GetFieldHeaders();
                     foreach (var row in csv)
                     {
-                        AlbumObject albumObject = new AlbumObject
+                        Card card = new Card
                         {
                             //Set	Name (Oracle)	Version	Language	Rarity	Color	Cost	P/T	Type (Oracle)	Number	
                             //Legality	Artist	Foil	Border	Copyright	Comment	Name	Type	Price (R)	Price (F)	Rating
@@ -113,20 +113,20 @@ namespace LHpiNG.Album
                         switch (row.ElementAt(12))
                         {
                             case "Yes":
-                                albumObject.Foilage |= Foilage.Foil;// SetFlag
+                                card.Foilage |= Foilage.Foil;// SetFlag
                                 break;
                             case "No":
-                                albumObject.Foilage |= Foilage.Foil;// SetFlag
-                                albumObject.Foilage |= Foilage.Nonfoil;// SetFlag
+                                card.Foilage |= Foilage.Foil;// SetFlag
+                                card.Foilage |= Foilage.Nonfoil;// SetFlag
                                 break;
                             case "Only":
-                                albumObject.Foilage |= Foilage.Nonfoil;//SetFlag
+                                card.Foilage |= Foilage.Nonfoil;//SetFlag
                                 break;
                         }
                         switch (row.ElementAt(4))
                         {
                             case "L":
-                                albumObject.Rarity = Rarity.BasicLand;
+                                card.Rarity = Rarity.BasicLand;
                                 break;
                             case "C":
                             case "C1":
@@ -135,58 +135,58 @@ namespace LHpiNG.Album
                             case "C4":
                             case "C5":
                             case "CT":// Planar Chaos timeshifted
-                                albumObject.Rarity = Rarity.Common;
+                                card.Rarity = Rarity.Common;
                                 break;
                             case "U":
                             case "U2":
                             case "U3":
                             case "U4":
                             case "UT":// Planar Chaos timeshifted
-                                albumObject.Rarity = Rarity.Uncommon;
+                                card.Rarity = Rarity.Uncommon;
                                 break;
                             case "R":
                             case "U1":
                             case "RT":// Planar Chaos timeshifted
-                                albumObject.Rarity = Rarity.Rare;
+                                card.Rarity = Rarity.Rare;
                                 break;
                             case "M":
-                                albumObject.Rarity = Rarity.Mythic;
+                                card.Rarity = Rarity.Mythic;
                                 break;
                             case "T":
                             case "E":// some Emblems
                             case "O":// fnm doublesided promo tokens
-                                albumObject.Rarity = Rarity.Token;
+                                card.Rarity = Rarity.Token;
                                 break;
                             case "S":// Inventions,Invocations, some Championship Prizes
-                                albumObject.Rarity = Rarity.Special;
+                                card.Rarity = Rarity.Special;
                                 break;
                             case "P":// some Promos
-                                albumObject.Rarity = Rarity.Other;
+                                card.Rarity = Rarity.Other;
                                 break;
                             default:
-                                albumObject.Rarity = Rarity.None;
+                                card.Rarity = Rarity.None;
                                 break;
                         }
-                        string matchedNumber = Regex.Match(albumObject.Number ?? "", @"^T? ?(\d+)").Groups[0].Value;
+                        string matchedNumber = Regex.Match(card.Number ?? "", @"^T? ?(\d+)").Groups[0].Value;
                         if (int.TryParse(matchedNumber, out int parsedNumber))
                         {
-                            albumObject.CollNr = parsedNumber;
+                            card.CollNr = parsedNumber;
                         }
                         if (Enum.TryParse(row.ElementAt(21), true, out ObjectType parsedObjectType))
                         {
-                            albumObject.ObjectType = parsedObjectType;
+                            card.ObjectType = parsedObjectType;
                         }
                         else
                         {
                             throw new FormatException("ObjectType not parsed");
                         }
-                        if (albumObject.OracleName == null || albumObject.Version == null || albumObject.SetTLA == null || albumObject.LanguageTLA == null
-                            || albumObject.OracleName == string.Empty || albumObject.SetTLA == string.Empty || albumObject.LanguageTLA == string.Empty)
+                        if (card.OracleName == null || card.Version == null || card.SetTLA == null || card.LanguageTLA == null
+                            || card.OracleName == string.Empty || card.SetTLA == string.Empty || card.LanguageTLA == string.Empty)
                         {
                             throw new FormatException("Key field not parsed");
                         }
-                        albumObject.Uid = Sha256Helper.GenerateHashBytes(String.Concat(albumObject.OracleName, albumObject.Version, albumObject.SetTLA, albumObject.ObjectType, albumObject.LanguageTLA));
-                        albumObjects.Add(albumObject);
+                        card.Uid = Sha256Helper.GenerateHashBytes(String.Concat(card.OracleName, card.Version, card.SetTLA, card.ObjectType, card.LanguageTLA));
+                        cards.Add(card);
                     }
                 }
             }
@@ -194,14 +194,14 @@ namespace LHpiNG.Album
             {
                 throw;
             }
-            return albumObjects; // found 244731, which matches MA and csv
+            return cards; // found 244731, which matches MA and csv
         }
 
         //public void SetDerivedSetAttributes(IEnumerable<Set> sets)
         //{
         //    foreach (Set set in sets)
         //    {
-        //        set.CardCount = set.AlbumObjects.Where(o => o.ty)
+        //        set.CardCount = set.Cards.Where(o => o.ty)
         //    }
         //}
 

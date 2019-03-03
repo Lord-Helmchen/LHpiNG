@@ -12,9 +12,50 @@ namespace LHpiNG.Maps
     public static class Cartographer
     {
 
-        private static Product FindMatch(AlbumObject albumObject, IEnumerable<Expansion> expansions)
+        public static List<SetExpansionMap> CreateMaps(IEnumerable<Set> sets, IEnumerable<Expansion> expansions)
         {
-            IEnumerable<Product> candidates = FindMatchCandidates(albumObject, expansions);
+            var maps = new HashSet<SetExpansionMap>();
+            foreach (Set set in sets)
+            {
+                HashSet<SetExpansionMap> setMaps = MapSet(set, expansions);
+                maps.UnionWith(setMaps);
+            }
+            return maps.ToList();
+        }
+
+        private static HashSet<SetExpansionMap> MapSet(Set set, IEnumerable<Expansion> expansions)
+        {
+            var maps = new HashSet<SetExpansionMap>();
+            foreach (Card card in set.Cards)
+            {
+                Product match = FindMatch(card, expansions);
+                if (match != null)
+                {
+                    SetExpansionMap map = new SetExpansionMap(card.Set, match.Expansion as Expansion);
+                    if (maps.None(m => m.ExpansionUid == map.ExpansionUid))
+                    {
+                        maps.Add(map);
+                    }
+                }
+            }
+            return maps;
+        }
+
+        private static IEnumerable<Product> FindMatchCandidates(Card card, IEnumerable<Expansion> expansions)
+        {
+            List<Product> candidates = new List<Product>();
+            foreach (Expansion expansion in expansions)
+            {
+                candidates.AddRange(expansion.Products.Where(p => p.EnName == card.OracleName
+                                                            && (int)p.Rarity == (int)card.Rarity
+                                                            && p.CollNr == card.CollNr));
+            }
+            return candidates;
+        }
+
+        private static Product FindMatch(Card card, IEnumerable<Expansion> expansions)
+        {
+            IEnumerable<Product> candidates = FindMatchCandidates(card, expansions);
             switch (candidates.Count())
             {
                 case 0:
@@ -22,6 +63,7 @@ namespace LHpiNG.Maps
                     return candidates.SingleOrDefault();
                 default:
                     Product selected = null;
+                    selected = ManualMatch(card, candidates);
                     //display objects and candidates
                     //manually select correct candidate (or none)
                     return selected;
@@ -29,37 +71,10 @@ namespace LHpiNG.Maps
 
         }
 
-        private static IEnumerable<Product> FindMatchCandidates(AlbumObject albumObject, IEnumerable<Expansion> expansions)
+        private static Product ManualMatch(Card card, IEnumerable<Product> candidates)
         {
-            List<Product> candidates = new List<Product>();
-            foreach (Expansion expansion in expansions)
-            {
-                candidates.AddRange(expansion.Products.Where(p => p.EnName == albumObject.OracleName
-                                                            && (int)p.Rarity == (int)albumObject.Rarity
-                                                            && p.CollNr == albumObject.CollNr));
-            }
-            return candidates;
-        }
 
-        public static List<SetExpansionMap> CreateMaps(IEnumerable<Set> sets, IEnumerable<Expansion> expansions)
-        {
-            var maps = new List<SetExpansionMap>();
-            foreach (Set set in sets)
-            {
-                foreach (AlbumObject albumObject in set.AlbumObjects)
-                {
-                    Product match = FindMatch(albumObject, expansions);
-                    if (match != null)
-                    {
-                        SetExpansionMap map = new SetExpansionMap(albumObject.Set, match.Expansion as Expansion);
-                        if (maps.None(m => m.ExpansionUid == map.ExpansionUid))
-                        {
-                            maps.Add(map);
-                        }
-                    }
-                }
-            }
-            return maps;
+            throw new NotImplementedException();
         }
     }
 }

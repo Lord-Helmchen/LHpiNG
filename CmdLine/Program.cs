@@ -16,28 +16,24 @@ namespace LHpiNG
     class Program
     {
         public static Importer Importer { get; set; }
-        public static EFContext Database { get; set; }
+        //public static EFContext Database { get; set; }
         public static FileReader Reader { get; set; }
 
         public static ExpansionList ExpansionList { get; set; }
         public static IEnumerable<Album.Language> AlbumLanguages { get; set; }
         public static IEnumerable<Album.Set> AlbumSets { get; set; }
-        public static IEnumerable<Album.AlbumObject> AlbumObjects { get; set; }
-        public static IEnumerable<ObjectProductMap> CardMap { get; set; }
+        public static IEnumerable<Album.Card> Cards { get; set; }
+        public static IEnumerable<CardProductMap> CardMap { get; set; }
         public static IEnumerable<SetExpansionMap> SetMap { get; set; }
 
         static void Main(string[] args)
         {
 
-            Database = new SQLContext();
+            //Database = new SQLContext();
             ExpansionList = new ExpansionList();
 
             Console.WriteLine("Program started!");
             MainMenu();
-
-            //Console.WriteLine("Press any key to close the window!");
-            //Console.ReadKey();
-            // Go to http://aka.ms/dotnet-get-started-console to continue learning how to build a console app! 
         }
 
         private static void PrintMainMenu()
@@ -48,8 +44,8 @@ namespace LHpiNG
             Console.WriteLine("\t2 - Market");
             Console.WriteLine("\t3 - Album");
             Console.WriteLine("\t4 - Mapping");
-            Console.WriteLine("\t5 - Save changes to Database");
-            Console.WriteLine("\t6 - Load Sets and Expansions from Database");
+            Console.WriteLine("\t5 - Load Sets and Expansions from Database");
+            Console.WriteLine("\t5 - Save Sets and Expansions to Database");
             Console.WriteLine("\t9 - Test()");
             Console.WriteLine("\t0 - quit");
         }
@@ -79,12 +75,21 @@ namespace LHpiNG
                         PrintMainMenu();
                         break;
                     case "5":
-                        Database.SaveChanges();
+                        using (EFContext database = new SQLContext())
+                        {
+                            ExpansionList = database.LoadExpansionList();
+                            AlbumSets = database.LoadSets();
+                        }
                         break;
                     case "6":
-                        ExpansionList = Database.LoadExpansionList();
-                        AlbumSets = Database.LoadSets();
+                        using (EFContext database = new SQLContext())
+                        {
+                            database.SaveExpansionList(ExpansionList);
+                            database.SaveSets(AlbumSets);
+                            database.SaveChanges();
+                        }
                         break;
+
                     case "9":
                         Test();
                         Console.WriteLine(String.Format("Test() done"));
@@ -103,15 +108,11 @@ namespace LHpiNG
         {
             Console.WriteLine("\nMarket Menu");
             Console.WriteLine("Choose which method to run:");
-            Console.WriteLine("\t1 - Print expansionList.Length");
-            Console.WriteLine("\t2 - Load Expansions from DB");
-            Console.WriteLine("\t3 - Sync Expansions to DbSet");
-            Console.WriteLine("\t4 - Scrape Expansions from Web");
-            Console.WriteLine("\t5 - null expansionList");
-
-            Console.WriteLine("\t6 - Scrape Products from Web");
-            Console.WriteLine("\t7 - test priceguide scraping");
-
+            Console.WriteLine("\t1 - Load Expansions from DB");
+            Console.WriteLine("\t2 - Save Expansions to DB");
+            Console.WriteLine("\t3 - Scrape Expansions from Web");
+            Console.WriteLine("\t4 - Scrape Products from Web");
+            Console.WriteLine("\t5 - test priceguide scraping");
             Console.WriteLine("\t8 - reduce expansionList to debug-worthy cases");
             Console.WriteLine("\t0 - return");
         }
@@ -128,31 +129,29 @@ namespace LHpiNG
                 Console.Write("Your option? ");
                 switch (Console.ReadLine())
                 {
-                    case "1"://noop
-                        Console.WriteLine(String.Format("{0} Expansions in List", ExpansionList.Expansions.Count));
+                    case "1":
+                        using (EFContext database = new SQLContext())
+                        {
+                            ExpansionList = database.LoadExpansionList();
+                            Console.WriteLine(String.Format("{0} Expansions loaded", ExpansionList.Expansions.Count));
+                        }
                         break;
                     case "2":
-                        ExpansionList = Database.LoadExpansionList();
-                        Console.WriteLine(String.Format("{0} Expansions loaded", ExpansionList.Expansions.Count));
+                        using (EFContext database = new SQLContext())
+                        {
+                            database.SaveExpansionList(ExpansionList);
+                            database.SaveChanges();
+                            Console.WriteLine(String.Format("{0} Expansions saved", ExpansionList.Expansions.Count));
+                        }
                         break;
                     case "3":
-                        Database.SaveExpansionList(ExpansionList);
-                        Console.WriteLine(String.Format("{0} Expansions saved", ExpansionList.Expansions.Count));
-                        break;
-                    case "4":
                         ExpansionList = Importer.ImportExpansionList();
                         Console.WriteLine(String.Format("{0} Expansions scraped", ExpansionList.Expansions.Count));
                         break;
-                    case "5"://null list
-                        ExpansionList = new ExpansionList();
-                        Console.WriteLine(String.Format("{0} Expansions in List", ExpansionList.Expansions.Count));
-                        break;
-                    case "6":
-                        //ExpansionList.Expansions = ExpansionList.Expansions.Where(e => e.ProductCount != e.Products.Count()).ToList();
-                        //ExpansionList.Expansions = ExpansionList.Expansions.Where(e => e.Products.Any(p => p.Rarity == Cardmarket.Rarity.None)).ToList() ;
+                    case "4":
                         ExpansionList = Importer.ImportProducts(ExpansionList);
                         break;
-                    case "7":
+                    case "5":
                         TestScrapePrice(Importer, ExpansionList);
                         break;
                     case "8":
@@ -173,15 +172,12 @@ namespace LHpiNG
         {
             Console.WriteLine("\nAlbum Menu");
             Console.WriteLine("Choose which method to run:");
-            Console.WriteLine("\t1 - Load Languages from database");
-            Console.WriteLine("\t2 - Read Languages from file");
-            Console.WriteLine("\t3 - Sync Languages to DbSet");
-            Console.WriteLine("\t4 - Load Sets from database");
-            Console.WriteLine("\t5 - Read Sets from file");
-            Console.WriteLine("\t6 - Sync Sets to DbSet");
-            Console.WriteLine("\t7 - Load Objects from database");
+            Console.WriteLine("\t1 - Read Languages from file");
+            Console.WriteLine("\t2 - Read Sets from file");
             Console.WriteLine("\t8 - Read Objects from file");
-            Console.WriteLine("\t9 - Sync Objects to DbSet");
+            Console.WriteLine("\t4 - Save Languages to DB");
+            Console.WriteLine("\t5 - Save Sets to DB");
+            Console.WriteLine("\t6 - Save Objects to DB");
             Console.WriteLine("\t0 - return");
 
             Reader = Reader ?? new FileReader();
@@ -193,31 +189,33 @@ namespace LHpiNG
                 switch (Console.ReadLine())
                 {
                     case "1":
-                        AlbumLanguages = Database.LoadLanguages();
-                        break;
-                    case "2":
                         AlbumLanguages = Reader.ReadLanguages();
                         break;
-                    case "3":
-                        Database.SaveLanguages(AlbumLanguages);
-                        break;
-                    case "4":
-                        AlbumSets = Database.LoadSets();
-                        break;
-                    case "5":
+                    case "2":
                         AlbumSets = Reader.ReadSets();
                         break;
+                    case "3":
+                        Cards = Reader.ReadCards();
+                        break;
+                    case "4":
+                        using (EFContext database = new SQLContext())
+                        {
+                            database.SaveLanguages(AlbumLanguages);
+                            database.SaveChanges();
+                        }
+                        break;
+                    case "5":
+                        using (EFContext database = new SQLContext())
+                        {
+                            database.SaveSets(AlbumSets);
+                            database.SaveChanges();
+                        } break;
                     case "6":
-                        Database.SaveSets(AlbumSets);
-                        break;
-                    case "7":
-                        AlbumObjects = Database.LoadObjects();
-                        break;
-                    case "8":
-                        AlbumObjects = Reader.ReadObjects();
-                        break;
-                    case "9":
-                        Database.SaveAlbumObjects(AlbumObjects);
+                        using (EFContext database = new SQLContext())
+                        {
+                            database.SaveCards(Cards);
+                            database.SaveChanges();
+                        }
                         break;
                     case "0":
                         quit = true;
@@ -235,7 +233,7 @@ namespace LHpiNG
             Console.WriteLine("Choose which method to run:");
             Console.WriteLine("\t1 - Test Fuzzy Match sets to expansions");
             Console.WriteLine("\t2 - map expansions to sets");
-            Console.WriteLine("\t3 - Sync maps to DbSet");
+            Console.WriteLine("\t3 - Save maps to DB");
             Console.WriteLine("\t0 - return");
 
             Reader = Reader ?? new FileReader();
@@ -256,7 +254,12 @@ namespace LHpiNG
                         Cartographer.CreateMaps(AlbumSets, ExpansionList.Expansions);
                         break;
                     case "3":
-                        Database.ObjectProductMap.AddRange(CardMap);
+                        using (EFContext database = new SQLContext())
+                        {
+                            database.CardProductMaps.AddRange(CardMap);
+                            database.SetExpansionMaps.AddRange(SetMap);
+                            database.SaveChanges();
+                        }
                         break;
                     case "4":
                     case "5":

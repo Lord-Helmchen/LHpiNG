@@ -1,5 +1,4 @@
-﻿using LHpiNg.Album;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace LHpiNG.Album
@@ -11,7 +10,7 @@ namespace LHpiNG.Album
         public int Id { get; set; }
         public string Name { get; set; }
         //information
-        public ICollection<AlbumObject> AlbumObjects { get; set; }
+        public ICollection<Card> Cards { get; set; }
         //public ICollection<Language> Languages { get; set; }//postponed, many-to-many in EFCore needs join table
         public int? CardCount { get; set; }
         public int? TokenCount { get; set; }

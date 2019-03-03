@@ -10,9 +10,9 @@ using System.Threading.Tasks;
 
 namespace LHpiNG.db.EFConfigs
 {
-    class AlbumObjectConfiguration : IEntityTypeConfiguration<AlbumObject>
+    class CardConfiguration : IEntityTypeConfiguration<Card>
     {
-        public void Configure(EntityTypeBuilder<AlbumObject> modelBuilder)
+        public void Configure(EntityTypeBuilder<Card> modelBuilder)
         {
             modelBuilder
                 .Property(o => o.OracleName)
@@ -53,7 +53,7 @@ namespace LHpiNG.db.EFConfigs
             ;
             modelBuilder
                 .HasOne<Set>(o => o.Set)
-                .WithMany(s => s.AlbumObjects)
+                .WithMany(s => s.Cards)
                 .HasForeignKey(o => o.SetTLA)
                 .HasPrincipalKey(s => s.TLA)
                 .OnDelete(DeleteBehavior.Cascade)

@@ -8,17 +8,19 @@ using System.Threading.Tasks;
 
 namespace LHpiNG.Maps
 {
-    public class ObjectProductMap
+    public class CardProductMap
     {
-        public byte[] AlbumObjectUid { get; set; }
-        public AlbumObject AlbumObject { get; set; }
+        public byte[] CardUid { get; set; }
+        public Card Card { get; set; }
         public byte[] ProductUid { get; set; }
         public Product Product { get; set; }
 
-        public ObjectProductMap(AlbumObject albumObject, Product product) : base()
+
+        public CardProductMap() : base() { }
+        public CardProductMap(Card card, Product product) : base()
         {
-            AlbumObject = albumObject;
-            AlbumObjectUid = albumObject.Uid;
+            Card = card;
+            CardUid = card.Uid;
             Product = product;
             ProductUid = product.Uid;
         }

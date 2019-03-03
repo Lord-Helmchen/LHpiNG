@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LHpiNG.db.Migrations
 {
     [DbContext(typeof(SQLContext))]
-    [Migration("20190226210343_RecreateFromScratch")]
-    partial class RecreateFromScratch
+    [Migration("20190303193745_RenameAlbumObjectToCard")]
+    partial class RenameAlbumObjectToCard
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -22,7 +22,7 @@ namespace LHpiNG.db.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128)
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("LHpiNG.Album.AlbumObject", b =>
+            modelBuilder.Entity("LHpiNG.Album.Card", b =>
                 {
                     b.Property<string>("OracleName");
 
@@ -60,7 +60,7 @@ namespace LHpiNG.db.Migrations
 
                     b.HasIndex("SetTLA");
 
-                    b.ToTable("AlbumObjects");
+                    b.ToTable("Cards");
                 });
 
             modelBuilder.Entity("LHpiNG.Album.Language", b =>
@@ -213,23 +213,23 @@ namespace LHpiNG.db.Migrations
                     b.ToTable("Products");
                 });
 
-            modelBuilder.Entity("LHpiNG.Maps.ObjectProductMap", b =>
+            modelBuilder.Entity("LHpiNG.Maps.CardProductMap", b =>
                 {
-                    b.Property<byte[]>("AlbumObjectUid")
+                    b.Property<byte[]>("CardUid")
                         .HasColumnType("binary(32)");
 
                     b.Property<byte[]>("ProductUid")
                         .HasColumnType("binary(32)");
 
-                    b.HasKey("AlbumObjectUid", "ProductUid");
+                    b.HasKey("CardUid", "ProductUid");
 
-                    b.HasIndex("AlbumObjectUid")
+                    b.HasIndex("CardUid")
                         .IsUnique();
 
                     b.HasIndex("ProductUid")
                         .IsUnique();
 
-                    b.ToTable("ObjectProductMap");
+                    b.ToTable("CardProductMaps");
                 });
 
             modelBuilder.Entity("LHpiNG.Maps.SetExpansionMap", b =>
@@ -248,7 +248,7 @@ namespace LHpiNG.db.Migrations
                     b.HasIndex("SetTLA")
                         .IsUnique();
 
-                    b.ToTable("SetExpansionMap");
+                    b.ToTable("SetExpansionMaps");
                 });
 
             modelBuilder.Entity("LHpiNG.db.State", b =>
@@ -288,7 +288,7 @@ namespace LHpiNG.db.Migrations
                     b.HasDiscriminator().HasValue("Expansion");
                 });
 
-            modelBuilder.Entity("LHpiNG.Album.AlbumObject", b =>
+            modelBuilder.Entity("LHpiNG.Album.Card", b =>
                 {
                     b.HasOne("LHpiNG.Album.Language", "Language")
                         .WithMany()
@@ -297,7 +297,7 @@ namespace LHpiNG.db.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.HasOne("LHpiNG.Album.Set", "Set")
-                        .WithMany("AlbumObjects")
+                        .WithMany("Cards")
                         .HasForeignKey("SetTLA")
                         .HasPrincipalKey("TLA")
                         .OnDelete(DeleteBehavior.Cascade);
@@ -326,17 +326,17 @@ namespace LHpiNG.db.Migrations
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("LHpiNG.Maps.ObjectProductMap", b =>
+            modelBuilder.Entity("LHpiNG.Maps.CardProductMap", b =>
                 {
-                    b.HasOne("LHpiNG.Album.AlbumObject", "AlbumObject")
+                    b.HasOne("LHpiNG.Album.Card", "Card")
                         .WithOne()
-                        .HasForeignKey("LHpiNG.Maps.ObjectProductMap", "AlbumObjectUid")
-                        .HasPrincipalKey("LHpiNG.Album.AlbumObject", "Uid")
+                        .HasForeignKey("LHpiNG.Maps.CardProductMap", "CardUid")
+                        .HasPrincipalKey("LHpiNG.Album.Card", "Uid")
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("LHpiNG.Cardmarket.Product", "Product")
                         .WithOne()
-                        .HasForeignKey("LHpiNG.Maps.ObjectProductMap", "ProductUid")
+                        .HasForeignKey("LHpiNG.Maps.CardProductMap", "ProductUid")
                         .HasPrincipalKey("LHpiNG.Cardmarket.Product", "Uid")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
