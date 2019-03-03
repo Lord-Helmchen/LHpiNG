@@ -39,7 +39,7 @@ public static class Sha256Helper
         return hashBytes;
     }
 
-    private static string HexStringFromBytes(IEnumerable<byte> bytes)
+    public static string HexStringFromBytes(IEnumerable<byte> bytes)
     {
         var sb = new StringBuilder();
 

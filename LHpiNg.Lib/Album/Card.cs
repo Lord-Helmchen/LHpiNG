@@ -7,17 +7,17 @@ using System.Threading.Tasks;
 
 namespace LHpiNG.Album
 {
-    public class Card
+    public class Card : IEquatable<Card>
     {
-        public byte[] Uid { get; set; }
+        public byte[] Uid { get; set; }             // altKey
         //MA identification
-        public string OracleName { get; set; }
-        public string Version { get; set; }
-        public string SetTLA { get; set; }
+        public string OracleName { get; set; }      // pKey.1
+        public string Version { get; set; }         // pKey.2
+        public string SetTLA { get; set; }          // pKey.3
         public Set Set { get; set; }
-        public string LanguageTLA { get; set; }
+        public string LanguageTLA { get; set; }     // pKey.5
         public Language Language { get; set; }
-        public ObjectType ObjectType { get; set; }
+        public ObjectType ObjectType { get; set; }  // pKey.4
         //information
         public string Number { get; set; }
         public int? CollNr { get; set; }
@@ -52,5 +52,25 @@ namespace LHpiNG.Album
         [NotMapped]
         public string Rating { get; set; }
 
+        bool IEquatable<Card>.Equals(Card other)
+        {
+            if (other == null) return false;
+            return OracleName == other.OracleName
+                && Version == other.Version
+                && SetTLA == other.SetTLA
+                && ObjectType == other.ObjectType
+                && LanguageTLA == other.LanguageTLA;
+        }
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != GetType()) return false;
+            return Equals(obj as Card);
+        }
+        public override int GetHashCode()
+        {
+            return (OracleName, Version, SetTLA, ObjectType, LanguageTLA).GetHashCode();
+        }
     }
 }

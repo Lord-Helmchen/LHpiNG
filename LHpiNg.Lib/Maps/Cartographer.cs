@@ -9,18 +9,18 @@ using System.Threading.Tasks;
 
 namespace LHpiNG.Maps
 {
-    public static class Cartographer
+    public class Cartographer
     {
 
-        public static List<SetExpansionMap> CreateMaps(IEnumerable<Set> sets, IEnumerable<Expansion> expansions)
+        public static Atlas CreateMaps(IEnumerable<Set> sets, IEnumerable<Expansion> expansions)
         {
-            var maps = new HashSet<SetExpansionMap>();
+            var atlas = new Atlas();
             foreach (Set set in sets)
             {
                 HashSet<SetExpansionMap> setMaps = MapSet(set, expansions);
-                maps.UnionWith(setMaps);
+                atlas.SetMaps.UnionWith(setMaps);
             }
-            return maps.ToList();
+            return atlas;
         }
 
         private static HashSet<SetExpansionMap> MapSet(Set set, IEnumerable<Expansion> expansions)

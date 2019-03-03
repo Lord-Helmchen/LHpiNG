@@ -8,7 +8,7 @@ using System.Linq;
 namespace LHpiNG.Cardmarket
 {
     [Table("Expansions")]
-    public class ExpansionEntity
+    public class ExpansionEntity : IEquatable<ExpansionEntity>
     {
         public int? IdExpansion { get; set; }                       // Expansion's ID
         //[Key, Column("Name")]
@@ -52,6 +52,23 @@ namespace LHpiNG.Cardmarket
             IdGame = entity.IdGame;
             Links = entity.Links;
             Uid = entity.Uid;
+        }
+
+        bool IEquatable<ExpansionEntity>.Equals(ExpansionEntity other)
+        {
+            if (other == null) return false;
+            return EnName == other.EnName;
+        }
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != GetType()) return false;
+            return Equals(obj as ExpansionEntity);
+        }
+        public override int GetHashCode()
+        {
+            return (EnName).GetHashCode();
         }
 
     }

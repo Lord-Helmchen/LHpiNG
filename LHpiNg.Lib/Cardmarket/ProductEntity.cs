@@ -7,7 +7,7 @@ using System.Linq;
 namespace LHpiNG.Cardmarket
 {
     [Table("Products")]
-    public class ProductEntity
+    public class ProductEntity : IEquatable<ProductEntity>
     {
         public int? IdProduct { get; set; }                          // Product ID
         public int? IdMetaproduct { get; set; }                     // Metaproduct ID
@@ -71,6 +71,24 @@ namespace LHpiNG.Cardmarket
             Expansion = entity.Expansion;
             PriceGuide = entity.PriceGuide;
             Reprint = entity.Reprint;
+        }
+
+        bool IEquatable<ProductEntity>.Equals(ProductEntity other)
+        {
+            if (other == null) return false;
+            return EnName == other.EnName
+                && ExpansionName== other.ExpansionName;
+        }
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != GetType()) return false;
+            return Equals(obj as ProductEntity);
+        }
+        public override int GetHashCode()
+        {
+            return (EnName, ExpansionName).GetHashCode();
+        }
     }
-}
 }

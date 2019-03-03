@@ -208,7 +208,8 @@ namespace LHpiNG
                         {
                             database.SaveSets(AlbumSets);
                             database.SaveChanges();
-                        } break;
+                        }
+                        break;
                     case "6":
                         using (EFContext database = new SQLContext())
                         {
@@ -305,8 +306,15 @@ namespace LHpiNG
 
         private static void Test()
         {
-            Expansion exp = ExpansionList.Expansions.FirstOrDefault();
-            var foo = exp.EnName.GetHashCode();
+            IList<Card> list;
+            using (EFContext ctx = new SQLContext())
+            {
+                list = ctx.Cards.ToList();
+            }
+            HashSet<Card> set = list.ToHashSet();
+            Console.WriteLine($"list contains {list.Count()} iteml, set contains {set.Count()} elements.");
+            Card element = set.FirstOrDefault();
+            Console.WriteLine($"{element.OracleName} has hash {element.GetHashCode()} and uid {Sha256Helper.HexStringFromBytes(element.Uid)}");
         }
 
         private static ExpansionList CullExpansionList(ExpansionList expansionList)
