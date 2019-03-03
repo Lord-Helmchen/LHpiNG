@@ -16,7 +16,6 @@ namespace LHpiNG
     class Program
     {
         public static Importer Importer { get; set; }
-        //public static EFContext Database { get; set; }
         public static FileReader Reader { get; set; }
 
         public static ExpansionList ExpansionList { get; set; }

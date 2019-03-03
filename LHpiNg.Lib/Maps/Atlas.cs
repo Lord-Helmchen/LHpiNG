@@ -6,10 +6,15 @@ using System.Threading.Tasks;
 
 namespace LHpiNG.Maps
 {
-    class Atlas
+    public class Atlas
     {
-        HashSet<SetExpansionMap> SetAtlas { get; set; }
-        HashSet<CardProductMap> CardAtlas { get; set; }
-    }
+        public HashSet<SetExpansionMap> SetMaps { get; set; }
+        public HashSet<CardProductMap> CardMaps { get; set; }
 
+        public Atlas() : base()
+        {
+            this.SetMaps = new HashSet<SetExpansionMap>();
+            this.CardMaps = new HashSet<CardProductMap>();
+        }
+    }
 }

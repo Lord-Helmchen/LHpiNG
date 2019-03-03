@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace LHpiNG.Album
 {
-    public class FileReader
+    public class FileReader : IFromAlbum
     {
         private string AlbumFilePath { get; set; }
         private string AlbumExportFileName { get; set; }
