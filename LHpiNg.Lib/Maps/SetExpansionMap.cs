@@ -25,7 +25,7 @@ namespace LHpiNG.Maps
             ExpansionUid = expansion.Uid;
         }
 
-        bool IEquatable<SetExpansionMap>.Equals(SetExpansionMap other)
+        public bool Equals(SetExpansionMap other)
         {
             if (other == null) return false;
             return SetTLA == other.SetTLA

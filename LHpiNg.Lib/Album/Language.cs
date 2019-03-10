@@ -9,7 +9,7 @@ namespace LHpiNG.Album
         public string M15Abbr { get; set; }
         public string Name { get; set; }
 
-        bool IEquatable<Language>.Equals(Language other)
+        public bool Equals(Language other)
         {
             if (other == null) return false;
             return Id == other.Id

@@ -44,7 +44,7 @@ namespace LHpiNG
             Console.WriteLine("\t3 - Album");
             Console.WriteLine("\t4 - Mapping");
             Console.WriteLine("\t5 - Load Sets and Expansions from Database");
-            Console.WriteLine("\t5 - Save Sets and Expansions to Database");
+            Console.WriteLine("\t6 - Save Sets and Expansions to Database");
             Console.WriteLine("\t9 - Test()");
             Console.WriteLine("\t0 - quit");
         }

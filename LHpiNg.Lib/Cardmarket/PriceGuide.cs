@@ -36,7 +36,7 @@ namespace LHpiNG.Cardmarket
             }
         }
 
-        bool IEquatable<PriceGuide>.Equals(PriceGuide other)
+        public bool Equals(PriceGuide other)
         {
             if (other == null) return false;
             return ProductName == other.ProductName

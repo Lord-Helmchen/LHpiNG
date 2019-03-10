@@ -73,7 +73,7 @@ namespace LHpiNG.Cardmarket
             Reprint = entity.Reprint;
         }
 
-        bool IEquatable<ProductEntity>.Equals(ProductEntity other)
+        public bool Equals(ProductEntity other)
         {
             if (other == null) return false;
             return EnName == other.EnName

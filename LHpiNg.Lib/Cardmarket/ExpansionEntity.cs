@@ -54,7 +54,7 @@ namespace LHpiNG.Cardmarket
             Uid = entity.Uid;
         }
 
-        bool IEquatable<ExpansionEntity>.Equals(ExpansionEntity other)
+        public bool Equals(ExpansionEntity other)
         {
             if (other == null) return false;
             return EnName == other.EnName;

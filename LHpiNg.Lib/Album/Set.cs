@@ -20,7 +20,7 @@ namespace LHpiNG.Album
         public int? ReplicaCount { get; set; }
         public Foilage Foilage { get; set; }
 
-        bool IEquatable<Set>.Equals(Set other)
+        public bool Equals(Set other)
         {
             if (other == null) return false;
             return Id == other.Id

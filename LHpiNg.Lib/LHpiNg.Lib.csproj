@@ -91,10 +91,10 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="FSharp.Core">
-      <Version>4.6.1</Version>
+      <Version>4.6.2</Version>
     </PackageReference>
     <PackageReference Include="HtmlAgilityPack">
-      <Version>1.8.14</Version>
+      <Version>1.9.2</Version>
     </PackageReference>
     <PackageReference Include="LumenWorks.Framework.IO">
       <Version>3.8.0</Version>

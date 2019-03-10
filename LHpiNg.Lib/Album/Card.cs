@@ -52,7 +52,7 @@ namespace LHpiNG.Album
         [NotMapped]
         public string Rating { get; set; }
 
-        bool IEquatable<Card>.Equals(Card other)
+        public bool Equals(Card other)
         {
             if (other == null) return false;
             return OracleName == other.OracleName

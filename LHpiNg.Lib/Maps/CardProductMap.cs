@@ -26,7 +26,7 @@ namespace LHpiNG.Maps
             ProductUid = product.Uid;
         }
 
-        bool IEquatable<CardProductMap>.Equals(CardProductMap other)
+        public bool Equals(CardProductMap other)
         {
             if (other == null) return false;
             return CardUid.ByteArrayCompare(other.CardUid)
