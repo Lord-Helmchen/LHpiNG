@@ -5,7 +5,7 @@
 //using System.Threading.Tasks;
 //using LHpiNG.Cardmarket;
 
-//namespace LHpiNG.db
+//namespace LHpiNG.DB
 //{
 //    //TODO compare with https://github.com/msallin/SQLiteCodeFirst/tree/master/SQLite.CodeFirst.Console
 

@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace LHpiNG.db.Migrations
+namespace LHpiNG.DB.Migrations
 {
     public partial class RenameAlbumObjectToCard : Migration
     {

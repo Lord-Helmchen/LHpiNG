@@ -7,11 +7,11 @@ using System.Data.Common;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using LHpiNG.db.EFConfigs;
+using LHpiNG.DB.EFConfigs;
 using LHpiNG.Album;
 using LHpiNG.Maps;
 
-namespace LHpiNG.db
+namespace LHpiNG.DB
 {
     public abstract class EFContext : DbContext, ICardmarketData, IAlbumData
     {
@@ -35,6 +35,11 @@ namespace LHpiNG.db
             //update: we definitely don't want it in the constructor, as this messes with removing migrations
             //https://docs.microsoft.com/en-us/ef/core/managing-schemas/migrations/#apply-migrations-at-runtime
             //this.Database.Migrate();
+        }
+
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            optionsBuilder.EnableSensitiveDataLogging();
         }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -72,8 +77,8 @@ namespace LHpiNG.db
                     Expansions = Expansions
                         .Include(e => e.Products)
                             .ThenInclude(p => p.PriceGuides)
-                        .ToList()
-                };
+                        .AsNoTracking().ToList()
+            };
                 expansionList.FetchedOn = State.LastOrDefault()?.ExpansionListFetchDate ?? DateTime.MinValue;
 
                 return expansionList;
@@ -86,11 +91,15 @@ namespace LHpiNG.db
 
         public void SaveExpansionList(ExpansionList expansionList)
         {
+            int i = 1;
+            int j = expansionList.Expansions.Count();
             try
             {
                 foreach (Expansion expansion in expansionList)
                 {
+                    Console.Write($"\r {i}/{j} : {expansion.EnName}");
                     AddOrUpdateExpansion(expansion);
+                    i++;
                 }
                 State.LastOrDefault().ExpansionListFetchDate = expansionList.FetchedOn;
             }
@@ -98,6 +107,7 @@ namespace LHpiNG.db
             {
                 throw;
             }
+            Console.WriteLine();
         }
 
         public void AddOrUpdateExpansion(Expansion expansion)
@@ -128,7 +138,8 @@ namespace LHpiNG.db
         {
             try
             {
-                Product existing = Products.Find(product.EnName, product.ExpansionName);
+                //Product existing = Products.Find(product.EnName, product.ExpansionName);
+                Product existing = Products.SingleOrDefault(p => p.Uid == product.Uid);// faster by factor 3
                 if (existing != null)
                 {
                     foreach (PriceGuide priceGuide in product.PriceGuides)
@@ -174,12 +185,12 @@ namespace LHpiNG.db
         #endregion
 
         #region Album
+        [Obsolete]
         public IEnumerable<Language> LoadLanguages()
         {
             try
             {
-                var languages = new List<Language>();
-                languages = Languages.ToList();
+                var languages = Languages.AsNoTracking().ToList();
                 return languages;
             }
             catch (DbException) //should catch both SqlExcelption and SqliteException
@@ -191,11 +202,10 @@ namespace LHpiNG.db
         {
             try
             {
-                var sets = new List<Set>();
-                sets = Sets
+                var sets = Sets
                     .Include(s => s.Cards)
                         .ThenInclude(o => o.Language)
-                    .ToList();
+                    .AsNoTracking().ToList();
                 return sets;
 
             }
@@ -204,13 +214,13 @@ namespace LHpiNG.db
                 throw;
             }
         }
-        public IEnumerable<Card> LoadObjects()
+        [Obsolete]
+        public IEnumerable<Card> LoadCards()
         {
             try
             {
-                var cards = new List<Card>();
-                cards = Cards
-                    .ToList();
+                var cards = Cards
+                    .AsNoTracking().ToList();
                 return cards;
 
             }
@@ -246,8 +256,11 @@ namespace LHpiNG.db
 
         public void SaveSets(IEnumerable<Set> sets)
         {
+            int i = 1;
+            int j = sets.Count();
             foreach (Set set in sets)
             {
+                Console.Write($"\r {i}/{j} : {set.TLA}");
                 try
                 {
                     Set existing = Sets.Find(set.Id);
@@ -269,14 +282,17 @@ namespace LHpiNG.db
                 {
                     throw;
                 }
+                i++;
             }
+            Console.WriteLine();
         }
         public void SaveCards(IEnumerable<Card> cards)
         {
             int i = 1;
+            int j = cards.Count();
             foreach (Card card in cards)
             {
-                Console.Write($"\r {i}");
+                Console.Write($"\r {i}/{j}");
                 AddOrUpdateCard(card);
                 i++;
             }
@@ -287,7 +303,8 @@ namespace LHpiNG.db
         {
             try
             {
-                Card existing = Cards.Find(card.OracleName, card.Version, card.SetTLA, card.ObjectType, card.LanguageTLA);
+                //Card existing = Cards.Find(card.OracleName, card.Version, card.SetTLA, card.ObjectType, card.LanguageTLA);//slow, need faster index
+                Card existing = Cards.SingleOrDefault(c => c.Uid == card.Uid);
                 if (existing != null)
                 {
                     existing.InjectNonNull(card);

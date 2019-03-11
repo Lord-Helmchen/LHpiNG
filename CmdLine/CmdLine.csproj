@@ -72,11 +72,7 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\LHpiNG.db\LHpiNG.db.csproj">
-      <Project>{E226197C-0546-43D4-9DF6-5AC6BD867E70}</Project>
-      <Name>LHpiNG.db</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\LHpiNg.Lib\LHpiNG.Lib.csproj">
+    <ProjectReference Include="..\LHpiNG.Lib\LHpiNG.Lib.csproj">
       <Project>{92324EEB-BFBC-4AD0-B066-B392219DC302}</Project>
       <Name>LHpiNG.Lib</Name>
     </ProjectReference>

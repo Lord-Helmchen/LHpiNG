@@ -1,5 +1,5 @@
 ﻿using LHpiNG.Cardmarket;
-using LHpiNG.db;
+using LHpiNG.DB;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -83,7 +83,7 @@ namespace LHpiNG
                     case "6":
                         using (EFContext database = new SQLContext())
                         {
-                            database.SaveExpansionList(ExpansionList);
+                            //database.SaveExpansionList(ExpansionList);
                             database.SaveSets(AlbumSets);
                             database.SaveChanges();
                         }

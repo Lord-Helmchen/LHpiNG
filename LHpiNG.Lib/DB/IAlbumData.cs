@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
-namespace LHpiNG.db
+namespace LHpiNG.DB
 {
     public interface IAlbumData
     {
@@ -16,7 +16,7 @@ namespace LHpiNG.db
         DbSet<Set> Sets { get; set; }
 
         IEnumerable<Language> LoadLanguages();
-        IEnumerable<Card> LoadObjects();
+        IEnumerable<Card> LoadCards();
         IEnumerable<Set> LoadSets();
         void SaveCards(IEnumerable<Card> cards);
         void SaveLanguages(IEnumerable<Language> languages);

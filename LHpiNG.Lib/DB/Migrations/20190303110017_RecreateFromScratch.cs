@@ -2,7 +2,7 @@
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace LHpiNG.db.Migrations
+namespace LHpiNG.DB.Migrations
 {
     public partial class RecreateFromScratch : Migration
     {

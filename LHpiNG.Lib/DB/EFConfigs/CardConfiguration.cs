@@ -8,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LHpiNG.db.EFConfigs
+namespace LHpiNG.DB.EFConfigs
 {
     class CardConfiguration : IEntityTypeConfiguration<Card>
     {

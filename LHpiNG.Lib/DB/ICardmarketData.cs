@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 
-namespace LHpiNG.db
+namespace LHpiNG.DB
 {
     public interface ICardmarketData
     {

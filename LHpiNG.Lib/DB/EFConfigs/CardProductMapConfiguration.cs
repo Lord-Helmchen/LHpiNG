@@ -4,7 +4,7 @@ using LHpiNG.Maps;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace LHpiNG.db.EFConfigs
+namespace LHpiNG.DB.EFConfigs
 {
     class CardProductMapConfiguration : IEntityTypeConfiguration<CardProductMap>
     {
