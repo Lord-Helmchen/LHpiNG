@@ -78,7 +78,7 @@ namespace LHpiNG.DB
                         .Include(e => e.Products)
                             .ThenInclude(p => p.PriceGuides)
                         .AsNoTracking().ToList()
-            };
+                };
                 expansionList.FetchedOn = State.LastOrDefault()?.ExpansionListFetchDate ?? DateTime.MinValue;
 
                 return expansionList;
@@ -258,48 +258,48 @@ namespace LHpiNG.DB
         {
             int i = 1;
             int j = sets.Count();
-            foreach (Set set in sets)
+            try
             {
-                Console.Write($"\r {i}/{j} : {set.TLA}");
-                try
+                foreach (Set set in sets)
                 {
-                    Set existing = Sets.Find(set.Id);
-                    if (existing != null)
-                    {
-                        foreach (Card card in set.Cards)
-                        {
-                            AddOrUpdateCard(card);
-                        }
-                        set.Cards = existing.Cards;
-                        existing.InjectNonNull(set);
-                    }
-                    else
-                    {
-                        Sets.Add(set);
-                    }
+                    Console.Write($"\r {i}/{j} : {set.TLA}");
+                    AddOrUpdateSet(set);
+                    i++;
                 }
-                catch (DbException)
-                {
-                    throw;
-                }
-                i++;
             }
-            Console.WriteLine();
-        }
-        public void SaveCards(IEnumerable<Card> cards)
-        {
-            int i = 1;
-            int j = cards.Count();
-            foreach (Card card in cards)
+            catch (DbException)
             {
-                Console.Write($"\r {i}/{j}");
-                AddOrUpdateCard(card);
-                i++;
+                throw;
             }
             Console.WriteLine();
         }
 
-        private void AddOrUpdateCard(Card card)
+        public void AddOrUpdateSet(Set set)
+        {
+            try
+            {
+                Set existing = Sets.Find(set.Id);
+                if (existing != null)
+                {
+                    foreach (Card card in set.Cards)
+                    {
+                        AddOrUpdateCard(card);
+                    }
+                    set.Cards = existing.Cards;
+                    existing.InjectNonNull(set);
+                }
+                else
+                {
+                    Sets.Add(set);
+                }
+            }
+            catch
+            {
+                throw;
+            }
+        }
+
+        public void AddOrUpdateCard(Card card)
         {
             try
             {
@@ -318,6 +318,19 @@ namespace LHpiNG.DB
             {
                 throw;
             }
+        }
+
+        public void SaveCards(IEnumerable<Card> cards)
+        {
+            int i = 1;
+            int j = cards.Count();
+            foreach (Card card in cards)
+            {
+                Console.Write($"\r {i}/{j}");
+                AddOrUpdateCard(card);
+                i++;
+            }
+            Console.WriteLine();
         }
         #endregion
 

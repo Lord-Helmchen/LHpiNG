@@ -21,6 +21,7 @@ namespace LHpiNG.DB
         void SaveCards(IEnumerable<Card> cards);
         void SaveLanguages(IEnumerable<Language> languages);
         void SaveSets(IEnumerable<Set> sets);
-
+        void AddOrUpdateSet(Set set);
+        void AddOrUpdateCard(Card card);
     }
 }
